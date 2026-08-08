@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AdminUsuarioController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\LoteController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -22,9 +24,10 @@ Route::get('/dashboard', function () {
 
 // ── Admin Routes ─────────────────────────────────────────────
 Route::middleware(['auth', 'role:1'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.admin');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [AdminUsuarioController::class, 'index'])->name('admin.dashboard');
+    Route::post('/usuarios', [AdminUsuarioController::class, 'store'])->name('admin.usuarios.store');
+    Route::put('/usuarios/{usuario}', [AdminUsuarioController::class, 'update'])->name('admin.usuarios.update');
+    Route::get('/usuarios/{usuario}/toggle-estado', [AdminUsuarioController::class, 'toggleEstado'])->name('admin.usuarios.toggleEstado');
 });
 
 // ── Trabajador Routes ────────────────────────────────────────
@@ -61,6 +64,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
     Route::get('/productos/{producto}/toggle-estado', [ProductoController::class, 'toggleEstado'])->name('productos.toggleEstado');
     Route::get('/catalogo', [ProductoController::class, 'catalogo'])->name('productos.catalogo');
+
+    // ── Lotes Routes ──────────────────────────────────────────
+    Route::get('/lotes', [LoteController::class, 'index'])->name('lotes.index');
+    Route::post('/lotes', [LoteController::class, 'store'])->name('lotes.store');
+    Route::put('/lotes/{lote}', [LoteController::class, 'update'])->name('lotes.update');
+    Route::delete('/lotes/{lote}', [LoteController::class, 'destroy'])->name('lotes.destroy');
+
+    // Batch details – separate resource under the same auth group
+    Route::get('/lotes/{lote}/detalles', [LoteController::class, 'detalles'])->name('lotes.detalles');
+    Route::post('/lotes/detalles', [LoteController::class, 'storeDetalle'])->name('lotes.detalles.store');
+    Route::put('/lotes/detalles/{detalle}', [LoteController::class, 'updateDetalle'])->name('lotes.detalles.update');
 });
 
 require __DIR__.'/auth.php';

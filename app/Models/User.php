@@ -72,4 +72,12 @@ class User extends Authenticatable
     {
         $this->attributes['nombres'] = $value;
     }
+
+    /**
+     * Relationship with Rol model
+     */
+    public function rol()
+    {
+        return $this->belongsTo(Rol::class, 'id_rol', 'id_rol');
+    }
 }

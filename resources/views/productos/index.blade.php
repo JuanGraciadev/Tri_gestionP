@@ -115,35 +115,60 @@
                 </a>
             </div>
 
-            <!-- NAVIGATION LINKS -->
             <nav class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+                <!-- MENÚ PRINCIPAL -->
                 <div>
-                    <p class="text-[10px] font-black text-sky-300/70 tracking-widest uppercase px-3 mb-2">PRINCIPAL</p>
+                    <p class="text-[10px] font-black text-sky-300/70 tracking-widest uppercase px-3 mb-2">MENÚ PRINCIPAL</p>
                     <div class="space-y-1">
-                        <a href="{{ route('dashboard') }}" 
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
-                            <svg class="w-5 h-5 text-sky-300/70 group-hover:text-sky-300 shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                            </svg>
-                            <span>Dashboard</span>
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                            <i class="fas fa-users text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                            <span>Gestión Usuarios</span>
                         </a>
                     </div>
                 </div>
 
+                <!-- OPERACIONES -->
                 <div>
-                    <p class="text-[10px] font-black text-sky-300/70 tracking-widest uppercase px-3 mb-2">GESTIÓN DE CATÁLOGO</p>
+                    <p class="text-[10px] font-black text-sky-300/70 tracking-widest uppercase px-3 mb-2">OPERACIONES</p>
                     <div class="space-y-1">
-                        <a href="{{ route('categorias.index') }}" 
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
-                            <i class="fas fa-folder-tree text-sky-300/70 group-hover:text-sky-300 shrink-0 text-lg"></i>
-                            <span>Gestión Categorías</span>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                            <i class="fas fa-boxes-stacked text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                            <span>Inventario MP</span>
                         </a>
-                        <a href="{{ route('productos.index') }}" 
-                           class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-extrabold bg-trigestion-500/30 text-white border-l-4 border-trigestion-400 shadow-md backdrop-blur-sm transition-all">
-                            <svg class="w-5 h-5 text-trigestion-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                            </svg>
-                            <span>Catálogo Productos</span>
+                        <a href="{{ route('lotes.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                            <i class="fas fa-box-open text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                            <span>Gestión de Lotes</span>
+                        </a>
+                        <a href="{{ route('categorias.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                            <i class="fas fa-tags text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                            <span>Categorías</span>
+                        </a>
+                        <a href="{{ route('productos.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-extrabold bg-trigestion-500/30 text-white border-l-4 border-trigestion-400 shadow-md backdrop-blur-sm">
+                            <i class="fas fa-tint text-trigestion-300 shrink-0"></i>
+                            <span>Productos</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                            <i class="fas fa-cubes text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                            <span>Inventario Productos</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                            <i class="fas fa-cart-shopping text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                            <span>Ventas y Pedidos</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                            <i class="fas fa-rotate-left text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                            <span>Devoluciones</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ANÁLISIS -->
+                <div>
+                    <p class="text-[10px] font-black text-sky-300/70 tracking-widest uppercase px-3 mb-2">ANÁLISIS</p>
+                    <div class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                            <i class="fas fa-file-invoice-dollar text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                            <span>Reportes Generales</span>
                         </a>
                     </div>
                 </div>
