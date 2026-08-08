@@ -47,6 +47,7 @@ class RegisteredUserController extends Controller
             'documento_numero' => $request->documento_numero,
             'telefono' => $request->telefono,
             'password' => Hash::make($request->password),
+            'id_rol' => 3, // Cliente por defecto
             'estado' => 1,
         ]);
 
