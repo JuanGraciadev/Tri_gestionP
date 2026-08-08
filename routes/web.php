@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +45,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ── Categorías Routes ─────────────────────────────────────
+    Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
+    Route::post('/categorias', [CategoriaController::class, 'store'])->name('categorias.store');
+    Route::put('/categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
+    Route::delete('/categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');
+    Route::get('/categorias/{categoria}/toggle-estado', [CategoriaController::class, 'toggleEstado'])->name('categorias.toggleEstado');
+    Route::post('/categorias/agregar-producto', [CategoriaController::class, 'agregarProducto'])->name('categorias.agregarProducto');
+
+    // ── Productos Routes ──────────────────────────────────────
+    Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
+    Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
+    Route::put('/productos/{producto}', [ProductoController::class, 'update'])->name('productos.update');
+    Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
+    Route::get('/productos/{producto}/toggle-estado', [ProductoController::class, 'toggleEstado'])->name('productos.toggleEstado');
+    Route::get('/catalogo', [ProductoController::class, 'catalogo'])->name('productos.catalogo');
 });
 
 require __DIR__.'/auth.php';

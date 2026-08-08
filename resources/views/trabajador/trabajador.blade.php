@@ -38,6 +38,8 @@
             }
         }
     </script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-sans antialiased bg-slate-100/90 text-slate-800 min-h-screen">
 
@@ -115,22 +117,6 @@
 
             </nav>
 
-            <!-- USER PROFILE FOOTER CARD -->
-            <div class="p-4 border-t border-white/10 bg-black/30">
-                <div class="flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/10 backdrop-blur-sm">
-                    <div class="w-10 h-10 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-base shadow-md shadow-amber-400/20 shrink-0">
-                        {{ strtoupper(substr(Auth::user()->nombres, 0, 1)) }}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-extrabold text-white truncate">{{ Auth::user()->nombres }}</p>
-                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-full mt-0.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                            Trabajador / Operador
-                        </span>
-                    </div>
-                </div>
-            </div>
-
         </aside>
 
         <!-- ═══════════ MAIN CONTENT ═══════════ -->
@@ -152,17 +138,69 @@
                         <span>{{ now()->format('d \d\e F, Y') }}</span>
                     </div>
 
-                    <!-- LOGOUT BUTTON -->
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" 
-                                class="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200/60 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all duration-200 shadow-sm hover:shadow active:scale-95">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    <!-- USER PROFILE DROPDOWN MENU -->
+                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                        <button @click="open = !open" type="button" 
+                                class="flex items-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl transition-all duration-200 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-amber-500/20 group cursor-pointer">
+                            <div class="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black text-base shadow-md shadow-amber-400/20 shrink-0">
+                                {{ strtoupper(substr(Auth::user()->nombres, 0, 1)) }}
+                            </div>
+                            <div class="text-left hidden sm:block">
+                                <p class="text-xs font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors truncate max-w-[160px]">
+                                    {{ Auth::user()->nombres }}
+                                </p>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60 mt-0.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                    Trabajador / Operador
+                                </span>
+                            </div>
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0 ml-1" 
+                                 :class="{ 'rotate-180': open }" 
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                             </svg>
-                            <span>Cerrar Sesión</span>
                         </button>
-                    </form>
+
+                        <!-- DROPDOWN MENU -->
+                        <div x-show="open" 
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 scale-95 translate-y-1"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 scale-95 translate-y-1"
+                             class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 divide-y divide-slate-100"
+                             style="display: none;">
+                            
+                            <div class="px-3.5 py-3">
+                                <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Cuenta Operativa</p>
+                                <p class="text-xs font-black text-slate-900 truncate mt-0.5">{{ Auth::user()->nombres }}</p>
+                                <p class="text-[11px] font-medium text-slate-500 truncate">{{ Auth::user()->email }}</p>
+                            </div>
+
+                            <div class="py-1">
+                                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-amber-600 transition-colors group">
+                                    <svg class="w-4 h-4 text-slate-400 group-hover:text-amber-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    <span>Mi Perfil</span>
+                                </a>
+                            </div>
+
+                            <div class="pt-1">
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold text-red-600 bg-red-50/60 hover:bg-red-100/80 border border-red-200/50 transition-all duration-200 group active:scale-98">
+                                        <svg class="w-4 h-4 text-red-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                        </svg>
+                                        <span>Cerrar Sesión</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
 
