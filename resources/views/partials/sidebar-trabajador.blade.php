@@ -54,8 +54,10 @@
                     <i class="fas fa-cubes {{ request()->routeIs('inventario-productos.index') ? 'text-violet-300' : 'text-sky-300/70 group-hover:text-sky-300' }} shrink-0"></i>
                     <span>Inventario Productos</span>
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
-                    <i class="fas fa-rotate-left text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                <a href="{{ route('devoluciones.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all group
+                   {{ request()->routeIs('devoluciones.*') ? 'font-extrabold bg-rose-500/20 text-white border-l-4 border-rose-400 shadow-md' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
+                    <i class="fas fa-rotate-left {{ request()->routeIs('devoluciones.*') ? 'text-rose-300' : 'text-sky-300/70 group-hover:text-sky-300' }} shrink-0"></i>
                     <span>Devoluciones</span>
                 </a>
             </div>

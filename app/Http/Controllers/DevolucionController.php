@@ -3,104 +3,88 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDevolucionRequest;
-use App\Models\DevolucionRetornable;
-use App\Models\InventarioMateriaPrima;
-use App\Models\Producto;
+use App\Models\DevolucionRetornables;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DevolucionController extends Controller
 {
-    // ── Index ──────────────────────────────────────────────────────────────────
-
     /**
-     * Listado de todas las devoluciones registradas.
-     * Solo se muestran productos retornables (garrafones).
+     * GET /devoluciones
+     * Lists balances per client, KPIs, and return history.
      */
     public function index(): View
     {
-        $devoluciones = DevolucionRetornable::with(['producto', 'usuario', 'inventarioReingreso'])
-            ->orderByDesc('id_retornables')
+        $balances  = DevolucionRetornables::obtenerBalancesClientes();
+        $historial = DevolucionRetornables::with(['producto', 'usuario'])
+            ->orderByDesc('fecha')
             ->get();
 
-        // Solo productos retornables disponibles para el formulario
-        $productosRetornables = Producto::where('retornable', 1)
-            ->where('estado', 1)
-            ->orderBy('nombre')
-            ->get();
-
-        // KPIs
-        $totalDevoluciones   = $devoluciones->count();
-        $totalUnidades       = $devoluciones->sum('cantidad');
-        // Aptas = tienen registro en inventario_materia_prima
-        $devolucionesAptas   = $devoluciones->filter(fn($d) => $d->inventarioReingreso !== null)->count();
-        // Dañadas = NO tienen registro en inventario_materia_prima
-        $devolucionesDanadas = $devoluciones->filter(fn($d) => $d->inventarioReingreso === null)->count();
+        $totalEntregados = array_sum(array_column($balances, 'total_entregado'));
+        $totalDevueltos  = array_sum(array_column($balances, 'total_devuelto'));
+        $totalEnConsumo  = array_sum(array_column($balances, 'en_consumo'));
 
         return view('devoluciones.index', compact(
-            'devoluciones',
-            'productosRetornables',
-            'totalDevoluciones',
-            'totalUnidades',
-            'devolucionesAptas',
-            'devolucionesDanadas'
+            'balances',
+            'historial',
+            'totalEntregados',
+            'totalDevueltos',
+            'totalEnConsumo'
         ));
     }
 
-    // ── Store ──────────────────────────────────────────────────────────────────
-
     /**
-     * Registra una devolución de garrafón.
-     *
-     * Regla de negocio:
-     *  - Solo productos con retornable = 1
-     *  - Si apto = 1: INSERT devolucion_retornables + INSERT inventario_materia_prima
-     *    (garrafón vuelve al stock de envases disponibles)
-     *  - Si apto = 0 (dañado): solo INSERT devolucion_retornables
-     *    (garrafón NO vuelve al stock)
-     *
-     * Se usa DB::transaction porque en el caso "apto" se modifican
-     * dos tablas relacionadas simultáneamente.
+     * POST /devoluciones
+     * Stores a returned bottle transaction and updates inventory.
      */
     public function store(StoreDevolucionRequest $request): RedirectResponse
     {
-        $apto = (int) $request->apto === 1;
+        $idUsuario  = (int) $request->id_usuario;
+        $idProducto = (int) $request->id_producto;
+        $cantidad   = (int) $request->cantidad;
+        $bodega     = $request->input('bodega', 'Bodega Principal');
+        $danado     = $request->input('estado_envase') === 'danado';
 
-        DB::transaction(function () use ($request, $apto) {
-
-            // Paso 1: registrar la devolución
-            $devolucion = DevolucionRetornable::create([
-                'cantidad'    => $request->cantidad,
-                'id_producto' => $request->id_producto,
-                'id_usuario'  => Auth::user()->id_usuario,
-                // fecha se auto-asigna por el default CURRENT_TIMESTAMP
-            ]);
-
-            // Paso 2: si el garrafón está APTO → vuelve a inventario de envases
-            if ($apto) {
-                InventarioMateriaPrima::create([
-                    'ingreso'        => $devolucion->cantidad,
-                    'fecha'          => now()->toDateString(),
-                    'bodega'         => 'Bodega Principal',
-                    'id_detalles'    => null,
-                    'id_retornables' => $devolucion->id_retornables,
-                ]);
+        // Check client's consumption balance so they can't return more than delivered
+        $balances = DevolucionRetornables::obtenerBalancesClientes();
+        $match = null;
+        foreach ($balances as $b) {
+            if ($b['id_usuario'] == $idUsuario && $b['id_producto'] == $idProducto) {
+                $match = $b;
+                break;
             }
-            // Si DAÑADO: no se crea registro en inventario_materia_prima
-            // → el garrafón no vuelve al stock disponible
-        });
+        }
 
-        $msg = $apto
-            ? 'El garrafón fue devuelto y reingresado al inventario de envases disponibles.'
-            : 'El garrafón fue registrado como dañado y NO reingresó al inventario.';
+        $enConsumo = $match ? $match['en_consumo'] : 0;
+        if ($cantidad > $enConsumo) {
+            return redirect()->route('devoluciones.index')
+                ->with('alert', [
+                    'icon'  => 'error',
+                    'title' => 'Cantidad no permitida',
+                    'text'  => "El cliente solo tiene {$enConsumo} envase(s) en consumo pendientes de devolución.",
+                ]);
+        }
+
+        $exito = DevolucionRetornables::registrarDevolucion($idUsuario, $idProducto, $cantidad, $bodega, $danado);
+
+        if ($exito) {
+            $msg = $danado
+                ? "Se registraron {$cantidad} envase(s) devueltos como DAÑADOS. Han quedado fuera del stock disponible."
+                : "Se han recibido {$cantidad} envase(s) y reingresado a Materia Prima para reutilización.";
+
+            return redirect()->route('devoluciones.index')
+                ->with('alert', [
+                    'icon'  => 'success',
+                    'title' => '¡Devolución Registrada!',
+                    'text'  => $msg,
+                ]);
+        }
 
         return redirect()->route('devoluciones.index')
             ->with('alert', [
-                'icon'  => 'success',
-                'title' => 'Devolución Registrada',
-                'text'  => $msg,
+                'icon'  => 'error',
+                'title' => 'Error',
+                'text'  => 'Hubo un error al intentar procesar la devolución.',
             ]);
     }
 }

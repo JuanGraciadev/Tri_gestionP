@@ -88,7 +88,7 @@
                             <i class="fas fa-store text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Catálogo de Productos</span>
                         </a>
-                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                        <a href="{{ route('cliente.misCompras') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
                             <i class="fas fa-shopping-bag text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Mis Compras</span>
                         </a>
@@ -149,7 +149,7 @@
                             <a href="{{ route('productos.catalogo') }}" class="flex items-center justify-center gap-2 bg-white text-sky-600 px-7 py-4 rounded-2xl font-extrabold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
                                 <i class="fas fa-store text-lg"></i> Ir al Catálogo
                             </a>
-                            <a href="#" class="flex items-center justify-center gap-2 bg-white/15 border border-white/25 text-white px-7 py-4 rounded-2xl font-extrabold backdrop-blur-md hover:bg-white/25 transition-all transform hover:-translate-y-0.5">
+                            <a href="{{ route('cliente.misCompras') }}" class="flex items-center justify-center gap-2 bg-white/15 border border-white/25 text-white px-7 py-4 rounded-2xl font-extrabold backdrop-blur-md hover:bg-white/25 transition-all transform hover:-translate-y-0.5">
                                 <i class="fas fa-bag-shopping text-lg"></i> Mis Pedidos
                             </a>
                         </div>
@@ -197,7 +197,7 @@
                         </div>
                         <i class="fas fa-arrow-right ml-auto text-slate-300 group-hover:text-sky-500 transition-colors"></i>
                     </a>
-                    <a href="#" class="glass-card rounded-[2.5rem] border border-slate-100 p-8 flex items-center gap-5 hover:border-indigo-300 hover:shadow-xl transition-all group">
+                    <a href="{{ route('cliente.misCompras') }}" class="glass-card rounded-[2.5rem] border border-slate-100 p-8 flex items-center gap-5 hover:border-indigo-300 hover:shadow-xl transition-all group">
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform">
                             <i class="fas fa-bag-shopping"></i>
                         </div>

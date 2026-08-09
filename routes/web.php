@@ -92,10 +92,43 @@ Route::middleware('auth')->group(function () {
     Route::get('/devoluciones', [DevolucionController::class, 'index'])->name('devoluciones.index');
     Route::post('/devoluciones', [DevolucionController::class, 'store'])->name('devoluciones.store');
 
+    // ── Carrito Routes (AJAX, sesión) ──────────────────────────────────
+    Route::get('/carrito', [CarritoController::class, 'obtener'])->name('carrito.obtener');
+    Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
+    Route::post('/carrito/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
+    Route::post('/carrito/eliminar', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
+    Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
+
+    // ── Ventas Routes (cliente) ───────────────────────────────────────
+    Route::get('/mis-compras', [VentaController::class, 'misCompras'])->name('ventas.mis-compras');
+    Route::get('/checkout', [VentaController::class, 'checkout'])->name('ventas.checkout');
+    Route::post('/checkout/confirmar', [VentaController::class, 'confirmarCompra'])->name('ventas.confirmar');
+
+    // ── Ventas Routes (admin) ─────────────────────────────────────────
+    Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
+    Route::get('/ventas/{venta}', [VentaController::class, 'show'])->name('ventas.show');
+    Route::get('/ventas/{venta}/estado/{estado}', [VentaController::class, 'cambiarEstado'])->name('ventas.estado');
+
     // ── Producción Routes ─────────────────────────────────────
     Route::get('/produccion', [ProduccionController::class, 'index'])->name('produccion.index');
     Route::post('/produccion', [ProduccionController::class, 'store'])->name('produccion.store');
     Route::get('/produccion/{id}/finalizar', [ProduccionController::class, 'finalizar'])->name('produccion.finalizar');
+
+    // ── Ventas Admin Routes ─────────────────────────────
+    Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
+    Route::post('/ventas/cambiar-estado', [VentaController::class, 'cambiarEstado'])->name('ventas.cambiarEstado');
+    Route::post('/ventas/crear-pos', [VentaController::class, 'crearPOS'])->name('ventas.crearPOS');
+    Route::get('/ventas/factura/{id_venta}', [VentaController::class, 'obtenerFactura'])->name('ventas.factura');
+
+    // ── Carrito AJAX Routes (all authenticated, role checked in controller) ──
+    Route::post('/carrito/agregar', [VentaController::class, 'agregarAlCarrito'])->name('carrito.agregar');
+    Route::get('/carrito/obtener', [VentaController::class, 'obtenerCarrito'])->name('carrito.obtener');
+    Route::post('/carrito/actualizar', [VentaController::class, 'actualizarCarrito'])->name('carrito.actualizar');
+    Route::post('/carrito/eliminar', [VentaController::class, 'eliminarDelCarrito'])->name('carrito.eliminar');
+    Route::post('/carrito/finalizar', [VentaController::class, 'finalizarCompra'])->name('carrito.finalizar');
+
+    // ── Cliente – Mis Compras ──────────────────────────────
+    Route::get('/mis-compras', [VentaController::class, 'misCompras'])->name('cliente.misCompras');
 });
 
 require __DIR__.'/auth.php';

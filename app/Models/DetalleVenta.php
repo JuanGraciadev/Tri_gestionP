@@ -12,20 +12,17 @@ class DetalleVenta extends Model
     public    $timestamps = false;
 
     protected $fillable = [
+        'id_venta',
+        'id_producto',
+        'cantidad',
         'precio_unitario',
         'descuento',
-        'id_venta',
-        'cantidad',
-        'id_producto',
     ];
 
     protected $casts = [
-        'precio_unitario' => 'decimal:2',
+        'precio_unitario' => 'float',
         'descuento'       => 'float',
-        'cantidad'        => 'integer',
     ];
-
-    // ── Relationships ──────────────────────────────────────────────────────────
 
     public function venta(): BelongsTo
     {
@@ -35,5 +32,10 @@ class DetalleVenta extends Model
     public function producto(): BelongsTo
     {
         return $this->belongsTo(Producto::class, 'id_producto', 'id_producto');
+    }
+
+    public function subtotal(): float
+    {
+        return ($this->precio_unitario * $this->cantidad) - ($this->descuento ?? 0);
     }
 }

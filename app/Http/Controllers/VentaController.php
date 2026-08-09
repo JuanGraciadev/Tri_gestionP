@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cliente;
 use App\Models\DetalleVenta;
-use App\Models\InventarioProductos;
 use App\Models\Producto;
+use App\Models\User;
 use App\Models\Venta;
+use App\Services\StockService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,261 +17,405 @@ use Illuminate\View\View;
 
 class VentaController extends Controller
 {
-    // ── Helpers ────────────────────────────────────────────────────────────────
+    // ════════════════════════════════════════════════════════════════════════
+    // CARRITO (AJAX – sesión)
+    // ════════════════════════════════════════════════════════════════════════
 
-    /**
-     * Stock disponible = SUM(inventario_productos.cantidad) - SUM(detalle_venta.cantidad) de ventas activas.
-     */
-    private function stockDisponible(int $idProducto): int
+    public function agregarAlCarrito(Request $request): JsonResponse
     {
-        $entradas = InventarioProductos::where('id_producto', $idProducto)->sum('cantidad');
-        $vendido  = DetalleVenta::whereHas('venta', fn($q) => $q->whereNotIn('estado', ['Cancelada']))
-            ->where('id_producto', $idProducto)
-            ->sum('cantidad');
-        return max(0, (int) $entradas - (int) $vendido);
-    }
+        $idProducto = (int) $request->input('id_producto', 0);
+        $cantidad   = max(1, (int) $request->input('cantidad', 1));
 
-    // ── Vista catálogo (cliente) ───────────────────────────────────────────────
-
-    /**
-     * GET /ventas/catalogo  — ya existe route('productos.catalogo') que usa ProductoController,
-     * por lo que no duplicamos esa ruta.
-     */
-
-    // ── Mis compras (cliente) ─────────────────────────────────────────────────
-
-    /**
-     * GET /mis-compras
-     * Lista las ventas del cliente autenticado, con detalles.
-     */
-    public function misCompras(): View
-    {
-        $ventas = Venta::with(['detalles.producto'])
-            ->where('id_usuario', Auth::user()->id_usuario)
-            ->orderByDesc('id_venta')
-            ->get();
-
-        return view('ventas.mis_compras', compact('ventas'));
-    }
-
-    // ── Checkout (finalizar compra) ───────────────────────────────────────────
-
-    /**
-     * GET /checkout
-     * Muestra la página de confirmación del carrito.
-     */
-    public function checkout(): View
-    {
-        $carrito = session('carrito', []);
-
-        if (empty($carrito)) {
-            return view('ventas.checkout', ['carrito' => [], 'total' => 0]);
+        $prod = Producto::where('id_producto', $idProducto)->where('estado', 1)->first();
+        if (!$prod) {
+            return response()->json(['ok' => false, 'msg' => 'Producto no encontrado']);
         }
 
-        $total = array_sum(array_column($carrito, 'subtotal'));
-
-        return view('ventas.checkout', compact('carrito', 'total'));
-    }
-
-    /**
-     * POST /checkout/confirmar
-     * Finaliza la compra:
-     *  1. Valida stock de cada ítem del carrito.
-     *  2. Crea el registro en venta.
-     *  3. Crea un detalle_venta por cada producto.
-     *  4. Descuenta el stock (inserta registro negativo en inventario_productos).
-     *  5. Limpia el carrito de sesión.
-     *
-     * Usa DB::transaction para garantizar consistencia entre
-     * venta + detalles + inventario.
-     */
-    public function confirmarCompra(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'metodo_pago' => 'required|string|max:50',
-            'notas'       => 'nullable|string|max:500',
-        ]);
+        $stock = StockService::disponible($idProducto);
+        if ($stock < 1) {
+            return response()->json(['ok' => false, 'msg' => 'Sin stock disponible para este producto']);
+        }
 
         $carrito = session('carrito', []);
 
-        if (empty($carrito)) {
-            return redirect()->route('productos.catalogo')
-                ->with('alert', [
-                    'icon'  => 'warning',
-                    'title' => 'Carrito vacío',
-                    'text'  => 'Agrega productos antes de continuar.',
-                ]);
+        if (isset($carrito[$idProducto])) {
+            $nueva = $carrito[$idProducto]['cantidad'] + $cantidad;
+            if ($nueva > $stock) {
+                return response()->json(['ok' => false, 'msg' => "Stock máximo disponible: {$stock} unidades"]);
+            }
+            $carrito[$idProducto]['cantidad'] = $nueva;
+        } else {
+            $carrito[$idProducto] = [
+                'id_producto'     => $idProducto,
+                'nombre'          => $prod->nombre,
+                'precio_unitario' => (float) $prod->precio,
+                'img'             => $prod->img ?? '',
+                'cantidad'        => $cantidad,
+            ];
         }
 
-        // Verificar stock antes de iniciar la transacción
+        session(['carrito' => $carrito]);
+
+        $total_items = array_sum(array_column($carrito, 'cantidad'));
+        return response()->json(['ok' => true, 'total_items' => $total_items, 'msg' => 'Producto añadido al carrito']);
+    }
+
+    public function obtenerCarrito(): JsonResponse
+    {
+        $carrito = session('carrito', []);
+        $total   = 0;
         foreach ($carrito as $item) {
-            $stock = $this->stockDisponible((int) $item['id_producto']);
-            if ($item['cantidad'] > $stock) {
-                $nombre = $item['nombre'];
-                return redirect()->route('ventas.checkout')
-                    ->with('alert', [
-                        'icon'  => 'error',
-                        'title' => 'Stock insuficiente',
-                        'text'  => "El producto '{$nombre}' solo tiene {$stock} unidades disponibles.",
-                    ]);
+            $total += $item['precio_unitario'] * $item['cantidad'];
+        }
+        return response()->json(['ok' => true, 'carrito' => array_values($carrito), 'total' => $total]);
+    }
+
+    public function actualizarCarrito(Request $request): JsonResponse
+    {
+        $idProducto = (int) $request->input('id_producto', 0);
+        $cantidad   = (int) $request->input('cantidad', 0);
+        $carrito    = session('carrito', []);
+
+        if ($cantidad <= 0) {
+            unset($carrito[$idProducto]);
+        } else {
+            $stock = StockService::disponible($idProducto);
+            if ($cantidad > $stock) $cantidad = $stock;
+            if (isset($carrito[$idProducto])) {
+                $carrito[$idProducto]['cantidad'] = $cantidad;
             }
         }
 
-        $total = array_sum(array_column($carrito, 'subtotal'));
-        $user  = Auth::user();
+        session(['carrito' => $carrito]);
 
-        DB::transaction(function () use ($carrito, $total, $request, $user) {
+        $total = $total_items = 0;
+        foreach ($carrito as $item) {
+            $total       += $item['precio_unitario'] * $item['cantidad'];
+            $total_items += $item['cantidad'];
+        }
 
-            // Primer producto del carrito para los campos legacy de venta
-            $primerItem = array_values($carrito)[0];
-
-            // ── Paso 1: crear la venta ────────────────────────────────────────
-            $venta = Venta::create([
-                'fecha'       => now()->toDateString(),
-                'cantidad'    => array_sum(array_column($carrito, 'cantidad')),
-                'precio'      => $primerItem['precio'],
-                'estado'      => 'Pendiente',
-                'id_usuario'  => $user->id_usuario,
-                'id_producto' => $primerItem['id_producto'],
-                'total'       => $total,
-                'notas'       => $request->notas,
-                'metodo_pago' => $request->metodo_pago,
-            ]);
-
-            // ── Paso 2: crear detalles + descontar stock ──────────────────────
-            foreach ($carrito as $item) {
-                // Detalle de venta
-                DetalleVenta::create([
-                    'id_venta'       => $venta->id_venta,
-                    'id_producto'    => $item['id_producto'],
-                    'cantidad'       => $item['cantidad'],
-                    'precio_unitario' => $item['precio'],
-                    'descuento'      => 0,
-                ]);
-
-                // Descuento de inventario (valor negativo = salida)
-                InventarioProductos::create([
-                    'fecha'        => now()->toDateString(),
-                    'bodega'       => 'Principal',
-                    'id_produccion'=> null,
-                    'id_producto'  => $item['id_producto'],
-                    'id_usuario'   => $user->id_usuario,
-                    'cantidad'     => -(int) $item['cantidad'],
-                ]);
-            }
-        });
-
-        // ── Paso 3: limpiar carrito ───────────────────────────────────────────
-        session()->forget('carrito');
-
-        return redirect()->route('ventas.mis-compras')
-            ->with('alert', [
-                'icon'  => 'success',
-                'title' => '¡Pedido Realizado!',
-                'text'  => 'Tu pedido fue registrado correctamente. En breve será procesado.',
-            ]);
+        return response()->json(['ok' => true, 'carrito' => array_values($carrito), 'total' => $total, 'total_items' => $total_items]);
     }
 
-    // ── Administración de ventas (admin) ──────────────────────────────────────
+    public function eliminarDelCarrito(Request $request): JsonResponse
+    {
+        $idProducto = (int) $request->input('id_producto', 0);
+        $carrito    = session('carrito', []);
+        unset($carrito[$idProducto]);
+        session(['carrito' => $carrito]);
 
-    /**
-     * GET /ventas
-     * Lista todas las ventas para el administrador.
-     */
+        $total = $total_items = 0;
+        foreach ($carrito as $item) {
+            $total       += $item['precio_unitario'] * $item['cantidad'];
+            $total_items += $item['cantidad'];
+        }
+
+        return response()->json(['ok' => true, 'carrito' => array_values($carrito), 'total' => $total, 'total_items' => $total_items]);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // CHECKOUT — finalizar_compra
+    // ════════════════════════════════════════════════════════════════════════
+
+    public function finalizarCompra(Request $request): JsonResponse
+    {
+        $carrito = session('carrito', []);
+        if (empty($carrito)) {
+            return response()->json(['ok' => false, 'msg' => 'El carrito está vacío']);
+        }
+
+        $idUsuario  = Auth::user()->id_usuario;
+        $notas      = $request->input('notas', '');
+        $metodoPago = $request->input('metodo_pago', 'Efectivo');
+
+        $items = [];
+        foreach ($carrito as $item) {
+            $items[] = [
+                'id_producto'     => $item['id_producto'],
+                'cantidad'        => $item['cantidad'],
+                'precio_unitario' => $item['precio_unitario'],
+                'descuento'       => 0,
+            ];
+        }
+
+        try {
+            $result = DB::transaction(function () use ($idUsuario, $items, $notas, $metodoPago) {
+                foreach ($items as $item) {
+                    $stock = StockService::disponible($item['id_producto']);
+                    if ($stock < $item['cantidad']) {
+                        throw new \RuntimeException('Stock insuficiente para el producto ID ' . $item['id_producto']);
+                    }
+                }
+
+                $cliente   = Cliente::firstOrCreateForUser($idUsuario);
+                $subtotal  = 0;
+                foreach ($items as $item) {
+                    $subtotal += ($item['precio_unitario'] * $item['cantidad']) - ($item['descuento'] ?? 0);
+                }
+                $total = $subtotal * 1.19;
+
+                $venta = Venta::create([
+                    'id_cliente'  => $cliente->id_cliente,
+                    'id_usuario'  => $idUsuario,
+                    'estado'      => 'Pendiente',
+                    'total'       => $total,
+                    'notas'       => $notas,
+                    'metodo_pago' => $metodoPago,
+                    'fecha'       => now()->toDateString(),
+                ]);
+
+                foreach ($items as $item) {
+                    DetalleVenta::create([
+                        'id_venta'        => $venta->id_venta,
+                        'id_producto'     => $item['id_producto'],
+                        'cantidad'        => $item['cantidad'],
+                        'precio_unitario' => $item['precio_unitario'],
+                        'descuento'       => $item['descuento'] ?? 0,
+                    ]);
+                }
+
+                return $venta->id_venta;
+            });
+
+            session(['carrito' => []]);
+
+            $detalles = DetalleVenta::with('producto')
+                ->where('id_venta', $result)
+                ->get()
+                ->map(fn($d) => [
+                    'producto_nombre' => $d->producto->nombre ?? '',
+                    'producto_img'    => $d->producto->img ?? '',
+                    'cantidad'        => $d->cantidad,
+                    'precio_unitario' => $d->precio_unitario,
+                    'descuento'       => $d->descuento,
+                ])->toArray();
+
+            $user  = Auth::user();
+            $total = array_sum(array_map(fn($i) => $i['precio_unitario'] * $i['cantidad'], $detalles)) * 1.19;
+
+            return response()->json([
+                'ok'       => true,
+                'id_venta' => $result,
+                'msg'      => '¡Pedido realizado con éxito!',
+                'factura'  => [
+                    'id_venta'    => $result,
+                    'fecha'       => now()->format('d/m/Y'),
+                    'cliente'     => $user->nombres ?? $user->name,
+                    'email'       => $user->email ?? '',
+                    'telefono'    => $user->telefono ?? '',
+                    'direccion'   => $user->direccion ?? '',
+                    'metodo_pago' => $metodoPago,
+                    'notas'       => $notas,
+                    'items'       => $detalles,
+                    'total'       => $total,
+                ],
+            ]);
+        } catch (\RuntimeException $e) {
+            return response()->json(['ok' => false, 'msg' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'msg' => 'Error al procesar la compra: ' . $e->getMessage()]);
+        }
+    }
+
+    public function obtenerFactura(int $idVenta): JsonResponse
+    {
+        $venta = Venta::with(['cliente.usuario', 'detalles.producto'])->find($idVenta);
+        if (!$venta) {
+            return response()->json(['ok' => false, 'msg' => 'Venta no encontrada']);
+        }
+
+        $clienteUser = $venta->cliente?->usuario;
+        $authUser    = Auth::user();
+
+        $detalles = $venta->detalles->map(fn($d) => [
+            'producto_nombre' => $d->producto->nombre ?? '',
+            'producto_img'    => $d->producto->img ?? '',
+            'cantidad'        => $d->cantidad,
+            'precio_unitario' => $d->precio_unitario,
+            'descuento'       => $d->descuento,
+        ])->toArray();
+
+        return response()->json([
+            'ok'      => true,
+            'factura' => [
+                'id_venta'    => $venta->id_venta,
+                'fecha'       => optional($venta->fecha)->format('d/m/Y') ?? '',
+                'cliente'     => $clienteUser->nombres ?? $authUser->nombres ?? $authUser->name,
+                'email'       => $clienteUser->email ?? $authUser->email ?? '',
+                'telefono'    => $clienteUser->telefono ?? $authUser->telefono ?? '',
+                'direccion'   => $clienteUser->direccion ?? $authUser->direccion ?? '',
+                'metodo_pago' => $venta->metodo_pago ?? 'Efectivo',
+                'notas'       => $venta->notas ?? '',
+                'items'       => $detalles,
+                'total'       => $venta->total,
+            ],
+        ]);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // ADMIN VIEWS
+    // ════════════════════════════════════════════════════════════════════════
+
     public function index(): View
     {
-        $ventas = Venta::with(['usuario', 'detalles.producto'])
+        $ventas = Venta::with(['cliente.usuario', 'detalles.producto'])
             ->orderByDesc('id_venta')
-            ->get();
+            ->get()
+            ->map(function ($v) {
+                $u = $v->cliente?->usuario;
+                $v->cliente_nombre    = $u?->nombres ?? 'N/A';
+                $v->cliente_email     = $u?->email ?? '';
+                $v->cliente_telefono  = $u?->telefono ?? '';
+                $v->cliente_direccion = $u?->direccion ?? '';
+                return $v;
+            });
 
-        $totalVentas    = $ventas->count();
-        $totalRecaudado = $ventas->whereNotIn('estado', ['Cancelada'])->sum('total');
-        $pendientes     = $ventas->where('estado', 'Pendiente')->count();
-        $completadas    = $ventas->where('estado', 'Completada')->count();
+        $stats = [
+            'Pendiente'      => Venta::where('estado', 'Pendiente')->count(),
+            'En Proceso'     => Venta::where('estado', 'En Proceso')->count(),
+            'Entregado'      => Venta::where('estado', 'Entregado')->count(),
+            'Cancelado'      => Venta::where('estado', 'Cancelado')->count(),
+            'total_ingresos' => Venta::whereNotIn('estado', ['Pendiente', 'Cancelado'])->sum('total'),
+        ];
 
-        return view('ventas.index', compact(
-            'ventas',
-            'totalVentas',
-            'totalRecaudado',
-            'pendientes',
-            'completadas'
-        ));
+        $productosActivos = Producto::where('estado', 1)->orderBy('nombre')->get()
+            ->map(function ($p) {
+                $p->stock = StockService::disponible($p->id_producto);
+                return $p;
+            });
+
+        $clientes = User::where('id_rol', 3)->orderBy('nombres')->get();
+
+        return view('ventas.index', compact('ventas', 'stats', 'productosActivos', 'clientes'));
     }
 
-    /**
-     * GET /ventas/{venta}
-     * Detalle de una venta específica (admin).
-     */
-    public function show(Venta $venta): View
+    public function cambiarEstado(Request $request): RedirectResponse
     {
-        $venta->load(['usuario', 'detalles.producto']);
-        return view('ventas.show', compact('venta'));
-    }
+        $request->validate([
+            'id_venta' => ['required', 'integer', 'exists:venta,id_venta'],
+            'estado'   => ['required', 'in:Pendiente,En Proceso,Entregado,Cancelado'],
+        ]);
 
-    /**
-     * GET /ventas/{venta}/estado/{estado}
-     * Cambia el estado de una venta.
-     * Estados permitidos: Pendiente, Completada, Cancelada
-     */
-    public function cambiarEstado(Venta $venta, string $estado): RedirectResponse
-    {
-        $permitidos = ['Pendiente', 'Completada', 'Cancelada'];
-
-        if (!in_array($estado, $permitidos)) {
-            return redirect()->route('ventas.index')
-                ->with('alert', [
-                    'icon'  => 'error',
-                    'title' => 'Estado inválido',
-                    'text'  => 'El estado indicado no es válido.',
-                ]);
-        }
-
-        // Si se cancela una venta que estaba activa, devolver stock
-        $estadoAnterior = $venta->estado;
-
-        DB::transaction(function () use ($venta, $estado, $estadoAnterior) {
-            $venta->estado = $estado;
-            $venta->save();
-
-            // Si se cancela: revertir el descuento de stock (crear entradas positivas)
-            if ($estado === 'Cancelada' && $estadoAnterior !== 'Cancelada') {
-                foreach ($venta->detalles as $detalle) {
-                    InventarioProductos::create([
-                        'fecha'        => now()->toDateString(),
-                        'bodega'       => 'Principal',
-                        'id_produccion'=> null,
-                        'id_producto'  => $detalle->id_producto,
-                        'id_usuario'   => Auth::user()->id_usuario,
-                        'cantidad'     => (int) $detalle->cantidad, // positivo = devolución al stock
-                    ]);
-                }
-            }
-
-            // Si se reactiva una venta cancelada: volver a descontar stock
-            if ($estadoAnterior === 'Cancelada' && $estado !== 'Cancelada') {
-                foreach ($venta->detalles as $detalle) {
-                    // Verificar stock antes
-                    $stock = InventarioProductos::where('id_producto', $detalle->id_producto)->sum('cantidad');
-                    // Solo descuenta, no bloquea (comportamiento simple)
-                    InventarioProductos::create([
-                        'fecha'        => now()->toDateString(),
-                        'bodega'       => 'Principal',
-                        'id_produccion'=> null,
-                        'id_producto'  => $detalle->id_producto,
-                        'id_usuario'   => Auth::user()->id_usuario,
-                        'cantidad'     => -(int) $detalle->cantidad,
-                    ]);
-                }
-            }
-        });
-
-        $venta->load('detalles');
+        $venta = Venta::findOrFail($request->id_venta);
+        $venta->update([
+            'estado'     => $request->estado,
+            'id_usuario' => Auth::user()->id_usuario,
+        ]);
 
         return redirect()->route('ventas.index')
             ->with('alert', [
                 'icon'  => 'success',
                 'title' => 'Estado Actualizado',
-                'text'  => "La venta #" . $venta->id_venta . " fue marcada como {$estado}.",
+                'text'  => "El pedido #{$venta->id_venta} ahora está en estado: {$request->estado}",
             ]);
+    }
+
+    public function crearPOS(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'id_cliente'     => ['required', 'integer', 'exists:usuarios,id_usuario'],
+            'pos_producto'   => ['required', 'array', 'min:1'],
+            'pos_producto.*' => ['integer'],
+            'pos_cantidad'   => ['required', 'array'],
+            'pos_cantidad.*' => ['integer', 'min:1'],
+        ]);
+
+        $idClienteUsuario = (int) $request->id_cliente;
+        $notas            = $request->input('notas', 'Venta en punto de venta');
+        $idAdmin          = Auth::user()->id_usuario;
+        $productosIds     = $request->input('pos_producto', []);
+        $cantidades       = $request->input('pos_cantidad', []);
+
+        $productosMap = Producto::whereIn('id_producto', $productosIds)->get()->keyBy('id_producto');
+
+        $items = [];
+        for ($i = 0; $i < count($productosIds); $i++) {
+            $pid = (int) $productosIds[$i];
+            $qty = max(1, (int) ($cantidades[$i] ?? 1));
+            if ($pid > 0 && isset($productosMap[$pid])) {
+                $items[] = [
+                    'id_producto'     => $pid,
+                    'cantidad'        => $qty,
+                    'precio_unitario' => (float) $productosMap[$pid]->precio,
+                    'descuento'       => 0,
+                ];
+            }
+        }
+
+        if (empty($items)) {
+            return redirect()->route('ventas.index')
+                ->with('alert', ['icon' => 'error', 'title' => 'Error', 'text' => 'No se encontraron productos válidos.']);
+        }
+
+        try {
+            $result = DB::transaction(function () use ($idClienteUsuario, $items, $notas, $idAdmin) {
+                foreach ($items as $item) {
+                    $stock = StockService::disponible($item['id_producto']);
+                    if ($stock < $item['cantidad']) {
+                        throw new \RuntimeException('Stock insuficiente para el producto ID ' . $item['id_producto']);
+                    }
+                }
+
+                $cliente  = Cliente::firstOrCreateForUser($idClienteUsuario);
+                $subtotal = 0;
+                foreach ($items as $item) {
+                    $subtotal += ($item['precio_unitario'] * $item['cantidad']) - ($item['descuento'] ?? 0);
+                }
+                $total = $subtotal * 1.19;
+
+                $venta = Venta::create([
+                    'id_cliente'  => $cliente->id_cliente,
+                    'id_usuario'  => $idAdmin,
+                    'estado'      => 'Entregado',
+                    'total'       => $total,
+                    'notas'       => $notas,
+                    'metodo_pago' => 'Efectivo',
+                    'fecha'       => now()->toDateString(),
+                ]);
+
+                foreach ($items as $item) {
+                    DetalleVenta::create([
+                        'id_venta'        => $venta->id_venta,
+                        'id_producto'     => $item['id_producto'],
+                        'cantidad'        => $item['cantidad'],
+                        'precio_unitario' => $item['precio_unitario'],
+                        'descuento'       => $item['descuento'] ?? 0,
+                    ]);
+                }
+
+                return ['id' => $venta->id_venta, 'total' => $total];
+            });
+
+            return redirect()->route('ventas.index')
+                ->with('alert', [
+                    'icon'  => 'success',
+                    'title' => '¡Venta Registrada!',
+                    'text'  => "Venta #{$result['id']} registrada. Total: $" . number_format($result['total'], 2),
+                ]);
+        } catch (\Throwable $e) {
+            return redirect()->route('ventas.index')
+                ->with('alert', ['icon' => 'error', 'title' => 'Error al registrar', 'text' => $e->getMessage()]);
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // CLIENTE — Mis Compras
+    // ════════════════════════════════════════════════════════════════════════
+
+    public function misCompras(): View
+    {
+        $idUsuario = Auth::user()->id_usuario;
+
+        $ventas = Venta::select('venta.*')
+            ->selectRaw("GROUP_CONCAT(p.nombre SEPARATOR ', ') AS productos_lista")
+            ->leftJoin('detalle_venta as dv', 'venta.id_venta', '=', 'dv.id_venta')
+            ->leftJoin('producto as p', 'dv.id_producto', '=', 'p.id_producto')
+            ->leftJoin('cliente as c', 'venta.id_cliente', '=', 'c.id_cliente')
+            ->where('c.id_usuario', $idUsuario)
+            ->groupBy('venta.id_venta')
+            ->orderByDesc('venta.id_venta')
+            ->get();
+
+        return view('ventas.mis-compras', compact('ventas'));
     }
 }

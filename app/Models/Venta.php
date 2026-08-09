@@ -14,38 +14,47 @@ class Venta extends Model
 
     protected $fillable = [
         'fecha',
-        'cantidad',
-        'precio',
         'estado',
-        'id_cliente',
-        'id_usuario',
-        'id_producto',
         'total',
         'notas',
         'metodo_pago',
+        'id_cliente',
+        'id_usuario',
     ];
 
     protected $casts = [
-        'fecha'    => 'date',
-        'precio'   => 'decimal:2',
-        'total'    => 'decimal:2',
-        'cantidad' => 'integer',
+        'fecha' => 'date',
+        'total' => 'float',
     ];
 
     // ── Relationships ──────────────────────────────────────────────────────────
+
+    public function cliente(): BelongsTo
+    {
+        return $this->belongsTo(Cliente::class, 'id_cliente', 'id_cliente');
+    }
 
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
     }
 
-    public function producto(): BelongsTo
-    {
-        return $this->belongsTo(Producto::class, 'id_producto', 'id_producto');
-    }
-
     public function detalles(): HasMany
     {
         return $this->hasMany(DetalleVenta::class, 'id_venta', 'id_venta');
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
+    const ESTADOS_VALIDOS = ['Pendiente', 'En Proceso', 'Entregado', 'Cancelado'];
+
+    public function esEditable(): bool
+    {
+        return !in_array($this->estado, ['Cancelado', 'Entregado']);
+    }
+
+    public function subtotal(): float
+    {
+        return round($this->total / 1.19, 2);
     }
 }

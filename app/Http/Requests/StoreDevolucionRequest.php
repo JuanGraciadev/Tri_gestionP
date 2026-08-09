@@ -2,45 +2,47 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Producto;
+
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreDevolucionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check();
+        return Auth::check() && in_array((int) Auth::user()->id_rol, [1, 2]);
     }
 
     public function rules(): array
     {
         return [
-            // Solo productos marcados como retornables
-            'id_producto' => [
+            'id_usuario'    => ['required', 'integer', 'exists:usuarios,id_usuario'],
+            'id_producto'   => [
                 'required',
+                'integer',
                 'exists:producto,id_producto',
                 function ($attribute, $value, $fail) {
-                    $producto = \App\Models\Producto::find($value);
+                    $producto = Producto::find($value);
                     if (!$producto || !$producto->retornable) {
-                        $fail('Solo se pueden devolver productos retornables (garrafones).');
+                        $fail('Únicamente los garrafones/envases retornables pueden procesarse en devoluciones.');
                     }
                 },
             ],
-            'cantidad' => ['required', 'integer', 'min:1'],
-            // 'apto' determina si el garrafón vuelve a stock o está dañado
-            'apto'     => ['required', 'in:1,0'],
+            'cantidad'      => ['required', 'integer', 'min:1'],
+            'bodega'        => ['required', 'string', 'max:100'],
+            'estado_envase' => ['nullable', 'string', 'in:bueno,danado'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'id_producto.required' => 'Debes seleccionar el producto a devolver.',
-            'id_producto.exists'   => 'El producto seleccionado no existe.',
+            'id_usuario.required'  => 'Debes seleccionar un cliente.',
+            'id_usuario.exists'    => 'El cliente seleccionado no existe.',
+            'id_producto.required' => 'Debes seleccionar un envase retornable.',
             'cantidad.required'    => 'La cantidad es obligatoria.',
-            'cantidad.integer'     => 'La cantidad debe ser un número entero.',
-            'cantidad.min'         => 'La cantidad mínima es 1.',
-            'apto.required'        => 'Debes indicar el estado del garrafón.',
-            'apto.in'              => 'El estado del garrafón debe ser Apto o Dañado.',
+            'cantidad.min'         => 'La cantidad debe ser al menos 1.',
         ];
     }
 }
