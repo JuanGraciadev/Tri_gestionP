@@ -1,10 +1,16 @@
 <?php
 
 use App\Http\Controllers\AdminUsuarioController;
+use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\DevolucionController;
+use App\Http\Controllers\InventarioMateriaPrimaController;
+use App\Http\Controllers\InventarioProductosController;
 use App\Http\Controllers\LoteController;
+use App\Http\Controllers\ProduccionController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -75,6 +81,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/lotes/{lote}/detalles', [LoteController::class, 'detalles'])->name('lotes.detalles');
     Route::post('/lotes/detalles', [LoteController::class, 'storeDetalle'])->name('lotes.detalles.store');
     Route::put('/lotes/detalles/{detalle}', [LoteController::class, 'updateDetalle'])->name('lotes.detalles.update');
+
+    // ── Inventario Materia Prima Routes ──────────────────────────────────
+    Route::get('/inventario-mp', [InventarioMateriaPrimaController::class, 'index'])->name('inventario-mp.index');
+
+    // ── Inventario Productos Routes ───────────────────────────────────
+    Route::get('/inventario-productos', [InventarioProductosController::class, 'index'])->name('inventario-productos.index');
+
+    // ── Devoluciones Routes ───────────────────────────────────────────
+    Route::get('/devoluciones', [DevolucionController::class, 'index'])->name('devoluciones.index');
+    Route::post('/devoluciones', [DevolucionController::class, 'store'])->name('devoluciones.store');
+
+    // ── Producción Routes ─────────────────────────────────────
+    Route::get('/produccion', [ProduccionController::class, 'index'])->name('produccion.index');
+    Route::post('/produccion', [ProduccionController::class, 'store'])->name('produccion.store');
+    Route::get('/produccion/{id}/finalizar', [ProduccionController::class, 'finalizar'])->name('produccion.finalizar');
 });
 
 require __DIR__.'/auth.php';

@@ -84,11 +84,11 @@
                 <div>
                     <p class="text-[10px] font-black text-sky-300/70 tracking-widest uppercase px-3 mb-2">ÁREA DE TRABAJO</p>
                     <div class="space-y-1">
-                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                        <a href="{{ route('produccion.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
                             <i class="fas fa-industry text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Producción</span>
                         </a>
-                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                        <a href="{{ route('inventario-mp.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
                             <i class="fas fa-boxes-stacked text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Inventario MP</span>
                         </a>
@@ -96,7 +96,7 @@
                             <i class="fas fa-box-open text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Gestión de Lotes</span>
                         </a>
-                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                        <a href="{{ route('inventario-productos.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
                             <i class="fas fa-cubes text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Inventario Productos</span>
                         </a>
@@ -157,7 +157,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
                     <!-- Producción -->
-                    <a href="#" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-sky-300 hover:shadow-2xl hover:shadow-sky-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
+                    <a href="{{ route('produccion.index') }}" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-sky-300 hover:shadow-2xl hover:shadow-sky-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
                         <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center text-2xl font-bold mb-4 transition-all shadow-sm">
                             <i class="fas fa-industry"></i>
                         </div>
@@ -166,7 +166,7 @@
                     </a>
 
                     <!-- Inventario Materia Prima -->
-                    <a href="#" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-emerald-300 hover:shadow-2xl hover:shadow-emerald-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
+                    <a href="{{ route('inventario-mp.index') }}" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-emerald-300 hover:shadow-2xl hover:shadow-emerald-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
                         <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-emerald-500 group-hover:text-white flex items-center justify-center text-2xl font-bold mb-4 transition-all shadow-sm">
                             <i class="fas fa-boxes-stacked"></i>
                         </div>
@@ -184,7 +184,7 @@
                     </a>
 
                     <!-- Inventario Productos -->
-                    <a href="#" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
+                    <a href="{{ route('inventario-productos.index') }}" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
                         <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-indigo-500 group-hover:text-white flex items-center justify-center text-2xl font-bold mb-4 transition-all shadow-sm">
                             <i class="fas fa-cubes"></i>
                         </div>

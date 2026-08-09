@@ -132,7 +132,7 @@
                 <div>
                     <p class="text-[10px] font-black text-sky-300/70 tracking-widest uppercase px-3 mb-2">OPERACIONES</p>
                     <div class="space-y-1">
-                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                        <a href="{{ route('inventario-mp.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
                             <i class="fas fa-boxes-stacked text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Inventario MP</span>
                         </a>
@@ -148,7 +148,7 @@
                             <i class="fas fa-tint text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Productos</span>
                         </a>
-                        <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
+                        <a href="{{ route('inventario-productos.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
                             <i class="fas fa-cubes text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
                             <span>Inventario Productos</span>
                         </a>
