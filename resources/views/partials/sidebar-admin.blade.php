@@ -85,8 +85,10 @@
         <div>
             <p class="text-[10px] font-black text-sky-300/70 tracking-widest uppercase px-3 mb-2">ANÁLISIS</p>
             <div class="space-y-1">
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-sky-100/80 hover:bg-white/10 hover:text-white transition-all group">
-                    <i class="fas fa-file-invoice-dollar text-sky-300/70 group-hover:text-sky-300 shrink-0"></i>
+                <a href="{{ route('reportes.index') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all group
+                   {{ request()->routeIs('reportes.*') ? 'font-extrabold bg-indigo-600/30 text-white border-l-4 border-indigo-400 shadow-md' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
+                    <i class="fas fa-file-invoice-dollar {{ request()->routeIs('reportes.*') ? 'text-indigo-300' : 'text-sky-300/70 group-hover:text-sky-300' }} shrink-0"></i>
                     <span>Reportes Generales</span>
                 </a>
             </div>

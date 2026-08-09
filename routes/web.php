@@ -10,6 +10,7 @@ use App\Http\Controllers\LoteController;
 use App\Http\Controllers\ProduccionController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Route;
 
@@ -129,6 +130,9 @@ Route::middleware('auth')->group(function () {
 
     // ── Cliente – Mis Compras ──────────────────────────────
     Route::get('/mis-compras', [VentaController::class, 'misCompras'])->name('cliente.misCompras');
+
+    // ── Reportes Routes (Admin) ────────────────────────────
+    Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
 });
 
 require __DIR__.'/auth.php';
