@@ -54,12 +54,7 @@
                     <i class="fas fa-tint {{ request()->routeIs('productos.*') ? 'text-trigestion-300' : 'text-sky-300/70 group-hover:text-sky-300' }} shrink-0"></i>
                     <span>Productos</span>
                 </a>
-                <a href="{{ route('produccion.index') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all group
-                   {{ request()->routeIs('produccion.*') ? 'font-extrabold bg-emerald-500/20 text-white border-l-4 border-emerald-400 shadow-md' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
-                    <i class="fas fa-industry {{ request()->routeIs('produccion.*') ? 'text-emerald-300' : 'text-sky-300/70 group-hover:text-sky-300' }} shrink-0"></i>
-                    <span>Producción</span>
-                </a>
+
                 <a href="{{ route('inventario-productos.index') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all group
                    {{ request()->routeIs('inventario-productos.index') ? 'font-extrabold bg-violet-500/20 text-white border-l-4 border-violet-400 shadow-md' : 'text-sky-100/80 hover:bg-white/10 hover:text-white' }}">
