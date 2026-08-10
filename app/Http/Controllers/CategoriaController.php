@@ -19,11 +19,11 @@ class CategoriaController extends Controller
     {
         $categorias = Categoria::withCount('productos')
             ->orderBy('id_categoria', 'desc')
-            ->get();
+            ->paginate(12);
 
-        $totalCats = $categorias->count();
-        $catsActivas = $categorias->where('estado', true)->count();
-        $totalProds = $categorias->sum('productos_count');
+        $totalCats   = Categoria::count();
+        $catsActivas = Categoria::where('estado', true)->count();
+        $totalProds  = Categoria::withCount('productos')->get()->sum('productos_count');
 
         return view('categorias.index', compact('categorias', 'totalCats', 'catsActivas', 'totalProds'));
     }

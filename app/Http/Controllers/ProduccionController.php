@@ -20,9 +20,9 @@ class ProduccionController extends Controller
     {
         $producciones = Produccion::with(['producto', 'usuario'])
             ->orderByDesc('id_produccion')
-            ->get();
+            ->paginate(12);
 
-        $productos   = Producto::where('estado', 1)->orderBy('nombre')->get();
+        $productos    = Producto::where('estado', 1)->orderBy('nombre')->get();
         $materiaPrima = InventarioMateriaPrima::with('detalle.lote')
             ->orderByDesc('id_inventario_materia')
             ->get();

@@ -22,16 +22,12 @@ class InventarioMateriaPrimaController extends Controller
     {
         $inventario = InventarioMateriaPrima::with(['detalle.lote'])
             ->orderByDesc('id_inventario_materia')
-            ->get();
+            ->paginate(15);
 
-        // KPI: total de unidades disponibles (campo ingreso = stock actual)
-        $totalIngreso = $inventario->sum('ingreso');
-
-        // KPI: total de registros
-        $totalRegistros = $inventario->count();
-
-        // KPI: registros con stock > 0
-        $conStock = $inventario->where('ingreso', '>', 0)->count();
+        // KPIs sobre el total real (sin paginar)
+        $totalIngreso   = InventarioMateriaPrima::sum('ingreso');
+        $totalRegistros = InventarioMateriaPrima::count();
+        $conStock       = InventarioMateriaPrima::where('ingreso', '>', 0)->count();
 
         return view('inventario_mp.index', compact(
             'inventario',

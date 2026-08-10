@@ -17,7 +17,7 @@ class AdminUsuarioController extends Controller
      */
     public function index(): View
     {
-        $usuarios = User::with('rol')->orderBy('id_usuario', 'desc')->get();
+        $usuarios = User::with('rol')->orderBy('id_usuario', 'desc')->paginate(15);
         $roles    = Rol::all();
 
         return view('admin.admin', compact('usuarios', 'roles'));

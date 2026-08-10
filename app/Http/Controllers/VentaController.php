@@ -260,15 +260,17 @@ class VentaController extends Controller
     {
         $ventas = Venta::with(['cliente.usuario', 'detalles.producto'])
             ->orderByDesc('id_venta')
-            ->get()
-            ->map(function ($v) {
-                $u = $v->cliente?->usuario;
-                $v->cliente_nombre    = $u?->nombres ?? 'N/A';
-                $v->cliente_email     = $u?->email ?? '';
-                $v->cliente_telefono  = $u?->telefono ?? '';
-                $v->cliente_direccion = $u?->direccion ?? '';
-                return $v;
-            });
+            ->paginate(15);
+
+        // Mapear datos del cliente en cada venta
+        $ventas->getCollection()->transform(function ($v) {
+            $u = $v->cliente?->usuario;
+            $v->cliente_nombre    = $u?->nombres ?? 'N/A';
+            $v->cliente_email     = $u?->email ?? '';
+            $v->cliente_telefono  = $u?->telefono ?? '';
+            $v->cliente_direccion = $u?->direccion ?? '';
+            return $v;
+        });
 
         $stats = [
             'Pendiente'      => Venta::where('estado', 'Pendiente')->count(),

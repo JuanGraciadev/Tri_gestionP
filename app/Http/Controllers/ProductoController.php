@@ -19,13 +19,12 @@ class ProductoController extends Controller
     {
         $productos = Producto::with('categoria')
             ->orderBy('id_producto', 'desc')
-            ->get();
+            ->paginate(16);
 
-        $categorias = Categoria::all();
-
-        $totalProductos = $productos->count();
-        $activos = $productos->where('estado', true)->count();
-        $inactivos = $totalProductos - $activos;
+        $categorias     = Categoria::all();
+        $totalProductos = Producto::count();
+        $activos        = Producto::where('estado', true)->count();
+        $inactivos      = $totalProductos - $activos;
         $totalCategorias = $categorias->count();
 
         return view('productos.index', compact(

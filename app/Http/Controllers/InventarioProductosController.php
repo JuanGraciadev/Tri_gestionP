@@ -18,20 +18,15 @@ class InventarioProductosController extends Controller
     {
         $inventario = InventarioProductos::with(['produccion', 'producto', 'usuario'])
             ->orderByDesc('id_inventario')
-            ->get();
+            ->paginate(15);
 
-        // Stock total por producto: SUM(cantidad) agrupado por id_producto
+        // KPIs sobre el total real (sin paginar)
         $stockPorProducto = InventarioProductos::selectRaw('id_producto, SUM(cantidad) as total_stock')
             ->groupBy('id_producto')
             ->pluck('total_stock', 'id_producto');
 
-        // Total de unidades en todo el inventario
-        $totalUnidades = $inventario->sum('cantidad');
-
-        // Total de registros (entradas)
-        $totalEntradas = $inventario->count();
-
-        // Número de productos distintos con stock
+        $totalUnidades     = InventarioProductos::sum('cantidad');
+        $totalEntradas     = InventarioProductos::count();
         $productosConStock = $stockPorProducto->count();
 
         return view('inventario_productos.index', compact(

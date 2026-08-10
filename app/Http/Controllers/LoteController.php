@@ -24,7 +24,7 @@ class LoteController extends Controller
         $lotes = Lote::with('usuario')
             ->withCount('detalles')
             ->orderBy('id_lote', 'desc')
-            ->get();
+            ->paginate(15);
 
         return view('lotes.index', compact('lotes'));
     }
