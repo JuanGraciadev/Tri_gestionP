@@ -34,13 +34,15 @@ class ProduccionController extends Controller
 
     public function store(StoreProduccionRequest $request): RedirectResponse
     {
+        $data = $request->validated();
+
         Produccion::create([
-            'lote_produccion'       => $request->lote_produccion,
-            'cantidad'              => $request->cantidad,
-            'descripcion'           => $request->descripcion,
+            'lote_produccion'       => $data['lote_produccion'],
+            'cantidad'              => $data['cantidad'],
+            'descripcion'           => $data['descripcion'] ?? null,
             'id_usuario'            => Auth::user()->id_usuario,
-            'id_producto'           => $request->id_producto,
-            'id_inventario_materia' => $request->id_inventario_materia ?: null,
+            'id_producto'           => $data['id_producto'],
+            'id_inventario_materia' => $data['id_inventario_materia'] ?? null,
             'estado'                => 'En Producción',
         ]);
 

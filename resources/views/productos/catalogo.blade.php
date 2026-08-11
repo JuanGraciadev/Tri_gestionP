@@ -194,13 +194,17 @@
                 <!-- PRODUCTS GRID -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="catalogoGrid">
                     @foreach ($productos as $p)
-                        @php $imgUrl = $p->img ? asset($p->img) : null; @endphp
-                        <div class="catalogo-card glass-card rounded-[2.5rem] border border-white overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col"
+                        @php
+                            $imgUrl   = $p->img ? asset($p->img) : null;
+                            $stock    = $p->stock ?? 0;
+                            $sinStock = $stock <= 0;
+                        @endphp
+                        <div class="catalogo-card glass-card rounded-[2.5rem] border border-white overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col {{ $sinStock ? 'opacity-60' : '' }}"
                              data-nombre="{{ strtolower($p->nombre) }}">
 
                             <div class="h-52 relative overflow-hidden flex items-center justify-center p-6 bg-gradient-to-br from-sky-50 to-blue-50">
                                 @if ($imgUrl)
-                                    <img src="{{ $imgUrl }}" alt="{{ $p->nombre }}" class="max-w-[72%] max-h-[72%] object-contain relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-md">
+                                    <img src="{{ $imgUrl }}" alt="{{ $p->nombre }}" class="max-w-[72%] max-h-[72%] object-contain relative z-10 group-hover:scale-110 transition-transform duration-500 drop-shadow-md {{ $sinStock ? 'grayscale' : '' }}">
                                 @else
                                     <div class="w-20 h-20 rounded-2xl bg-white/80 flex items-center justify-center relative z-10 group-hover:scale-110 transition-transform duration-500 shadow-md">
                                         <i class="fas fa-box text-3xl text-sky-400"></i>
@@ -212,21 +216,45 @@
                                         ${{ number_format($p->precio, 2) }}
                                     </span>
                                 </div>
+
+                                @if ($sinStock)
+                                <div class="absolute inset-0 flex items-center justify-center z-20">
+                                    <span class="px-4 py-2 bg-slate-800/80 text-white text-xs font-black rounded-full uppercase tracking-widest backdrop-blur-sm">
+                                        Sin Stock
+                                    </span>
+                                </div>
+                                @endif
                             </div>
 
                             <div class="p-5 flex-1 flex flex-col bg-white">
-                                <h3 class="text-base font-black text-slate-800 leading-tight mb-3 line-clamp-2 group-hover:text-trigestion-600 transition-colors flex-1">
+                                <h3 class="text-base font-black text-slate-800 leading-tight mb-1 line-clamp-2 group-hover:text-trigestion-600 transition-colors flex-1">
                                     {{ $p->nombre }}
                                 </h3>
 
+                                <p class="text-[11px] font-bold mb-3 {{ $sinStock ? 'text-rose-400' : 'text-emerald-500' }}">
+                                    @if ($sinStock)
+                                        <i class="fas fa-circle-xmark mr-1"></i> Agotado
+                                    @else
+                                        <i class="fas fa-circle-check mr-1"></i> {{ $stock }} en stock
+                                    @endif
+                                </p>
+
                                 <div class="mt-auto">
-                                    <button
-                                        type="button"
-                                        onclick="agregarAlCarrito({{ $p->id_producto }}, '{{ addslashes($p->nombre) }}')"
-                                        class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold text-xs transition-all shadow-md active:scale-95 cursor-pointer">
-                                        <i class="fas fa-cart-plus text-sm"></i>
-                                        <span>Agregar al Carrito</span>
-                                    </button>
+                                    @if ($sinStock)
+                                        <button type="button" disabled
+                                            class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-200 text-slate-400 font-extrabold text-xs cursor-not-allowed">
+                                            <i class="fas fa-ban text-sm"></i>
+                                            <span>Sin Disponibilidad</span>
+                                        </button>
+                                    @else
+                                        <button
+                                            type="button"
+                                            onclick="agregarAlCarrito({{ $p->id_producto }}, '{{ addslashes($p->nombre) }}')"
+                                            class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold text-xs transition-all shadow-md active:scale-95 cursor-pointer">
+                                            <i class="fas fa-cart-plus text-sm"></i>
+                                            <span>Agregar al Carrito</span>
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -288,7 +316,7 @@
 
         function renderCart(items, total) {
             const container = document.getElementById('cartItemsContainer');
-            document.getElementById('cartTotalDisplay').textContent = '$' + (total * 1.19).toFixed(2);
+            document.getElementById('cartTotalDisplay').textContent = '$' + parseFloat(total).toFixed(2);
 
             let totalItems = 0;
             if (!items || items.length === 0) {
@@ -308,7 +336,7 @@
                     <div class="flex items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                         <div class="flex-1 min-w-0">
                             <h4 class="font-bold text-slate-800 text-sm truncate">${item.nombre}</h4>
-                            <p class="text-xs text-trigestion-600 font-extrabold mt-0.5">$${parseFloat(item.precio_unitario).toFixed(2)} c/u</p>
+                            <p class="text-xs text-trigestion-600 font-extrabold mt-0.5">$${parseFloat(item.precio ?? item.precio_unitario).toFixed(2)} c/u</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <button onclick="actualizarCantidad(${item.id_producto}, ${item.cantidad - 1})" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer">-</button>

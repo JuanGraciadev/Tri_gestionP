@@ -9,6 +9,7 @@ use App\Models\Lote;
 use App\Models\Produccion;
 use App\Models\Producto;
 use App\Models\Venta;
+use App\Services\StockService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -378,11 +379,10 @@ class ReportService
             ->orderByDesc('id_lote')
             ->get()
             ->map(fn($l) => [
-                'id_lote'         => $l->id_lote,
-                'codigo'          => $l->codigo,
-                'fecha_recepcion' => optional($l->fecha_recepcion)->format('d/m/Y') ?? 'N/A',
-                'usuario'         => $l->usuario->nombres ?? $l->usuario->name ?? 'N/A',
-                'total_detalles'  => $l->detalles->count(),
+                'id_lote'        => $l->id_lote,
+                'codigo_lote'    => $l->codigo_lote ?? 'N/A',
+                'usuario'        => $l->usuario->nombres ?? $l->usuario->name ?? 'N/A',
+                'total_detalles' => $l->detalles->count(),
             ])
             ->toArray();
     }

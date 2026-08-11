@@ -36,7 +36,7 @@ class CarritoController extends Controller
         $entradas = InventarioProductos::where('id_producto', $idProducto)->sum('cantidad');
 
         $vendido = \App\Models\DetalleVenta::whereHas('venta', function ($q) {
-                $q->whereNotIn('estado', ['Cancelada']);
+                $q->whereNotIn('estado', ['Cancelado']);
             })
             ->where('id_producto', $idProducto)
             ->sum('cantidad');

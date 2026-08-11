@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\ReportService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class ReporteController extends Controller
@@ -22,11 +21,6 @@ class ReporteController extends Controller
      */
     public function index(Request $request): View
     {
-        // Enforce Admin authorization
-        if (!Auth::check() || (int) Auth::user()->id_rol !== 1) {
-            abort(403, 'Acceso no autorizado al módulo de reportes.');
-        }
-
         $filtro      = $request->input('filtro', '30dias');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin    = $request->input('fecha_fin');

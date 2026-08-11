@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProductoRequest;
 use App\Http\Requests\UpdateProductoRequest;
 use App\Models\Categoria;
 use App\Models\Producto;
+use App\Services\StockService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -192,7 +193,11 @@ class ProductoController extends Controller
             $query->where('id_categoria', $filtroCat);
         }
 
-        $productos = $query->orderBy('id_producto', 'desc')->get();
+        $productos = $query->orderBy('id_producto', 'desc')->get()->map(function ($p) {
+            $p->stock = StockService::disponible($p->id_producto);
+            return $p;
+        });
+
         $categorias = Categoria::where('estado', true)->get();
 
         return view('productos.catalogo', compact('productos', 'categorias', 'filtroCat'));

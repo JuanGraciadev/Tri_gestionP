@@ -143,7 +143,9 @@ class VentaController extends Controller
                 foreach ($items as $item) {
                     $stock = StockService::disponible($item['id_producto']);
                     if ($stock < $item['cantidad']) {
-                        throw new \RuntimeException('Stock insuficiente para el producto ID ' . $item['id_producto']);
+                        $prod = Producto::find($item['id_producto']);
+                        $nombre = $prod->nombre ?? 'ID ' . $item['id_producto'];
+                        throw new \RuntimeException("Stock insuficiente para \"{$nombre}\". Disponible: {$stock}");
                     }
                 }
 
@@ -152,7 +154,7 @@ class VentaController extends Controller
                 foreach ($items as $item) {
                     $subtotal += ($item['precio_unitario'] * $item['cantidad']) - ($item['descuento'] ?? 0);
                 }
-                $total = $subtotal * 1.19;
+                $total = $subtotal;
 
                 $venta = Venta::create([
                     'id_cliente'  => $cliente->id_cliente,
@@ -191,7 +193,7 @@ class VentaController extends Controller
                 ])->toArray();
 
             $user  = Auth::user();
-            $total = array_sum(array_map(fn($i) => $i['precio_unitario'] * $i['cantidad'], $detalles)) * 1.19;
+            $total = array_sum(array_map(fn($i) => $i['precio_unitario'] * $i['cantidad'], $detalles));
 
             return response()->json([
                 'ok'       => true,
@@ -354,7 +356,9 @@ class VentaController extends Controller
                 foreach ($items as $item) {
                     $stock = StockService::disponible($item['id_producto']);
                     if ($stock < $item['cantidad']) {
-                        throw new \RuntimeException('Stock insuficiente para el producto ID ' . $item['id_producto']);
+                        $prod = Producto::find($item['id_producto']);
+                        $nombre = $prod->nombre ?? 'ID ' . $item['id_producto'];
+                        throw new \RuntimeException("Stock insuficiente para \"{$nombre}\". Disponible: {$stock}");
                     }
                 }
 
@@ -363,7 +367,7 @@ class VentaController extends Controller
                 foreach ($items as $item) {
                     $subtotal += ($item['precio_unitario'] * $item['cantidad']) - ($item['descuento'] ?? 0);
                 }
-                $total = $subtotal * 1.19;
+                $total = $subtotal;
 
                 $venta = Venta::create([
                     'id_cliente'  => $cliente->id_cliente,
@@ -408,15 +412,17 @@ class VentaController extends Controller
     {
         $idUsuario = Auth::user()->id_usuario;
 
-        $ventas = Venta::select('venta.*')
-            ->selectRaw("GROUP_CONCAT(p.nombre SEPARATOR ', ') AS productos_lista")
-            ->leftJoin('detalle_venta as dv', 'venta.id_venta', '=', 'dv.id_venta')
-            ->leftJoin('producto as p', 'dv.id_producto', '=', 'p.id_producto')
-            ->leftJoin('cliente as c', 'venta.id_cliente', '=', 'c.id_cliente')
-            ->where('c.id_usuario', $idUsuario)
-            ->groupBy('venta.id_venta')
-            ->orderByDesc('venta.id_venta')
-            ->get();
+        $ventas = Venta::with(['detalles.producto'])
+            ->whereHas('cliente', fn($q) => $q->where('id_usuario', $idUsuario))
+            ->orderByDesc('id_venta')
+            ->get()
+            ->map(function ($v) {
+                $v->productos_lista = $v->detalles
+                    ->map(fn($d) => $d->producto->nombre ?? '')
+                    ->filter()
+                    ->implode(', ');
+                return $v;
+            });
 
         return view('ventas.mis-compras', compact('ventas'));
     }

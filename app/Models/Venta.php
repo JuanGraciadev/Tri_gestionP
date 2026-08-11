@@ -55,6 +55,6 @@ class Venta extends Model
 
     public function subtotal(): float
     {
-        return round($this->total / 1.19, 2);
+        return round((float) $this->total, 2);
     }
 }
