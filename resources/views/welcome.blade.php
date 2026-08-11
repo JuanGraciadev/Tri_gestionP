@@ -608,3 +608,85 @@
         </div>
     </footer>
 
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- JAVASCRIPT                                                 -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <script>
+        // ── Carousel ────────────────────────────────────────────
+        let slideIndex = 0;
+
+        function setSlide(n) {
+            const slides = document.querySelectorAll('.carousel-slide');
+            const dots   = document.querySelectorAll('.carousel-dot');
+
+            slides.forEach((s, i) => {
+                if (i === n) {
+                    s.classList.remove('hidden');
+                    s.classList.add('flex');
+                } else {
+                    s.classList.add('hidden');
+                    s.classList.remove('flex');
+                }
+            });
+
+            dots.forEach((d, i) => {
+                if (i === n) {
+                    d.classList.remove('bg-sky-200');
+                    d.classList.add('bg-trigestion-500', 'scale-125');
+                } else {
+                    d.classList.remove('bg-trigestion-500', 'scale-125');
+                    d.classList.add('bg-sky-200');
+                }
+            });
+
+            slideIndex = n;
+        }
+
+        setInterval(() => {
+            setSlide((slideIndex + 1) % 3);
+        }, 4000);
+
+        // ── Calculadora ─────────────────────────────────────────
+        function updateCalc() {
+            const people  = parseInt(document.getElementById('people-slider').value);
+            const bottles = Math.max(2, Math.ceil(people * 1.3));
+            const liters  = bottles * 20;
+            const price   = bottles * 19000;
+
+            document.getElementById('people-count').textContent  = people + (people === 1 ? ' Persona' : ' Personas');
+            document.getElementById('result-bottles').textContent = bottles;
+            document.getElementById('result-liters').textContent  = liters + ' Litros de agua pura';
+            document.getElementById('result-price').textContent   = '$' + price.toLocaleString('es-CO') + ' / mes';
+        }
+
+        // Inicializar calculadora
+        updateCalc();
+
+        // ── FAQ accordion ───────────────────────────────────────
+        function toggleFaq(btn) {
+            const item = btn.closest('.faq-item');
+            const isOpen = item.classList.contains('open');
+
+            // Cerrar todos
+            document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+
+            // Abrir el clickeado si estaba cerrado
+            if (!isOpen) {
+                item.classList.add('open');
+            }
+        }
+
+        // ── Navbar scroll shadow ────────────────────────────────
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-md');
+            } else {
+                header.classList.remove('shadow-md');
+            }
+        });
+    </script>
+
+</body>
+</html>
