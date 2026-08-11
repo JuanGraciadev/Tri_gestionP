@@ -131,7 +131,7 @@ El garrafón **vuelve a estar disponible** para ser llenado en producción.
 |------|---------|
 | Controlador | `app/Http/Controllers/DevolucionController.php` |
 | Vista | `resources/views/devoluciones/index.blade.php` |
-| Modelo | `app/Models/DevolucionRetornable.php` |
+| Modelo | `app/Models/DevolucionRetornables.php` |
 | Request | `app/Http/Requests/StoreDevolucionRequest.php` |
 | Rutas | `routes/web.php` → grupo `role:1,2` |
 

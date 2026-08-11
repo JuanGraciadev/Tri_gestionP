@@ -190,15 +190,17 @@ Cabecera de cada pedido realizado por un cliente.
 |-------|------|-------------|
 | `id_venta` | Entero (PK) | Identificador único |
 | `fecha` | Fecha | Fecha del pedido |
-| `cantidad` | Entero | Total de unidades (campo legacy) |
-| `precio` | Decimal | Precio referencial (campo legacy) |
-| `estado` | Texto | Pendiente / Completada / Cancelada |
+| `estado` | Texto | `Pendiente` / `En Proceso` / `Entregado` / `Cancelado` |
 | `id_cliente` | Entero (FK → cliente) | Cliente que compró |
 | `id_usuario` | Entero (FK → usuarios) | Usuario que registró |
-| `id_producto` | Entero (FK → producto) | Primer producto (campo legacy) |
-| `total` | Decimal | Monto total del pedido |
+| `total` | Decimal | Monto total sin IVA (precios ya lo incluyen) |
 | `notas` | Texto | Instrucciones especiales |
-| `metodo_pago` | Texto | Efectivo / Transferencia / Tarjeta |
+| `metodo_pago` | Texto | `Efectivo` / `Transferencia` / `Tarjeta` |
+| `cantidad` | Entero | Campo heredado — no se usa en la lógica actual |
+| `precio` | Decimal | Campo heredado — no se usa en la lógica actual |
+| `id_producto` | Entero (FK → producto) | Campo heredado — no se usa en la lógica actual |
+
+> ⚠ Los campos `cantidad`, `precio` e `id_producto` de la tabla `venta` son columnas del diseño original que no se utilizan en la lógica actual. El detalle real de productos está en `detalle_venta`.
 
 ---
 
@@ -213,6 +215,32 @@ Líneas de producto de cada pedido. Un pedido puede tener múltiples líneas.
 | `id_venta` | Entero (FK → venta) | Pedido al que pertenece |
 | `cantidad` | Entero | Unidades compradas |
 | `id_producto` | Entero (FK → producto) | Producto comprado |
+
+---
+
+## Lógica de stock (StockService)
+
+El stock disponible se calcula **dinámicamente** — no hay un campo de stock en ninguna tabla. Se computa al momento de cada consulta:
+
+```
+Stock disponible = SUM(inventario_productos.cantidad para el producto)
+                 − SUM(detalle_venta.cantidad WHERE venta.estado IN ('En Proceso', 'Entregado'))
+```
+
+| Estado de venta | ¿Descuenta stock? |
+|---|---|
+| `Pendiente` | ❌ No |
+| `En Proceso` | ✅ Sí |
+| `Entregado` | ✅ Sí |
+| `Cancelado` | ❌ No |
+
+Esto evita que pedidos recién creados (aún sin confirmar) bloqueen el inventario.
+
+---
+
+## Modelo de devoluciones
+
+Solo existe **un modelo** para la tabla `devolucion_retornables`: `App\Models\DevolucionRetornables`. Contiene toda la lógica de negocio (`registrarDevolucion`, `obtenerBalancesClientes`).
 
 ---
 

@@ -2,118 +2,131 @@
 
 ## ¿Para qué sirve?
 
-Este módulo gestiona el catálogo de productos de TRIGESTION: las diferentes presentaciones de agua purificada que se ofrecen a los clientes (garrafones, botellas, etc.). El administrador puede crear, editar, habilitar/deshabilitar y eliminar productos. Los clientes los ven en su catálogo para hacer pedidos.
+Gestiona el catálogo de productos de TRIGESTION: las diferentes presentaciones de agua purificada (garrafones, botellas, etc.). El administrador crea, edita, habilita/deshabilita y elimina productos. Los clientes los ven en el catálogo para hacer pedidos, con visibilidad del stock disponible en tiempo real.
 
 ---
 
 ## ¿Quién puede usarlo?
 
 | Rol | Tipo de acceso |
-|-----|----------------|
-| Administrador (rol 1) | ✅ Gestión completa (crear, editar, eliminar, activar/desactivar) |
-| Trabajador (rol 2) | ❌ Sin acceso a la gestión |
-| Cliente (rol 3) | ✅ Solo lectura — ve el catálogo para comprar |
+|---|---|
+| Administrador (rol 1) | ✅ Gestión completa |
+| Trabajador (rol 2) | ❌ Sin acceso |
+| Cliente (rol 3) | ✅ Solo lectura — catálogo con stock visible |
 
 ---
 
 ## ¿Dónde está en la aplicación?
 
-- **Gestión (admin):** `/productos` → Menú: Productos
-- **Catálogo (cliente):** `/catalogo` → Menú: Catálogo de Productos
+- **Gestión (admin):** `/productos`
+- **Catálogo (cliente):** `/catalogo`
 
 ---
 
-## ¿Qué puede hacer el Administrador?
+## Gestión de productos (Administrador)
 
-### 1. Ver todos los productos
-La pantalla muestra una grilla con tarjetas de cada producto. En la parte superior hay 4 contadores:
+### Ver todos los productos
+Grilla de tarjetas con contadores en la parte superior:
 - Total de productos
 - Productos activos
 - Productos inactivos
 - Total de categorías
 
-Cada tarjeta del producto muestra:
-- Imagen del producto
-- Nombre
-- Precio
-- Categoría
-- Si es retornable (badge especial)
-- Estado (Activo / Inactivo)
-- Botones de acción: Editar, Habilitar/Inhabilitar, Eliminar
+Cada tarjeta muestra imagen, nombre, precio, categoría, badge retornable, estado y botones de acción. Barra de búsqueda en tiempo real.
 
-También hay una barra de búsqueda en tiempo real que filtra por nombre.
+### Crear un producto
 
-### 2. Crear un producto
-Al hacer clic en **"Nuevo Producto"** aparece un formulario con:
-
-| Campo | Obligatorio | Descripción |
-|-------|-------------|-------------|
-| Nombre | ✅ | Nombre del producto (ej. "Garrafón 20L") |
-| Precio | ✅ | Precio de venta (número con decimales) |
-| Categoría | ✅ | A qué categoría pertenece |
+| Campo | Obligatorio | Notas |
+|---|---|---|
+| Nombre | ✅ | Ej: "Garrafón 20L" |
+| Precio | ✅ | Precio final (ya incluye impuestos, sin IVA adicional) |
+| Categoría | ✅ | Debe existir y estar activa |
 | ¿Es retornable? | Opcional | Activa el ciclo de devolución del envase |
-| Imagen | Opcional | JPG, PNG, WEBP o GIF (máx. 5 MB) |
+| Imagen | Opcional | JPG, PNG, WEBP o GIF — máx. 5 MB |
 
-El producto se crea activo por defecto.
+El producto se crea **activo** por defecto.
 
-### 3. Editar un producto
-Se pueden modificar todos los campos. Si no se sube una nueva imagen, se conserva la existente.
+### Editar un producto
+Modifica todos los campos. Si no se sube nueva imagen, se conserva la existente.
 
-### 4. Habilitar / Inhabilitar un producto
-Un producto **inactivo** no aparece en el catálogo del cliente ni puede venderse. Útil para retirar temporalmente un producto sin eliminarlo.
+### Habilitar / Inhabilitar
+Un producto **inactivo** no aparece en el catálogo ni puede venderse. No requiere eliminarlo.
 
-### 5. Eliminar un producto
-Elimina el producto permanentemente. Si tenía imagen guardada en el servidor, también se elimina el archivo.
+### Eliminar
+Borra el producto permanentemente junto con su imagen del servidor.
 
 ---
 
-## ¿Qué ve el Cliente? (Catálogo)
+## Catálogo para el Cliente
 
-El cliente accede a `/catalogo` y ve todos los productos activos con:
-- Imagen
-- Nombre
+El cliente accede a `/catalogo` y ve todos los productos activos. Para cada producto se muestra:
+
+- Imagen del producto
 - Precio
-- Categoría
-- Botón **"Agregar al Carrito"**
+- **Stock disponible** — indicador en verde: `✔ X en stock`
+- Si no hay stock: imagen en escala de grises, overlay "Sin Stock", indicador rojo "Agotado"
+- Botón **"Agregar al Carrito"** — deshabilitado automáticamente si el stock es 0
 
-El cliente puede filtrar por categoría usando los botones en la parte superior, y buscar por nombre con la barra de búsqueda.
+El cliente puede filtrar por categoría (botones superiores) y buscar por nombre (buscador en tiempo real).
+
+### Comportamiento del botón según stock
+
+| Condición | Botón | Apariencia de la tarjeta |
+|---|---|---|
+| Stock > 0 | Activo — "Agregar al Carrito" | Normal, imagen en color |
+| Stock = 0 | Deshabilitado — "Sin Disponibilidad" | Opacidad reducida, imagen en gris, overlay "Sin Stock" |
 
 ---
 
 ## El campo "Retornable"
 
-Este campo es muy importante. Si un producto tiene `retornable = true` (como un garrafón), significa que el envase debe devolverse después de la venta. El módulo de **Devoluciones** usa este campo para identificar qué productos participan del ciclo de reutilización.
+Si un producto tiene `retornable = true` (como un garrafón), significa que el envase debe devolverse después de la venta. El módulo de **Devoluciones** usa este campo para identificar qué productos participan del ciclo de reutilización.
 
 ---
 
-## Tablas de base de datos involucradas
+## Cálculo del stock
+
+El stock que se muestra en el catálogo se calcula mediante `StockService::disponible()`:
+
+```
+Stock = SUM(inventario_productos.cantidad para este producto)
+      − SUM(detalle_venta.cantidad WHERE venta.estado IN ('En Proceso', 'Entregado'))
+```
+
+Las ventas en estado `Pendiente` o `Cancelado` **no descuentan** stock.
+
+---
+
+## Tablas involucradas
 
 | Tabla | Uso |
-|-------|-----|
-| `producto` | Almacena todos los datos del producto |
-| `categoria` | Relación de cada producto con su categoría |
-| `usuarios` | El usuario que creó el producto queda registrado |
+|---|---|
+| `producto` | Datos del producto |
+| `categoria` | Categoría del producto |
+| `inventario_productos` | Stock disponible |
+| `detalle_venta` + `venta` | Unidades vendidas (descuento de stock) |
 
-### Campos de la tabla `producto`
+### Campos de `producto`
 
 | Campo | Tipo | Descripción |
-|-------|------|-------------|
+|---|---|---|
 | `id_producto` | Entero (PK) | Identificador único |
 | `nombre` | Texto | Nombre del producto |
-| `precio` | Decimal | Precio de venta |
-| `img` | Texto | Ruta de la imagen |
-| `id_usuario` | Entero (FK) | Quien creó el producto |
-| `id_categoria` | Entero (FK) | Categoría a la que pertenece |
+| `precio` | Decimal(10,2) | Precio de venta (impuestos incluidos) |
+| `img` | Texto | Ruta relativa de la imagen |
+| `id_usuario` | FK → usuarios | Quién creó el producto |
+| `id_categoria` | FK → categoria | Categoría asignada |
 | `estado` | Booleano | 1 = activo, 0 = inactivo |
-| `retornable` | Booleano | 1 = el envase se devuelve |
+| `retornable` | Booleano | 1 = el envase debe devolverse |
 
 ---
 
 ## Archivos clave
 
 | Tipo | Archivo |
-|------|---------|
+|---|---|
 | Controlador | `app/Http/Controllers/ProductoController.php` |
+| Servicio | `app/Services/StockService.php` |
 | Vista (admin) | `resources/views/productos/index.blade.php` |
 | Vista (catálogo) | `resources/views/productos/catalogo.blade.php` |
 | Modelo | `app/Models/Producto.php` |
@@ -127,14 +140,15 @@ Este campo es muy importante. Si un producto tiene `retornable = true` (como un 
 
 ```
 Administrador:
-    Abre Productos → ve grilla con todos los productos
-    Crea → llena formulario → sube imagen opcional → activo por defecto
-    Edita → modifica datos
-    Inhabilita → deja de aparecer en catálogo
-    Elimina → borra producto e imagen
+    Abre /productos → grilla de tarjetas
+    Crear  → formulario → activo por defecto
+    Editar → modifica datos
+    Inhabilitar → desaparece del catálogo
+    Eliminar → borra producto e imagen
 
 Cliente:
-    Abre Catálogo → ve solo productos activos
-    Filtra por categoría o busca por nombre
-    Hace clic en "Agregar al Carrito" → producto va al carrito
+    Abre /catalogo → solo productos activos
+    Ve stock en tiempo real en cada tarjeta
+    Productos sin stock → tarjeta bloqueada
+    Agrega al carrito → solo si hay stock
 ```

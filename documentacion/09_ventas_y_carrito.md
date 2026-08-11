@@ -2,201 +2,209 @@
 
 ## ¿Para qué sirve?
 
-Este módulo permite a los **clientes** explorar el catálogo de productos, agregar artículos a su carrito y confirmar pedidos. También permite al **administrador** gestionar todos los pedidos del sistema, cambiar su estado y crear ventas directas desde el punto de venta (POS).
+Permite a los **clientes** explorar el catálogo, agregar productos al carrito y confirmar pedidos. Al **administrador** le permite gestionar todos los pedidos, cambiar sus estados y registrar ventas directas desde el punto de venta (POS).
 
 ---
 
 ## ¿Quién puede usarlo?
 
 | Rol | Acceso |
-|-----|--------|
+|---|---|
 | Administrador (rol 1) | ✅ Gestión de ventas, cambio de estados, POS |
 | Trabajador (rol 2) | ❌ Sin acceso |
 | Cliente (rol 3) | ✅ Catálogo, carrito, checkout y mis compras |
 
 ---
 
-## Parte 1: El Carrito (solo clientes)
+## Parte 1: El Carrito (clientes)
 
-### ¿Dónde está?
-- Catálogo: `/catalogo`
-- Checkout: no hay una URL fija, el carrito se gestiona por AJAX
+### Cómo funciona
 
-### ¿Cómo funciona?
+El carrito se guarda en la **sesión del servidor**. Los datos persisten mientras la sesión esté activa.
 
-El carrito se guarda en la **sesión del navegador**. Mientras el cliente no cierre la sesión, los productos en el carrito se mantienen.
+Estructura de cada ítem en sesión:
+```php
+[
+    'id_producto'     => int,
+    'nombre'          => string,
+    'precio_unitario' => float,  // precio al momento de agregar
+    'img'             => string,
+    'cantidad'        => int,
+]
+```
 
-### Agregar un producto al carrito
-Desde el catálogo, el cliente hace clic en **"Agregar al Carrito"**. El sistema:
-1. Verifica que el producto esté activo.
-2. Consulta el stock disponible real (inventario menos ventas activas).
-3. Si hay stock suficiente: agrega el producto y aumenta el contador del carrito.
-4. Si no hay stock: muestra un mensaje de error sin agregar.
+### Agregar un producto
 
-### Ver el carrito
-Un ícono de carrito en la cabecera muestra cuántos productos hay. Al hacer clic, el cliente va al checkout donde ve todos los artículos con opción de modificar cantidades.
+1. Cliente hace clic en "Agregar al Carrito" desde el catálogo.
+2. El sistema verifica que el producto esté **activo** (`estado = 1`).
+3. Consulta el **stock disponible** con `StockService::disponible()`.
+4. Si hay stock: agrega al carrito y actualiza el badge del contador.
+5. Si no hay stock: responde con mensaje de error, sin modificar el carrito.
+
+> El stock solo considera ventas en estado `En Proceso` o `Entregado`. Las ventas `Pendiente` no bloquean stock.
 
 ### Modificar cantidad
-El cliente puede aumentar o reducir la cantidad con los botones `+` y `−`. El sistema valida el stock en cada cambio. Si la nueva cantidad supera el stock, muestra error sin actualizar.
+Botones `+` / `−` en el carrito lateral (drawer). Cada cambio valida el stock en tiempo real. Si la cantidad supera el stock disponible, el sistema rechaza el cambio con un mensaje.
 
-### Eliminar un producto
-Botón `✕` junto a cada producto. Si se baja la cantidad a 0, también se elimina.
-
-### Vaciar el carrito
-Botón "Vaciar" en el checkout. Pide confirmación antes de borrar todo.
+### Eliminar / Vaciar
+Botón `✕` por ítem o botón "Vaciar" para todo el carrito. Pide confirmación antes de vaciar.
 
 ### Comunicación AJAX
-Todas las operaciones del carrito funcionan sin recargar la página (AJAX). Las respuestas del servidor incluyen:
-- Si fue exitoso (`ok: true/false`)
-- Mensaje informativo
-- Nuevo total del carrito
-- Nuevo contador de ítems
+Todas las operaciones del carrito son asíncronas (no recargan la página):
+
+| Ruta | Método | Descripción | Respuesta |
+|---|---|---|---|
+| `/carrito/agregar` | POST | Agrega ítem | `{ok, total_items, msg}` |
+| `/carrito/obtener` | GET | Retorna carrito completo | `{ok, carrito[], total}` |
+| `/carrito/actualizar` | POST | Cambia cantidad | `{ok, carrito[], total, total_items}` |
+| `/carrito/eliminar` | POST | Elimina ítem | `{ok, carrito[], total, total_items}` |
+| `/carrito/finalizar` | POST | Confirma compra | `{ok, id_venta, factura{}}` |
 
 ---
 
-## Parte 2: Checkout (confirmar compra)
+## Parte 2: Checkout — Confirmar la compra
 
-### ¿Cómo funciona?
+### Proceso al confirmar
 
-La página de checkout (`/checkout`) muestra:
-- Tabla con todos los productos del carrito (imagen, nombre, precio unitario, cantidad, subtotal)
-- Formulario de pago a la derecha con:
-  - **Método de pago:** Efectivo, Transferencia o Tarjeta
-  - **Notas del pedido:** Campo opcional para instrucciones especiales
-  - **Resumen del total**
-  - Botón **"Confirmar Pedido"**
-
-### ¿Qué pasa al confirmar?
-
-El sistema ejecuta todo dentro de una **transacción de base de datos** para garantizar consistencia:
+Todo se ejecuta dentro de una **transacción de base de datos**:
 
 ```
-1. Verifica stock de CADA producto del carrito
-    → Si alguno no tiene stock suficiente: cancela todo y muestra error
+1. Re-verifica el stock de CADA producto del carrito
+   → Si alguno no tiene stock suficiente: lanza excepción, rollback completo
+   → El mensaje de error indica el nombre del producto afectado
 
-2. Crea el registro en la tabla "venta"
-    → Fecha, total, método de pago, notas, usuario, estado = "Pendiente"
+2. Crea el registro en tabla "venta"
+   → estado = "Pendiente"
+   → fecha = hoy
+   → total = suma de (precio_unitario × cantidad) por ítem
+   → Sin IVA adicional (precio ya incluye impuestos)
 
-3. Por cada producto del carrito:
-    → Crea un registro en "detalle_venta" (producto, cantidad, precio)
-    → Crea un registro negativo en "inventario_productos" (descuenta el stock)
+3. Crea un registro en "detalle_venta" por cada ítem
 
 4. Limpia el carrito de la sesión
 
-5. Redirige a "Mis Compras" con mensaje de éxito
+5. Retorna JSON con datos de la factura
 ```
 
-Si cualquier paso falla, se revierten todos los cambios.
+> **Importante:** Al crear la venta con estado `Pendiente`, el stock **no se descuenta** todavía. El inventario solo se afecta cuando el admin cambia el estado a `En Proceso` o `Entregado`.
+
+### Cálculo del total
+
+```
+total = Σ (precio_unitario × cantidad − descuento) por cada ítem
+```
+
+Sin multiplicador de IVA. El precio registrado en el producto ya es el precio final.
 
 ---
 
 ## Parte 3: Mis Compras (historial del cliente)
 
-### ¿Dónde está?
 - **URL:** `/mis-compras`
-- **Menú:** Mis Compras
 
-### ¿Qué muestra?
-Lista de todos los pedidos realizados por el cliente autenticado. Por cada pedido se ve:
+Lista todos los pedidos del cliente autenticado usando Eloquent con relaciones (`detalles.producto`). Por cada pedido muestra:
 - Número de pedido
 - Fecha
-- Método de pago
-- Estado del pedido (Pendiente, Completada, Cancelada)
-- Total pagado
-- Desglose de productos (expandible)
-- Notas (si las hay)
+- Productos incluidos (lista separada por comas)
+- Total
+- Estado con badge de color
+- Barra de progreso: Pendiente → En Proceso → Entregado
+- Filtro por rango de fechas (client-side)
 
 ---
 
-## Parte 4: Gestión de Ventas (solo administrador)
+## Parte 4: Gestión de Ventas (Administrador)
 
 ### ¿Dónde está?
 - **URL:** `/ventas`
-- **Menú:** Ventas y Pedidos
 
-### ¿Qué muestra?
+### Panel principal
 
 4 contadores en la parte superior:
-- Total de pedidos
-- Total recaudado (sin cancelados)
-- Pedidos pendientes
-- Pedidos completados
+- Pendientes / En Proceso / Entregados / Cancelados
+- **Total ingresos** — suma de ventas en estado `En Proceso` o `Entregado`
 
-Tabla con todos los pedidos del sistema:
-- Número de pedido
-- Cliente / Usuario
-- Fecha
-- Total
-- Método de pago
-- Estado con badge de color
-- Acciones: Ver detalle, Completar, Cancelar, Pendiente
+Tabla paginada con todos los pedidos. Búsqueda en tiempo real.
 
-Búsqueda en tiempo real por número de pedido o nombre de cliente.
+### Estados y su efecto en el stock
 
-### Cambiar el estado de un pedido
+| Estado | ¿Descuenta stock? | Descripción |
+|---|---|---|
+| `Pendiente` | ❌ No | Recién creado por el cliente |
+| `En Proceso` | ✅ Sí | Admin confirma — el stock se descuenta |
+| `Entregado` | ✅ Sí | Pedido entregado al cliente |
+| `Cancelado` | ❌ No | Cancelado — el stock no se afecta |
 
-El administrador puede cambiar el estado con un solo clic. Los estados disponibles son:
+> El cambio de estado lo realiza el admin mediante el botón de estado en la tabla de ventas.
 
-| Estado | Descripción |
-|--------|-------------|
-| Pendiente | Pedido recibido, pendiente de procesamiento |
-| Completada | Pedido entregado al cliente |
-| Cancelada | Pedido cancelado — el stock se devuelve automáticamente |
+### Punto de Venta (POS)
 
-**Importante:** Si se cancela un pedido, el sistema automáticamente crea registros positivos en `inventario_productos` para devolver el stock. Si se reactiva un pedido cancelado, se vuelve a descontar el stock.
+El administrador puede registrar ventas directas sin que el cliente pase por el carrito:
 
-### Ver detalle de un pedido
-Pantalla completa con toda la información del pedido:
-- Datos del cliente
-- Fecha y método de pago
-- Tabla de productos con cantidades y precios
-- Total
-- Botones de cambio de estado
+1. Selecciona el cliente (usuario con rol 3)
+2. Elige productos y cantidades
+3. El sistema valida stock antes de confirmar
+4. La venta se crea directamente en estado `Entregado` (venta presencial inmediata)
+5. El total se calcula sin IVA adicional
+
+### Ver factura de un pedido
+
+Endpoint AJAX: `GET /ventas/factura/{id_venta}`
+
+Retorna JSON con todos los datos del pedido para mostrar en modal o impresión.
 
 ---
 
 ## Cálculo del stock disponible
 
-El stock disponible se calcula dinámicamente:
+`StockService::disponible(int $idProducto)`:
 
-```
-Stock = SUM(cantidad en inventario_productos) - SUM(cantidad en ventas activas)
-```
+```php
+$ingresado = InventarioProductos::where('id_producto', $id)->sum('cantidad');
 
-Las ventas "Canceladas" no se cuentan al calcular el stock, lo que permite que esos productos vuelvan a estar disponibles.
+$vendido = DetalleVenta::join('venta', ...)
+    ->whereIn('venta.estado', ['En Proceso', 'Entregado'])
+    ->where('id_producto', $id)
+    ->sum('cantidad');
+
+return max(0, $ingresado - $vendido);
+```
 
 ---
 
-## Tablas de base de datos involucradas
+## Tablas involucradas
 
 | Tabla | Uso |
-|-------|-----|
-| `venta` | Un registro por pedido realizado |
-| `detalle_venta` | Un registro por cada producto dentro del pedido |
-| `inventario_productos` | Se descuenta al vender (valores negativos) |
-| `producto` | Catálogo de productos disponibles |
-| `usuarios` | Cliente que realizó el pedido |
+|---|---|
+| `venta` | Cabecera de cada pedido |
+| `detalle_venta` | Líneas de producto por pedido |
+| `inventario_productos` | Stock de productos terminados |
+| `producto` | Datos del producto vendido |
+| `cliente` | Comprador del pedido |
+| `usuarios` | Datos del cliente y del operador |
 
 ### Campos de `venta`
 
 | Campo | Descripción |
-|-------|-------------|
+|---|---|
 | `id_venta` | Identificador único |
 | `fecha` | Fecha del pedido |
-| `estado` | Pendiente / Completada / Cancelada |
-| `id_usuario` | Cliente que compró |
-| `id_producto` | Primer producto (campo heredado) |
-| `total` | Monto total del pedido |
+| `estado` | `Pendiente` / `En Proceso` / `Entregado` / `Cancelado` |
+| `id_cliente` | FK → cliente |
+| `id_usuario` | FK → usuarios (quien registró) |
+| `total` | Monto total (sin IVA) |
 | `notas` | Instrucciones especiales |
-| `metodo_pago` | Efectivo / Transferencia / Tarjeta |
+| `metodo_pago` | `Efectivo` / `Transferencia` / `Tarjeta` |
+
+> Los campos `cantidad`, `precio` e `id_producto` de la tabla `venta` son campos heredados del diseño original y no se usan en la lógica actual. El detalle real está en `detalle_venta`.
 
 ### Campos de `detalle_venta`
 
 | Campo | Descripción |
-|-------|-------------|
+|---|---|
 | `id_detalle_de_venta` | Identificador único |
-| `id_venta` | Pedido al que pertenece |
-| `id_producto` | Producto comprado |
+| `id_venta` | FK → venta |
+| `id_producto` | FK → producto |
 | `cantidad` | Unidades compradas |
 | `precio_unitario` | Precio al momento de la compra |
 | `descuento` | Descuento aplicado (0 por defecto) |
@@ -206,49 +214,48 @@ Las ventas "Canceladas" no se cuentan al calcular el stock, lo que permite que e
 ## Archivos clave
 
 | Tipo | Archivo |
-|------|---------|
-| Controlador | `app/Http/Controllers/VentaController.php` |
-| Controlador | `app/Http/Controllers/CarritoController.php` |
-| Vista (catálogo) | `resources/views/productos/catalogo.blade.php` |
-| Vista (checkout) | `resources/views/ventas/checkout.blade.php` |
-| Vista (mis compras) | `resources/views/ventas/mis_compras.blade.php` |
-| Vista (admin ventas) | `resources/views/ventas/index.blade.php` |
-| Vista (detalle venta) | `resources/views/ventas/show.blade.php` |
+|---|---|
+| Controlador principal | `app/Http/Controllers/VentaController.php` |
+| Servicio de stock | `app/Services/StockService.php` |
+| Vista catálogo | `resources/views/productos/catalogo.blade.php` |
+| Vista checkout | `resources/views/ventas/checkout.blade.php` |
+| Vista mis compras | `resources/views/ventas/mis-compras.blade.php` |
+| Vista admin ventas | `resources/views/ventas/index.blade.php` |
 | Modelo | `app/Models/Venta.php` |
 | Modelo | `app/Models/DetalleVenta.php` |
-| Rutas | `routes/web.php` → `role:1` (admin) y `role:3` (cliente) |
+| Modelo | `app/Models/Cliente.php` |
 
 ---
 
 ## Flujo completo del cliente
 
 ```
-Cliente abre Catálogo
+/catalogo
+    ↓ Solo productos activos con stock > 0 disponibles
+    ↓ Productos agotados: tarjeta bloqueada, botón deshabilitado
+AJAX → /carrito/agregar
+    ↓ Verifica stock → agrega o rechaza con mensaje
+Drawer del carrito
+    ↓ Modifica cantidades / elimina ítems
+AJAX → /carrito/finalizar
+    ↓ Transacción DB:
+        Re-verifica stock de todos los ítems
+        Crea venta (estado: Pendiente)
+        Crea detalle_venta por ítem
+        Limpia carrito
     ↓
-Hace clic en "Agregar al Carrito" (AJAX)
-    → Verifica stock → agrega o muestra error
-    ↓
-Abre Checkout
-    → Ve productos, cantidades, total
-    → Selecciona método de pago, escribe notas
-    ↓
-Confirma el pedido (transacción)
-    → Verifica stock final
-    → Crea venta + detalles + descuenta inventario
-    → Limpia carrito
-    → Redirige a Mis Compras con confirmación
+/mis-compras → muestra nuevo pedido como "Pendiente"
 ```
 
 ## Flujo del administrador
 
 ```
-Admin abre Ventas y Pedidos
+/ventas
+    ↓ Ve todos los pedidos
+Cambiar estado:
+    Pendiente → En Proceso  (stock se descuenta aquí)
+    En Proceso → Entregado
+    Cualquier estado → Cancelado (stock libre)
     ↓
-Ve todos los pedidos con estados y totales
-    ↓
-Puede cambiar estado:
-    Completar → pedido entregado
-    Cancelar  → stock devuelto automáticamente
-    ↓
-Puede ver el detalle completo de cada pedido
+POS: registra venta directa → estado Entregado inmediato
 ```

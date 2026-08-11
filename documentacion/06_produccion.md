@@ -57,6 +57,8 @@ Al hacer clic en **"Iniciar Producción"** aparece un formulario con:
 
 La producción se crea con estado **"En Producción"**.
 
+> Todos los campos pasan por `StoreProduccionRequest::validated()` antes de guardarse, garantizando la sanitización de datos.
+
 ### 3. Finalizar una producción
 
 Al confirmar la finalización (con diálogo de SweetAlert), el sistema ejecuta dentro de una **transacción de base de datos**:
@@ -79,10 +81,10 @@ Al confirmar la finalización (con diálogo de SweetAlert), el sistema ejecuta d
 
 ## Reglas de negocio importantes
 
+- Solo se puede registrar devolución de productos marcados como `retornable = 1`.
+- La cantidad a devolver no puede superar los garrafones que el cliente tiene pendientes (`total_entregado - total_devuelto`).
+- El modelo único para esta funcionalidad es `App\Models\DevolucionRetornables` (plural). No existe un segundo modelo singular para la misma tabla.
 - Una producción **ya finalizada no puede finalizarse de nuevo**.
-- Si se intenta finalizar dos veces, el sistema muestra un error.
-- La transacción garantiza que si algo falla a mitad del proceso, **ningún cambio queda guardado** (todo se revierte).
-- El campo `ingreso` de la materia prima nunca puede quedar negativo.
 
 ---
 
