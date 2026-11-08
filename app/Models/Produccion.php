@@ -20,6 +20,21 @@ class Produccion extends Model
         'id_usuario',
         'id_producto',
         'id_inventario_materia',
+        'modalidad',
+        'id_presentacion',
+        'nombre_presentacion',
+        'cantidad_pacas',
+        'unidades_por_paca',
+        'unidades_fabricadas',
+        'materiales_consumidos',
+    ];
+
+    protected $casts = [
+        'cantidad'             => 'integer',
+        'cantidad_pacas'       => 'integer',
+        'unidades_por_paca'    => 'integer',
+        'unidades_fabricadas'  => 'integer',
+        'materiales_consumidos'=> 'array',
     ];
 
     // ── Relationships ──────────────────────────────────────────────────────────

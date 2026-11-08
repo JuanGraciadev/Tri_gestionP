@@ -3,11 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TRIGESTION — Agua Purificada Premium</title>
+    <title>TRIGESTION &mdash; Agua Purificada Premium</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,677 +15,430 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    fontFamily: { sans: ['"Outfit"', 'sans-serif'] },
                     colors: {
                         trigestion: {
                             50:'#f0f9ff', 100:'#e0f2fe', 200:'#bae6fd', 300:'#7dd3fc',
-                            400:'#38bdf8', 500:'#009ee3', 600:'#0081c2', 700:'#00669e',
-                            800:'#005282', 900:'#072b48',
+                            400:'#38bdf8', 500:'#0ea5e9', 600:'#0284c7', 700:'#00669e',
+                            800:'#005282', 900:'#082f49',
                         }
                     },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'float-slow': 'float 9s ease-in-out infinite',
-                        'pulse-soft': 'pulse 3s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-18px)' },
-                        }
-                    }
                 }
             }
         }
     </script>
     <style>
-        .blob { position:absolute; border-radius:50%; filter:blur(80px); opacity:.35; pointer-events:none; }
-        .nav-link { position:relative; }
-        .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:2px; background:#009ee3; border-radius:2px; transition:width .3s ease; }
-        .nav-link:hover::after { width:100%; }
-        .faq-item p { max-height:0; overflow:hidden; transition:max-height .4s ease, opacity .3s ease; opacity:0; }
-        .faq-item.open p { max-height:200px; opacity:1; }
-        .faq-item .faq-icon { transition:transform .3s ease; }
-        .faq-item.open .faq-icon { transform:rotate(45deg); }
-        ::-webkit-scrollbar { width:6px; }
-        ::-webkit-scrollbar-track { background:#f1f5f9; }
-        ::-webkit-scrollbar-thumb { background:#94a3b8; border-radius:3px; }
+        body { font-family: 'Outfit', sans-serif; }
+
+        /* Reveal on scroll */
+        .reveal-el { opacity: 0; transform: translateY(40px); transition: opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1); }
+        .reveal-active { opacity: 1 !important; transform: translateY(0) !important; }
+
+        /* Floating animation */
+        @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+        .animate-float { animation: floating 5s ease-in-out infinite; }
+
+        /* Blob animation */
+        @keyframes blob { 0% { transform: translate(0px,0px) scale(1); } 33% { transform: translate(30px,-50px) scale(1.1); } 66% { transform: translate(-20px,20px) scale(0.9); } 100% { transform: translate(0px,0px) scale(1); } }
+        .animate-blob { animation: blob 8s infinite alternate; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        /* Glass effects */
+        .water-glass { background: rgba(255,255,255,0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 40px -10px rgba(14,165,233,0.15); }
+        .glass-card-index { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); }
+        .premium-shadow-index { box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); }
+
+        /* Text gradient */
+        .text-water-gradient { background: linear-gradient(to right, #0ea5e9, #0284c7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        /* Background gradient */
+        .bg-water-gradient { background: linear-gradient(135deg,#0ea5e9 0%,#3b82f6 100%); }
+
+        /* Button shine */
+        .btn-shine { position: relative; overflow: hidden; }
+        .btn-shine::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%); transform: rotate(30deg) translateY(-100%); transition: all 0.6s ease; }
+        .btn-shine:hover::after { transform: rotate(30deg) translateY(100%); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
     </style>
 </head>
 
 <body class="font-sans bg-white text-slate-900 antialiased">
 
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- HERO                                                       -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <div class="relative min-h-screen flex flex-col overflow-hidden bg-gradient-to-br from-sky-50 via-white to-trigestion-50">
+    <div class="relative overflow-x-hidden" style="font-family: 'Outfit', sans-serif; background-color: #f0f9ff; color: #0f172a;">
 
-        <!-- Background blobs -->
-        <div class="blob w-[700px] h-[700px] bg-trigestion-300 top-[-200px] right-[-200px]"></div>
-        <div class="blob w-[500px] h-[500px] bg-sky-200 bottom-[-150px] left-[-150px]"></div>
+        @php $navScrolled = false; @endphp
 
-        <!-- ── NAVBAR ── -->
-        <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-sky-100/60 shadow-sm">
-            <div class="max-w-7xl mx-auto px-6 lg:px-12 py-4 flex items-center justify-between">
-
-                <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                    <div class="w-9 h-9 rounded-xl bg-trigestion-500 flex items-center justify-center shadow-md shadow-trigestion-500/30">
-                        <i class="fas fa-droplet text-white text-base"></i>
-                    </div>
-                    <span class="text-xl font-black text-slate-900 tracking-tight">TRI<span class="text-trigestion-500">GESTION</span></span>
+        <!-- NAVBAR -->
+        <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 py-3">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+                <!-- Logo -->
+                <a href="{{ url('/') }}" class="flex items-center gap-3">
+                    <img src="{{ asset('img/triges.png') }}" alt="Trigestion Logo" class="h-10 w-auto drop-shadow-md">
+                    <span class="text-2xl sm:text-3xl font-black text-sky-800 tracking-tight">TRIGESTION</span>
                 </a>
 
-                <nav class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-                    <a href="#beneficios" class="nav-link hover:text-trigestion-600 transition-colors">Beneficios</a>
-                    <a href="#calculadora" class="nav-link hover:text-trigestion-600 transition-colors">Calculadora</a>
-                    <a href="#productos" class="nav-link hover:text-trigestion-600 transition-colors">Productos</a>
-                    <a href="#faq" class="nav-link hover:text-trigestion-600 transition-colors">Preguntas</a>
+                <!-- Mobile menu button -->
+                <button id="mobileMenuBtn" class="md:hidden w-11 h-11 rounded-xl bg-white/80 backdrop-blur border border-sky-100 text-sky-700 flex items-center justify-center shadow-sm hover:bg-sky-50 transition-all">
+                    <i id="mobileMenuIcon" class="fas fa-bars text-lg"></i>
+                </button>
+
+                <!-- Desktop links -->
+                <div class="hidden md:flex items-center gap-8 font-bold text-slate-600">
+                    <a href="#beneficios" class="hover:text-sky-600 transition-colors">Beneficios</a>
+                    <a href="#productos" class="hover:text-sky-600 transition-colors">Productos</a>
                     @if (Route::has('login'))
                         @auth
-                            <a href="{{ url('/dashboard') }}" class="font-bold text-trigestion-600 hover:text-trigestion-800 transition-colors">
+                            <a href="{{ url('/dashboard') }}" class="text-sky-800 hover:text-sky-600 transition-colors">
                                 <i class="fas fa-gauge mr-1"></i> Dashboard
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="font-semibold text-slate-700 hover:text-trigestion-500 transition-colors">
-                                Iniciar Sesión
-                            </a>
+                            <a href="{{ route('login') }}" class="text-sky-800 hover:text-sky-600 transition-colors">Iniciar Sesi&oacute;n</a>
                             @if (Route::has('register'))
                                 <a href="{{ route('register') }}"
-                                   class="inline-flex items-center gap-2 bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-5 py-2.5 rounded-xl text-sm shadow-md shadow-trigestion-500/25 hover:-translate-y-0.5 transition-all">
-                                    <i class="fas fa-user-plus text-xs"></i> Registrarse
+                                   class="btn-shine px-8 py-3.5 rounded-full bg-water-gradient shadow-[0_10px_20px_-5px_rgba(14,165,233,0.5)] hover:shadow-[0_15px_30px_-5px_rgba(14,165,233,0.6)] transition-all text-white font-bold transform hover:-translate-y-1 tracking-wide">
+                                    Registrarse <i class="fas fa-user-plus ml-1"></i>
                                 </a>
                             @endif
                         @endauth
                     @endif
-                </nav>
+                </div>
+            </div>
 
-                <!-- Mobile -->
-                <div class="md:hidden flex items-center gap-2">
+            <!-- Mobile menu -->
+            <div id="mobileMenu" class="md:hidden hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-sky-100 shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)]">
+                <div class="flex flex-col gap-2 p-4 max-w-7xl mx-auto">
+                    <a href="#beneficios" class="px-5 py-3.5 rounded-xl text-slate-700 font-bold hover:bg-sky-50 hover:text-sky-600 transition-all flex items-center gap-3">
+                        <i class="fas fa-shield-halved text-sky-400 w-5"></i> Beneficios
+                    </a>
+                    <a href="#productos" class="px-5 py-3.5 rounded-xl text-slate-700 font-bold hover:bg-sky-50 hover:text-sky-600 transition-all flex items-center gap-3">
+                        <i class="fas fa-bottle-water text-sky-400 w-5"></i> Productos
+                    </a>
+                    <div class="border-t border-slate-100 my-2"></div>
                     @if (Route::has('login'))
                         @guest
-                            <a href="{{ route('login') }}" class="text-sm font-bold text-slate-700 px-4 py-2 rounded-xl hover:bg-slate-100 transition-colors">Entrar</a>
-                            <a href="{{ route('register') }}" class="bg-trigestion-500 text-white text-sm font-bold px-4 py-2 rounded-xl shadow-sm">Registro</a>
+                            <a href="{{ route('login') }}" class="px-5 py-3.5 rounded-xl text-slate-700 font-bold hover:bg-slate-50 transition-all flex items-center gap-3">
+                                <i class="fas fa-right-to-bracket text-sky-400 w-5"></i> Iniciar Sesi&oacute;n
+                            </a>
+                            <a href="{{ route('register') }}" class="px-5 py-3.5 rounded-xl bg-water-gradient text-white font-bold text-center shadow-md">
+                                <i class="fas fa-user-plus mr-2"></i> Registrarse
+                            </a>
                         @endguest
                     @endif
                 </div>
             </div>
-        </header>
+        </nav>
 
-
-        <!-- ── HERO CONTENT ── -->
-        <main class="relative z-10 flex-1 max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-
-            <!-- LEFT -->
-            <div class="lg:col-span-7 flex flex-col items-start">
-
-                <div class="inline-flex items-center gap-2 bg-trigestion-50 border border-trigestion-200 text-trigestion-700 px-4 py-1.5 rounded-full text-xs font-extrabold tracking-wider uppercase mb-6 shadow-sm">
-                    <span class="w-2 h-2 rounded-full bg-trigestion-500 animate-pulse-soft"></span>
-                    Pureza Certificada · Entrega a Domicilio
-                </div>
-
-                <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
-                    La experiencia de agua pura que tu cuerpo
-                    <span class="text-trigestion-500"> merece.</span>
-                </h1>
-
-                <p class="text-slate-500 text-base sm:text-lg max-w-xl mb-10 font-medium leading-relaxed">
-                    Hidratación ligera y cristalina a domicilio. Pide tus botellones retornables en segundos y disfruta de la mejor calidad con la comodidad que buscas.
-                </p>
-
-                <!-- Stats bar -->
-                <div class="flex flex-wrap items-center gap-6 bg-white/90 backdrop-blur border border-sky-100 px-6 py-4 rounded-2xl shadow-sm mb-10">
-                    <div>
-                        <span class="text-xl font-black text-trigestion-500 block">+15.000 L</span>
-                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Entregados este mes</span>
-                    </div>
-                    <div class="w-px h-8 bg-slate-200 hidden sm:block"></div>
-                    <div>
-                        <span class="text-xl font-black text-trigestion-500 block">7 Fases</span>
-                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ósmosis Inversa</span>
-                    </div>
-                    <div class="w-px h-8 bg-slate-200 hidden sm:block"></div>
-                    <div>
-                        <span class="text-xl font-black text-trigestion-500 block">4.9 ⭐</span>
-                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Calificación</span>
-                    </div>
-                </div>
-
-                <!-- CTAs -->
-                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                    <a href="{{ route('register') }}"
-                       class="inline-flex items-center justify-center gap-3 bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-8 py-4 rounded-2xl text-base shadow-lg shadow-trigestion-500/30 hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-cart-shopping"></i> Haz tu pedido
-                    </a>
-                    <a href="#calculadora"
-                       class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold px-8 py-4 rounded-2xl text-base shadow-sm hover:-translate-y-0.5 transition-all">
-                        Calcula tu consumo <i class="fas fa-arrow-down text-slate-400 text-sm"></i>
-                    </a>
-                </div>
+        <!-- HERO -->
+        <section class="relative min-h-[90vh] flex items-center pt-20 overflow-hidden">
+            <!-- Background -->
+            <div class="absolute inset-0 z-0">
+                <img src="{{ asset('img/login_bg.png') }}" alt="Agua Pura" class="w-full h-full object-cover object-center brightness-110 opacity-80">
+                <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(240,249,255,0.7), rgba(255,255,255,0.4), white);"></div>
             </div>
 
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+                <!-- Left text -->
+                <div class="text-center lg:text-left mt-10 lg:mt-0 reveal-el">
+                    <div class="absolute -top-10 -left-10 w-64 h-64 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob -z-10"></div>
+                    <div class="absolute top-20 left-40 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000 -z-10"></div>
 
-            <!-- RIGHT: carousel card -->
-            <div class="lg:col-span-5 flex justify-center">
-                <div class="relative w-full max-w-sm">
-                    <!-- glow ring -->
-                    <div class="absolute inset-0 bg-trigestion-400/20 rounded-[3rem] blur-3xl scale-110 pointer-events-none"></div>
+                    <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-white mb-6 shadow-[0_5px_15px_rgba(14,165,233,0.15)] hover:scale-105 transition-transform cursor-default">
+                        <i class="fas fa-droplet text-sky-500"></i>
+                        <span class="text-sm font-black text-sky-700 uppercase tracking-widest">Frescura y Pureza</span>
+                    </div>
 
-                    <div class="relative bg-white/90 backdrop-blur-2xl border border-white rounded-[2.5rem] shadow-2xl shadow-sky-900/10 p-10 text-center flex flex-col items-center min-h-[440px] justify-between overflow-hidden">
+                    <h1 class="text-3xl sm:text-5xl md:text-7xl font-black text-slate-800 leading-[1.1] mb-6 tracking-tight drop-shadow-sm">
+                        La mejor <span class="text-water-gradient">hidrataci&oacute;n</span> para tu familia.
+                    </h1>
 
-                        <!-- slide 0 -->
-                        <div class="carousel-slide flex flex-col items-center w-full" id="slide-0">
-                            <div class="w-24 h-24 bg-trigestion-50 border-2 border-trigestion-100 rounded-3xl flex items-center justify-center text-5xl mb-6 shadow-inner animate-float">💧</div>
-                            <p class="text-xs font-extrabold text-trigestion-500 uppercase tracking-widest mb-1">Recarga Clásica</p>
-                            <h3 class="text-2xl font-extrabold text-slate-900 mb-1">Bidón 20 Litros</h3>
-                            <p class="text-slate-400 text-sm font-medium mb-6">Agua purificada 100%</p>
-                            <a href="{{ route('register') }}" class="bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-md hover:scale-105 transition-all">
-                                Recarga · $19.000
+                    <p class="text-lg md:text-xl text-slate-600 mb-10 font-medium max-w-lg mx-auto lg:mx-0 leading-relaxed drop-shadow-sm">
+                        Agua purificada de m&aacute;xima calidad, directo a tu puerta. Realiza tu pedido en segundos con la plataforma Trigestion.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}"
+                               class="btn-shine w-full sm:w-auto px-9 py-4 rounded-2xl bg-water-gradient text-white font-bold hover:shadow-[0_15px_40px_-10px_rgba(14,165,233,0.6)] transform hover:-translate-y-1 transition-all text-lg flex items-center justify-center gap-3">
+                                <i class="fas fa-shopping-basket"></i> Haz tu pedido
                             </a>
-                        </div>
+                        @endif
+                        <a href="#beneficios"
+                           class="w-full sm:w-auto px-9 py-4 rounded-2xl bg-white/80 backdrop-blur-sm border-2 border-sky-100 text-sky-700 font-bold hover:bg-sky-50 hover:border-sky-300 transition-all text-lg flex items-center justify-center gap-3 shadow-sm transform hover:-translate-y-1">
+                            Conoce m&aacute;s <i class="fas fa-arrow-down"></i>
+                        </a>
+                    </div>
+                </div>
 
-                        <!-- slide 1 -->
-                        <div class="carousel-slide hidden flex-col items-center w-full" id="slide-1">
-                            <div class="w-24 h-24 bg-sky-50 border-2 border-sky-100 rounded-3xl flex items-center justify-center text-5xl mb-6 shadow-inner animate-float-slow">❄️</div>
-                            <p class="text-xs font-extrabold text-trigestion-500 uppercase tracking-widest mb-1">Equipo Completo</p>
-                            <h3 class="text-2xl font-extrabold text-slate-900 mb-1">Dispensador Frío/Calor</h3>
-                            <p class="text-slate-400 text-sm font-medium mb-6">Control electrónico de temperatura</p>
-                            <a href="{{ route('register') }}" class="bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-md hover:scale-105 transition-all">
-                                Equipo · $85.000
-                            </a>
+                <!-- Right card -->
+                <div class="hidden lg:flex justify-center items-center relative animate-float reveal-el" style="transition-delay: 200ms;">
+                    <div class="relative w-[420px] h-[520px] water-glass rounded-[3.5rem] p-10 flex flex-col items-center justify-center text-center hover:rotate-2 transition-transform duration-500">
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-sky-200 rounded-full blur-3xl opacity-50"></div>
+                        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-200 rounded-full blur-3xl opacity-50"></div>
+                        <img src="{{ asset('img/triges.png') }}" alt="Botella Trigestion" class="w-48 h-auto object-contain mb-8 filter drop-shadow-2xl">
+                        <h3 class="text-3xl font-black text-slate-800 mb-2">Agua Premium</h3>
+                        <p class="text-sky-600 font-bold mb-6">100% Purificada</p>
+                        <div class="flex gap-2">
+                            <span class="w-3 h-3 rounded-full bg-sky-300"></span>
+                            <span class="w-3 h-3 rounded-full bg-sky-400"></span>
+                            <span class="w-3 h-3 rounded-full bg-sky-500"></span>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                        <!-- slide 2 -->
-                        <div class="carousel-slide hidden flex-col items-center w-full" id="slide-2">
-                            <div class="w-24 h-24 bg-indigo-50 border-2 border-indigo-100 rounded-3xl flex items-center justify-center text-5xl mb-6 shadow-inner animate-float">📦</div>
-                            <p class="text-xs font-extrabold text-trigestion-500 uppercase tracking-widest mb-1">Pack Ahorro</p>
-                            <h3 class="text-2xl font-extrabold text-slate-900 mb-1">Pack Familiar 3×20L</h3>
-                            <p class="text-slate-400 text-sm font-medium mb-6">3 Recargas + Envío Gratis</p>
-                            <a href="{{ route('register') }}" class="bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-6 py-2.5 rounded-xl text-sm shadow-md hover:scale-105 transition-all">
-                                Pack · $50.000
-                            </a>
+        <!-- BENEFICIOS -->
+        <section id="beneficios" class="py-28 px-6 relative bg-gradient-to-b from-white to-slate-50">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-20 reveal-el">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 mb-6 shadow-sm">
+                        <i class="fas fa-shield-halved text-emerald-500 text-sm"></i>
+                        <span class="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Beneficios Exclusivos</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-6">
+                        &iquest;Por qu&eacute; elegir <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(to right,#0ea5e9,#6366f1);">Trigestion</span>?
+                    </h2>
+                    <p class="text-slate-500 max-w-2xl mx-auto font-medium text-lg leading-relaxed">
+                        Nos preocupamos por tu salud y bienestar, por eso nuestro proceso garantiza la m&aacute;xima calidad en cada gota.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10">
+                    <!-- Beneficio 1 -->
+                    <div class="water-glass p-12 rounded-[3rem] text-center group hover:-translate-y-4 transition-all duration-500 reveal-el">
+                        <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-sky-100 to-blue-50 text-sky-500 flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                            <i class="fas fa-tint drop-shadow-md"></i>
                         </div>
+                        <h3 class="text-2xl font-black text-slate-800 mb-4">100% Pura</h3>
+                        <p class="text-slate-500 font-medium leading-relaxed">Sometida a rigurosos procesos de filtraci&oacute;n y purificaci&oacute;n para asegurar un sabor fresco e inigualable.</p>
+                    </div>
 
-                        <!-- brand + dots -->
-                        <div class="mt-6 flex flex-col items-center gap-3">
-                            <span class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">TRIGESTION</span>
-                            <div class="flex items-center gap-2" id="carouselDots">
-                                <button onclick="setSlide(0)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-trigestion-500 transition-all"></button>
-                                <button onclick="setSlide(1)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-sky-200 transition-all"></button>
-                                <button onclick="setSlide(2)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-sky-200 transition-all"></button>
+                    <!-- Beneficio 2 -->
+                    <div class="water-glass p-12 rounded-[3rem] text-center group hover:-translate-y-4 transition-all duration-500 reveal-el" style="transition-delay: 150ms;">
+                        <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-50 text-emerald-500 flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                            <i class="fas fa-truck-fast drop-shadow-md"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-800 mb-4">Entrega Inmediata</h3>
+                        <p class="text-slate-500 font-medium leading-relaxed">Olv&iacute;date de cargar pesados garrafones. P&iacute;delo desde tu celular y nosotros lo llevamos hasta tu puerta.</p>
+                    </div>
+
+                    <!-- Beneficio 3 -->
+                    <div class="water-glass p-12 rounded-[3rem] text-center group hover:-translate-y-4 transition-all duration-500 reveal-el" style="transition-delay: 300ms;">
+                        <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-50 text-indigo-500 flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                            <i class="fas fa-mobile-screen drop-shadow-md"></i>
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-800 mb-4">Pedidos F&aacute;ciles</h3>
+                        <p class="text-slate-500 font-medium leading-relaxed">Una plataforma moderna e intuitiva donde puedes ver tus compras y realizar nuevos pedidos en segundos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUCTOS -->
+        <section id="productos" class="py-28 px-6 relative bg-white border-t border-slate-100 overflow-hidden">
+            <div class="absolute top-40 left-10 w-20 h-20 bg-sky-100 rounded-full mix-blend-multiply opacity-50 animate-float"></div>
+            <div class="absolute bottom-40 right-20 w-32 h-32 bg-indigo-50 rounded-full mix-blend-multiply opacity-50 animate-float animation-delay-2000"></div>
+
+            <div class="max-w-7xl mx-auto relative z-10">
+                <div class="text-center mb-20 reveal-el">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 border border-amber-100 mb-6 shadow-sm hover:rotate-3 transition-transform cursor-default">
+                        <i class="fas fa-star text-amber-500 animate-pulse"></i>
+                        <span class="text-[10px] font-black text-amber-700 uppercase tracking-widest">Cat&aacute;logo Premium</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-6 tracking-tight">
+                        Nuestros <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(to right,#38bdf8,#6366f1);">Productos</span>
+                    </h2>
+                    <p class="text-slate-500 max-w-2xl mx-auto font-medium text-lg leading-relaxed">
+                        Conoce nuestra l&iacute;nea de hidrataci&oacute;n. Agua pura, alcalina y mineralizada en presentaciones adaptadas a tu estilo de vida.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-10">
+                    <!-- Producto 1 -->
+                    <div class="glass-card-index rounded-[3rem] p-8 border border-slate-100 premium-shadow-index hover:shadow-[0_30px_60px_-15px_rgba(14,165,233,0.2)] hover:-translate-y-3 transition-all duration-500 group flex flex-col relative overflow-hidden bg-white reveal-el">
+                        <div class="absolute top-6 left-6 z-10 bg-white/90 backdrop-blur border border-slate-200 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                            <span class="text-slate-500">Agua Purificada</span>
+                        </div>
+                        <div class="w-full aspect-square bg-white rounded-[2rem] mb-6 flex items-center justify-center border border-slate-100 shadow-inner p-4 relative group-hover:bg-sky-50/50 transition-colors">
+                            <div class="absolute inset-0 bg-sky-400/20 blur-2xl rounded-full scale-50 group-hover:scale-100 transition-transform duration-500 opacity-0 group-hover:opacity-100"></div>
+                            <img src="{{ asset('img/garrafon_premium.png') }}" alt="Garraf&oacute;n Premium" class="max-w-[80%] max-h-[80%] object-contain relative z-[5] group-hover:scale-105 transition-transform duration-500 filter drop-shadow-2xl">
+                        </div>
+                        <div class="flex-1 flex flex-col">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2 leading-tight transition-colors group-hover:text-sky-600">Garraf&oacute;n Premium 20L</h3>
+                            <p class="text-slate-500 text-sm font-medium mb-6">Agua 100% purificada ideal para el dispensador de tu hogar o negocio.</p>
+                            <div class="mt-auto pt-6 flex items-end justify-between border-t border-slate-200/60">
+                                <div>
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Precio Unitario</span>
+                                    <span class="text-2xl font-black text-slate-800">$12,000</span>
+                                </div>
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}" class="w-12 h-12 rounded-2xl text-white flex items-center justify-center shadow-lg transform active:scale-95 transition-all bg-sky-500 hover:bg-sky-600 shadow-sky-500/30">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Producto 2 -->
+                    <div class="glass-card-index rounded-[3rem] p-8 border border-slate-100 premium-shadow-index hover:shadow-[0_30px_60px_-15px_rgba(14,165,233,0.2)] hover:-translate-y-3 transition-all duration-500 group flex flex-col relative overflow-hidden bg-white reveal-el" style="transition-delay: 150ms;">
+                        <div class="absolute top-6 left-6 z-10 bg-white/90 backdrop-blur border border-slate-200 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                            <span class="text-slate-500">Agua Premium</span>
+                        </div>
+                        <div class="w-full aspect-square bg-white rounded-[2rem] mb-6 flex items-center justify-center border border-slate-100 shadow-inner p-4 relative group-hover:bg-sky-50/50 transition-colors">
+                            <div class="absolute inset-0 bg-sky-400/20 blur-2xl rounded-full scale-50 group-hover:scale-100 transition-transform duration-500 opacity-0 group-hover:opacity-100"></div>
+                            <img src="{{ asset('img/botella_individual.png') }}" alt="Botella Individual" class="max-w-[80%] max-h-[80%] object-contain relative z-[5] group-hover:scale-105 transition-transform duration-500 filter drop-shadow-2xl">
+                        </div>
+                        <div class="flex-1 flex flex-col">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2 leading-tight transition-colors group-hover:text-sky-600">Botella de Cristal 500ml</h3>
+                            <p class="text-slate-500 text-sm font-medium mb-6">Dise&ntilde;o minimalista y elegante. La porci&oacute;n perfecta para acompa&ntilde;ar tus comidas.</p>
+                            <div class="mt-auto pt-6 flex items-end justify-between border-t border-slate-200/60">
+                                <div>
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Precio Unitario</span>
+                                    <span class="text-2xl font-black text-slate-800">$3,500</span>
+                                </div>
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}" class="w-12 h-12 rounded-2xl text-white flex items-center justify-center shadow-lg transform active:scale-95 transition-all bg-sky-500 hover:bg-sky-600 shadow-sky-500/30">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Producto 3 -->
+                    <div class="glass-card-index rounded-[3rem] p-8 border border-slate-100 premium-shadow-index hover:shadow-[0_30px_60px_-15px_rgba(14,165,233,0.2)] hover:-translate-y-3 transition-all duration-500 group flex flex-col relative overflow-hidden bg-white reveal-el" style="transition-delay: 300ms;">
+                        <div class="absolute top-6 left-6 z-10 bg-white/90 backdrop-blur border border-slate-200 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                            <span class="text-emerald-500">Agua Alcalina</span>
+                        </div>
+                        <div class="w-full aspect-square bg-white rounded-[2rem] mb-6 flex items-center justify-center border border-slate-100 shadow-inner p-4 relative group-hover:bg-sky-50/50 transition-colors">
+                            <div class="absolute inset-0 bg-emerald-400/20 blur-2xl rounded-full scale-50 group-hover:scale-100 transition-transform duration-500 opacity-0 group-hover:opacity-100"></div>
+                            <img src="{{ asset('img/botella_deportiva.png') }}" alt="Botella Deportiva" class="max-w-[80%] max-h-[80%] object-contain relative z-[5] group-hover:scale-105 transition-transform duration-500 filter drop-shadow-2xl">
+                        </div>
+                        <div class="flex-1 flex flex-col">
+                            <h3 class="text-xl font-bold text-slate-800 mb-2 leading-tight transition-colors group-hover:text-emerald-600">Termo Deportivo 750ml</h3>
+                            <p class="text-slate-500 text-sm font-medium mb-6">Mantiene el fr&iacute;o por horas. Dise&ntilde;ado para el gimnasio o actividades al aire libre.</p>
+                            <div class="mt-auto pt-6 flex items-end justify-between border-t border-slate-200/60">
+                                <div>
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Precio Unitario</span>
+                                    <span class="text-2xl font-black text-slate-800">$8,900</span>
+                                </div>
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}" class="w-12 h-12 rounded-2xl text-white flex items-center justify-center shadow-lg transform active:scale-95 transition-all bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="text-center mt-16 reveal-el">
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}"
+                           class="btn-shine inline-flex items-center gap-3 px-10 py-5 rounded-full bg-slate-900 text-white font-bold hover:scale-105 transition-all text-sm shadow-[0_15px_30px_-10px_rgba(15,23,42,0.5)] tracking-wide">
+                            Explorar todo el cat&aacute;logo <i class="fas fa-arrow-right"></i>
+                        </a>
+                    @endif
+                </div>
             </div>
+        </section>
 
-        </main>
+        <!-- CTA -->
+        <section class="py-28 px-6 relative">
+            <div class="max-w-5xl mx-auto p-8 sm:p-14 md:p-24 rounded-[2rem] sm:rounded-[3.5rem] text-center relative overflow-hidden border-none reveal-el reveal-active" style="background: linear-gradient(to right,#0284c7,#4338ca); box-shadow: 0 30px 60px -15px rgba(14,165,233,0.5);">
+                <div class="absolute inset-0 opacity-10 mix-blend-overlay bg-cover bg-center" style="background-image: url('{{ asset("img/login_bg.png") }}');"></div>
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
 
-        <!-- wave bottom -->
-        <div class="w-full overflow-hidden leading-none relative z-10">
-            <svg viewBox="0 0 1200 80" preserveAspectRatio="none" class="w-full h-14 lg:h-20 text-white block">
-                <path d="M0,0 C200,80 400,0 600,40 C800,80 1000,0 1200,40 L1200,80 L0,80 Z" fill="currentColor"/>
-            </svg>
-        </div>
+                <div class="relative z-10">
+                    <div class="w-24 h-24 mx-auto rounded-3xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 mb-8 -rotate-3 hover:rotate-3 transition-transform duration-300">
+                        <i class="fas fa-bottle-water text-5xl text-white"></i>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-md">Refresca tu vida hoy.</h2>
+                    <p class="text-sky-100 mb-10 font-medium text-lg md:text-xl max-w-2xl mx-auto opacity-90">
+                        &Uacute;nete a nuestra plataforma premium y mant&eacute;n tu hogar siempre hidratado con la mejor calidad del mercado.
+                    </p>
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}"
+                           class="btn-shine inline-flex items-center gap-2 px-10 py-5 rounded-full bg-white text-sky-700 font-black hover:-translate-y-1 hover:shadow-xl transition-all text-lg tracking-wide">
+                            <i class="fas fa-user-plus mr-1"></i> Crear cuenta de cliente
+                        </a>
+                    @endif
+                    @if (Route::has('login'))
+                        @guest
+                            <p class="mt-8 text-sky-100 text-sm font-medium">
+                                &iquest;Ya tienes cuenta?
+                                <a href="{{ route('login') }}" class="text-white hover:text-sky-200 transition-colors underline decoration-2 underline-offset-4 font-bold">
+                                    Inicia sesi&oacute;n
+                                </a>
+                            </p>
+                        @endguest
+                    @endif
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-10 px-6 text-slate-400 text-center relative z-10" style="background: #0f172a;">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <img src="{{ asset('img/triges.png') }}" alt="Trigestion Logo" class="h-8 w-auto opacity-40" style="filter: brightness(0) invert(1);">
+                    <span class="text-2xl font-black tracking-tight text-slate-500">TRIGESTION</span>
+                </div>
+                <p class="text-sm font-medium uppercase tracking-widest">
+                    &copy; {{ date('Y') }} Trigestion. Todos los derechos reservados.
+                </p>
+            </div>
+        </footer>
+
     </div>
-    <!-- END HERO -->
 
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- CALCULADORA                                                -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <section id="calculadora" class="bg-white py-20 lg:py-28 px-6 lg:px-12">
-        <div class="max-w-7xl mx-auto">
-            <div class="bg-gradient-to-br from-trigestion-500 via-trigestion-600 to-sky-700 rounded-[2.5rem] p-8 lg:p-14 text-white shadow-2xl shadow-trigestion-500/20 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative overflow-hidden">
-
-                <!-- bg decoration -->
-                <div class="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 w-56 h-56 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
-
-                <!-- left -->
-                <div class="lg:col-span-7 relative z-10">
-                    <span class="inline-block bg-white/20 backdrop-blur text-white font-extrabold text-xs uppercase tracking-widest px-4 py-1.5 rounded-full mb-5 border border-white/30">
-                        <i class="fas fa-calculator mr-2"></i>Calculadora de Hidratación
-                    </span>
-                    <h2 class="text-3xl sm:text-4xl font-extrabold leading-tight mb-4 tracking-tight">
-                        ¿Cuánta agua necesita tu hogar?
-                    </h2>
-                    <p class="text-sky-100 text-base leading-relaxed mb-8 font-medium max-w-lg">
-                        Calcula fácilmente la cantidad de botellones de 20 litros recomendados al mes según los integrantes de tu hogar u oficina.
-                    </p>
-                    <div class="bg-white/15 backdrop-blur border border-white/25 rounded-2xl p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="font-bold text-sm"><i class="fas fa-users mr-2 text-sky-200"></i>Personas en el hogar:</span>
-                            <span id="people-count" class="text-xl font-black text-sky-200">3 Personas</span>
-                        </div>
-                        <input type="range" id="people-slider" min="1" max="12" value="3"
-                               class="w-full h-2 rounded-full appearance-none cursor-pointer accent-white bg-sky-300/40"
-                               oninput="updateCalc()">
-                        <div class="flex justify-between text-xs text-sky-200/70 font-bold mt-1">
-                            <span>1</span><span>6</span><span>12</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- right: result card -->
-                <div class="lg:col-span-5 relative z-10 flex justify-center">
-                    <div class="bg-white text-slate-900 rounded-3xl p-8 w-full max-w-xs text-center shadow-xl">
-                        <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider block mb-3">Consumo Recomendado</span>
-                        <div id="result-bottles" class="text-5xl font-black text-trigestion-500 mb-1">4</div>
-                        <div class="text-base font-bold text-slate-500 mb-1">Botellones al mes</div>
-                        <div id="result-liters" class="text-xs font-bold text-slate-400 mb-6">80 Litros de agua pura</div>
-                        <div class="pt-4 border-t border-slate-100 mb-6">
-                            <span class="text-xs font-bold text-slate-400 block mb-1">Inversión mensual estimada</span>
-                            <span id="result-price" class="text-2xl font-black text-slate-900">$76.000 / mes</span>
-                        </div>
-                        <a href="{{ route('register') }}" class="block w-full bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold py-3.5 rounded-xl text-sm shadow-md transition-all hover:-translate-y-0.5">
-                            <i class="fas fa-cart-shopping mr-2"></i>Pedir Plan Sugerido
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- BENEFICIOS                                                 -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <section id="beneficios" class="bg-slate-50 py-20 lg:py-28 px-6 lg:px-12 border-t border-slate-200/70">
-        <div class="max-w-7xl mx-auto">
-
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="text-trigestion-600 font-extrabold text-xs uppercase tracking-widest block mb-3">
-                    Beneficios Exclusivos
-                </span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                    Calidad superior en cada gota
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-trigestion-200 hover:-translate-y-1 transition-all duration-300 group">
-                    <div class="w-14 h-14 rounded-2xl bg-trigestion-500 text-white flex items-center justify-center text-2xl mb-6 shadow-lg shadow-trigestion-500/25 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-droplet"></i>
-                    </div>
-                    <h3 class="text-xl font-extrabold text-slate-900 mb-3">100% Purificada</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed font-medium">
-                        Ósmosis inversa avanzada de 7 fases que remueve impurezas conservando la ligereza y frescura óptima.
-                    </p>
-                </div>
-
-                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-trigestion-200 hover:-translate-y-1 transition-all duration-300 group">
-                    <div class="w-14 h-14 rounded-2xl bg-trigestion-500 text-white flex items-center justify-center text-2xl mb-6 shadow-lg shadow-trigestion-500/25 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3 class="text-xl font-extrabold text-slate-900 mb-3">Entrega Express</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed font-medium">
-                        Recibe tus botellones directamente en la puerta de tu hogar u oficina en tiempo récord.
-                    </p>
-                </div>
-
-                <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-trigestion-200 hover:-translate-y-1 transition-all duration-300 group">
-                    <div class="w-14 h-14 rounded-2xl bg-trigestion-500 text-white flex items-center justify-center text-2xl mb-6 shadow-lg shadow-trigestion-500/25 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-leaf"></i>
-                    </div>
-                    <h3 class="text-xl font-extrabold text-slate-900 mb-3">Envases Ecológicos</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed font-medium">
-                        Botellones retornables de alta durabilidad libres de BPA, respetuosos con el medio ambiente.
-                    </p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- PRODUCTOS                                                  -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <section id="productos" class="bg-white py-20 lg:py-28 px-6 lg:px-12 border-t border-slate-200/70">
-        <div class="max-w-7xl mx-auto">
-
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="text-trigestion-600 font-extrabold text-xs uppercase tracking-widest block mb-3">
-                    Nuestros Productos
-                </span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                    Formatos para cada necesidad
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-                <!-- Producto 1 -->
-                <div class="relative bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-trigestion-200 hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                    <span class="absolute top-6 right-6 bg-trigestion-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-md">Más Vendido</span>
-                    <div class="w-full h-44 bg-trigestion-50 rounded-2xl flex items-center justify-center mb-6 text-7xl">💧</div>
-                    <span class="text-[11px] font-extrabold text-trigestion-600 uppercase tracking-widest">Recarga Clásica</span>
-                    <h3 class="text-xl font-extrabold text-slate-900 mt-1 mb-2">Bidón 20 Litros</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed font-medium mb-6 flex-1">Agua purificada premium para dispensador o bomba manual. La más solicitada.</p>
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div>
-                            <span class="text-xs text-slate-400 block font-bold">Precio Recarga</span>
-                            <span class="text-2xl font-black text-slate-900">$19.000</span>
-                        </div>
-                        <a href="{{ route('register') }}" class="bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-5 py-2.5 rounded-xl text-sm hover:scale-105 transition-all shadow-md shadow-trigestion-500/20">
-                            Pedir ahora
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Producto 2 -->
-                <div class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-trigestion-200 hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                    <div class="w-full h-44 bg-sky-50 rounded-2xl flex items-center justify-center mb-6 text-7xl">❄️</div>
-                    <span class="text-[11px] font-extrabold text-trigestion-600 uppercase tracking-widest">Equipo Completo</span>
-                    <h3 class="text-xl font-extrabold text-slate-900 mt-1 mb-2">Dispensador Frío/Calor</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed font-medium mb-6 flex-1">Dispensador moderno con control electrónico de temperatura fría y caliente.</p>
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div>
-                            <span class="text-xs text-slate-400 block font-bold">Precio Venta</span>
-                            <span class="text-2xl font-black text-slate-900">$85.000</span>
-                        </div>
-                        <a href="{{ route('register') }}" class="bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-5 py-2.5 rounded-xl text-sm hover:scale-105 transition-all shadow-md shadow-trigestion-500/20">
-                            Pedir ahora
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Producto 3 -->
-                <div class="relative bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-trigestion-200 hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                    <span class="absolute top-6 right-6 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-md">Ahorra 15%</span>
-                    <div class="w-full h-44 bg-indigo-50 rounded-2xl flex items-center justify-center mb-6 text-7xl">📦</div>
-                    <span class="text-[11px] font-extrabold text-trigestion-600 uppercase tracking-widest">Pack Ahorro</span>
-                    <h3 class="text-xl font-extrabold text-slate-900 mt-1 mb-2">Pack Familiar 3×20L</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed font-medium mb-6 flex-1">Combo de 3 recargas con envío prioritario gratis. El favorito de las familias.</p>
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div>
-                            <span class="text-xs text-slate-400 block font-bold">Precio Combo</span>
-                            <span class="text-2xl font-black text-slate-900">$50.000</span>
-                        </div>
-                        <a href="{{ route('register') }}" class="bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-5 py-2.5 rounded-xl text-sm hover:scale-105 transition-all shadow-md shadow-trigestion-500/20">
-                            Pedir ahora
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- PROCESO EN 3 PASOS                                        -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <section class="bg-gradient-to-br from-trigestion-500 to-sky-700 py-20 lg:py-28 px-6 lg:px-12">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <span class="text-sky-200 font-extrabold text-xs uppercase tracking-widest block mb-3">Proceso Simple</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                    Recibir agua pura es fácil
-                </h2>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center text-white">
-                <div class="flex flex-col items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-3xl font-black shadow-lg">
-                        1
-                    </div>
-                    <h3 class="text-lg font-extrabold">Regístrate</h3>
-                    <p class="text-sky-100 text-sm font-medium leading-relaxed max-w-xs">
-                        Crea tu cuenta gratuita en nuestra plataforma en menos de 2 minutos.
-                    </p>
-                </div>
-                <div class="flex flex-col items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-3xl font-black shadow-lg">
-                        2
-                    </div>
-                    <h3 class="text-lg font-extrabold">Elige tu pedido</h3>
-                    <p class="text-sky-100 text-sm font-medium leading-relaxed max-w-xs">
-                        Selecciona el producto y la cantidad. El precio es siempre claro y sin sorpresas.
-                    </p>
-                </div>
-                <div class="flex flex-col items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center text-3xl font-black shadow-lg">
-                        3
-                    </div>
-                    <h3 class="text-lg font-extrabold">Recibe a domicilio</h3>
-                    <p class="text-sky-100 text-sm font-medium leading-relaxed max-w-xs">
-                        Tu pedido llega directamente a tu puerta. Entregamos tu botellón vacío y nos llevamos el lleno.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- FAQ                                                        -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <section id="faq" class="bg-slate-50 py-20 lg:py-28 px-6 lg:px-12 border-t border-slate-200/70">
-        <div class="max-w-3xl mx-auto">
-
-            <div class="text-center mb-16">
-                <span class="text-trigestion-600 font-extrabold text-xs uppercase tracking-widest block mb-3">
-                    Preguntas Frecuentes
-                </span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                    Resolvemos tus dudas
-                </h2>
-            </div>
-
-            <div class="space-y-3" id="faqContainer">
-
-                <div class="faq-item bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-5 text-left font-extrabold text-slate-800 text-sm hover:bg-slate-50 transition-colors">
-                        <span>¿Cómo funciona el proceso de entrega de botellones?</span>
-                        <i class="fas fa-plus faq-icon text-trigestion-500 text-sm shrink-0 ml-4"></i>
-                    </button>
-                    <p class="px-6 pb-5 text-slate-500 text-sm font-medium leading-relaxed">
-                        Realizas tu pedido desde nuestra plataforma web. Asignamos la ruta óptima y un repartidor entrega tus botellones purificados en menos de 2 horas en el área de cobertura.
-                    </p>
-                </div>
-
-                <div class="faq-item bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-5 text-left font-extrabold text-slate-800 text-sm hover:bg-slate-50 transition-colors">
-                        <span>¿Debo tener envase de botellón previo para el intercambio?</span>
-                        <i class="fas fa-plus faq-icon text-trigestion-500 text-sm shrink-0 ml-4"></i>
-                    </button>
-                    <p class="px-6 pb-5 text-slate-500 text-sm font-medium leading-relaxed">
-                        Sí, entregas tu botellón vacío estándar de 20L y recibes uno completamente purificado y sellado. Si no posees envase, puedes adquirir uno nuevo en tu primer pedido.
-                    </p>
-                </div>
-
-                <div class="faq-item bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-5 text-left font-extrabold text-slate-800 text-sm hover:bg-slate-50 transition-colors">
-                        <span>¿Qué fases de purificación tiene el agua Trigestion?</span>
-                        <i class="fas fa-plus faq-icon text-trigestion-500 text-sm shrink-0 ml-4"></i>
-                    </button>
-                    <p class="px-6 pb-5 text-slate-500 text-sm font-medium leading-relaxed">
-                        Pasa por 7 etapas: Filtro de sedimentos, carbón activado en bloque, suavizador de agua, membrana de ósmosis inversa, filtro pulidor, esterilización UV y ozonización final.
-                    </p>
-                </div>
-
-                <div class="faq-item bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-5 text-left font-extrabold text-slate-800 text-sm hover:bg-slate-50 transition-colors">
-                        <span>¿Cuáles son los métodos de pago aceptados?</span>
-                        <i class="fas fa-plus faq-icon text-trigestion-500 text-sm shrink-0 ml-4"></i>
-                    </button>
-                    <p class="px-6 pb-5 text-slate-500 text-sm font-medium leading-relaxed">
-                        Aceptamos pago en efectivo contra entrega, transferencia bancaria y tarjeta débito/crédito. El método se selecciona al momento de confirmar tu pedido.
-                    </p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- CTA FINAL                                                  -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <section class="bg-white py-20 lg:py-24 px-6 lg:px-12 border-t border-slate-200/70">
-        <div class="max-w-4xl mx-auto text-center">
-            <div class="bg-trigestion-50 border border-trigestion-100 rounded-[2.5rem] p-12 lg:p-16 shadow-sm">
-                <div class="w-16 h-16 rounded-2xl bg-trigestion-500 text-white flex items-center justify-center text-3xl mx-auto mb-6 shadow-lg shadow-trigestion-500/25">
-                    <i class="fas fa-droplet"></i>
-                </div>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
-                    ¿Listo para hidratarte mejor?
-                </h2>
-                <p class="text-slate-500 text-base font-medium mb-8 max-w-lg mx-auto leading-relaxed">
-                    Únete a cientos de familias y empresas que confían en Trigestion para su hidratación diaria.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register') }}"
-                       class="inline-flex items-center justify-center gap-3 bg-trigestion-500 hover:bg-trigestion-600 text-white font-extrabold px-10 py-4 rounded-2xl text-base shadow-xl shadow-trigestion-500/30 hover:-translate-y-0.5 transition-all">
-                        <i class="fas fa-user-plus"></i> Crear cuenta gratis
-                    </a>
-                    <a href="{{ route('login') }}"
-                       class="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold px-10 py-4 rounded-2xl text-base shadow-sm hover:-translate-y-0.5 transition-all">
-                        Ya tengo cuenta <i class="fas fa-arrow-right text-slate-400 text-sm"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- FOOTER                                                     -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <footer class="bg-slate-950 text-white py-16 px-6 lg:px-12">
-        <div class="max-w-7xl mx-auto">
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-slate-800">
-
-                <!-- Brand -->
-                <div class="md:col-span-2">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-9 h-9 rounded-xl bg-trigestion-500 flex items-center justify-center shadow-md">
-                            <i class="fas fa-droplet text-white text-base"></i>
-                        </div>
-                        <span class="text-xl font-black tracking-tight">TRI<span class="text-trigestion-400">GESTION</span></span>
-                    </div>
-                    <p class="text-slate-400 text-sm font-medium leading-relaxed max-w-sm">
-                        Agua purificada premium con entrega a domicilio. Comprometidos con la calidad, la salud y el medio ambiente.
-                    </p>
-                </div>
-
-                <!-- Links -->
-                <div>
-                    <h4 class="font-extrabold text-sm uppercase tracking-widest text-slate-400 mb-4">Navegación</h4>
-                    <ul class="space-y-2 text-sm font-semibold text-slate-300">
-                        <li><a href="#beneficios" class="hover:text-trigestion-400 transition-colors">Beneficios</a></li>
-                        <li><a href="#calculadora" class="hover:text-trigestion-400 transition-colors">Calculadora</a></li>
-                        <li><a href="#productos" class="hover:text-trigestion-400 transition-colors">Productos</a></li>
-                        <li><a href="#faq" class="hover:text-trigestion-400 transition-colors">Preguntas</a></li>
-                    </ul>
-                </div>
-
-                <!-- Account -->
-                <div>
-                    <h4 class="font-extrabold text-sm uppercase tracking-widest text-slate-400 mb-4">Tu Cuenta</h4>
-                    <ul class="space-y-2 text-sm font-semibold text-slate-300">
-                        @if (Route::has('login'))
-                            @guest
-                                <li><a href="{{ route('login') }}" class="hover:text-trigestion-400 transition-colors">Iniciar Sesión</a></li>
-                                <li><a href="{{ route('register') }}" class="hover:text-trigestion-400 transition-colors">Registrarse</a></li>
-                            @else
-                                <li><a href="{{ url('/dashboard') }}" class="hover:text-trigestion-400 transition-colors">Dashboard</a></li>
-                            @endguest
-                        @endif
-                    </ul>
-                </div>
-            </div>
-
-            <div class="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center">
-                <p class="text-slate-500 text-sm font-medium">
-                    &copy; {{ date('Y') }} TRIGESTION. Todos los derechos reservados.
-                </p>
-                <p class="text-slate-600 text-xs font-semibold">
-                    Agua purificada · Calidad garantizada
-                </p>
-            </div>
-        </div>
-    </footer>
-
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- JAVASCRIPT                                                 -->
-    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- JS for navbar scroll, mobile menu, and reveal animations -->
     <script>
-        // ── Carousel ────────────────────────────────────────────
-        let slideIndex = 0;
-
-        function setSlide(n) {
-            const slides = document.querySelectorAll('.carousel-slide');
-            const dots   = document.querySelectorAll('.carousel-dot');
-
-            slides.forEach((s, i) => {
-                if (i === n) {
-                    s.classList.remove('hidden');
-                    s.classList.add('flex');
-                } else {
-                    s.classList.add('hidden');
-                    s.classList.remove('flex');
-                }
-            });
-
-            dots.forEach((d, i) => {
-                if (i === n) {
-                    d.classList.remove('bg-sky-200');
-                    d.classList.add('bg-trigestion-500', 'scale-125');
-                } else {
-                    d.classList.remove('bg-trigestion-500', 'scale-125');
-                    d.classList.add('bg-sky-200');
-                }
-            });
-
-            slideIndex = n;
-        }
-
-        setInterval(() => {
-            setSlide((slideIndex + 1) % 3);
-        }, 4000);
-
-        // ── Calculadora ─────────────────────────────────────────
-        function updateCalc() {
-            const people  = parseInt(document.getElementById('people-slider').value);
-            const bottles = Math.max(2, Math.ceil(people * 1.3));
-            const liters  = bottles * 20;
-            const price   = bottles * 19000;
-
-            document.getElementById('people-count').textContent  = people + (people === 1 ? ' Persona' : ' Personas');
-            document.getElementById('result-bottles').textContent = bottles;
-            document.getElementById('result-liters').textContent  = liters + ' Litros de agua pura';
-            document.getElementById('result-price').textContent   = '$' + price.toLocaleString('es-CO') + ' / mes';
-        }
-
-        // Inicializar calculadora
-        updateCalc();
-
-        // ── FAQ accordion ───────────────────────────────────────
-        function toggleFaq(btn) {
-            const item = btn.closest('.faq-item');
-            const isOpen = item.classList.contains('open');
-
-            // Cerrar todos
-            document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
-
-            // Abrir el clickeado si estaba cerrado
-            if (!isOpen) {
-                item.classList.add('open');
-            }
-        }
-
-        // ── Navbar scroll shadow ────────────────────────────────
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
-            const header = document.querySelector('header');
             if (window.scrollY > 20) {
-                header.classList.add('shadow-md');
+                navbar.classList.add('py-1', 'shadow-sm');
+                navbar.classList.remove('py-3');
+                navbar.style.background = 'rgba(255,255,255,0.85)';
+                navbar.style.backdropFilter = 'blur(20px)';
+                navbar.style.borderBottom = '1px solid rgba(255,255,255,0.6)';
             } else {
-                header.classList.remove('shadow-md');
+                navbar.classList.remove('py-1', 'shadow-sm');
+                navbar.classList.add('py-3');
+                navbar.style.background = '';
+                navbar.style.backdropFilter = '';
+                navbar.style.borderBottom = '';
             }
         });
+
+        // Mobile menu toggle
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileIcon = document.getElementById('mobileMenuIcon');
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            mobileIcon.classList.toggle('fa-bars');
+            mobileIcon.classList.toggle('fa-times');
+        });
+
+        // Reveal on scroll
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('reveal-active');
+                    revealObserver.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal-el').forEach((el) => revealObserver.observe(el));
     </script>
 
 </body>

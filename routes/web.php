@@ -2,14 +2,18 @@
 
 use App\Http\Controllers\AdminUsuarioController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ChatIAController;
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\InventarioMateriaPrimaController;
 use App\Http\Controllers\InventarioProductosController;
 use App\Http\Controllers\LoteController;
+use App\Http\Controllers\MateriaPrimaController;
+use App\Http\Controllers\PresentacionProductoController;
 use App\Http\Controllers\ProduccionController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\SolicitudDevolucionController;
 use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Route;
 
@@ -121,6 +125,44 @@ Route::middleware(['auth', 'role:3'])->group(function () {
     Route::post('/carrito/actualizar', [VentaController::class, 'actualizarCarrito'])->name('carrito.actualizar');
     Route::post('/carrito/eliminar', [VentaController::class, 'eliminarDelCarrito'])->name('carrito.eliminar');
     Route::post('/carrito/finalizar', [VentaController::class, 'finalizarCompra'])->name('carrito.finalizar');
+    route::post("carritot");
+});
+
+// ── API: Materias Primas (Admin & Trabajador) ──────────────────
+Route::middleware(['auth', 'role:1,2'])->group(function () {
+    Route::get('/api/materias-primas', [MateriaPrimaController::class, 'index']);
+    Route::post('/api/materias-primas', [MateriaPrimaController::class, 'store']);
+    Route::put('/api/materias-primas/{materiaPrima}', [MateriaPrimaController::class, 'update']);
+    Route::delete('/api/materias-primas/{materiaPrima}', [MateriaPrimaController::class, 'destroy']);
+    Route::post('/api/materias-primas/entrada', [MateriaPrimaController::class, 'registrarEntrada']);
+    Route::get('/api/materias-primas/alertas', [MateriaPrimaController::class, 'alertas']);
+    Route::get('/api/materias-primas/{materiaPrima}/toggle-estado', [MateriaPrimaController::class, 'toggleEstado']);
+
+    // Presentaciones (Pacas)
+    Route::get('/api/presentaciones', [PresentacionProductoController::class, 'index']);
+    Route::post('/api/presentaciones', [PresentacionProductoController::class, 'store']);
+    Route::put('/api/presentaciones/{presentacion}', [PresentacionProductoController::class, 'update']);
+    Route::delete('/api/presentaciones/{presentacion}', [PresentacionProductoController::class, 'destroy']);
+    Route::get('/api/productos/{producto}/presentaciones', [PresentacionProductoController::class, 'porProducto']);
+});
+
+// ── API: Solicitudes de Devolución ─────────────────────────────
+Route::middleware(['auth'])->group(function () {
+    // Cliente
+    Route::post('/api/solicitudes-devolucion/solicitar', [SolicitudDevolucionController::class, 'solicitar']);
+    Route::get('/api/solicitudes-devolucion/mis-solicitudes', [SolicitudDevolucionController::class, 'misSolicitudes']);
+});
+
+Route::middleware(['auth', 'role:1,2'])->group(function () {
+    Route::get('/api/solicitudes-devolucion', [SolicitudDevolucionController::class, 'index']);
+    Route::post('/api/solicitudes-devolucion/{solicitud}/procesar', [SolicitudDevolucionController::class, 'procesar']);
+    Route::post('/api/solicitudes-devolucion/marcar-leidas', [SolicitudDevolucionController::class, 'marcarLeidas']);
+});
+
+// ── API: Chat IA (Gemini) ──────────────────────────────────────
+Route::middleware(['auth'])->group(function () {
+    Route::post('/api/ia/chat', [ChatIAController::class, 'chat']);
+    Route::get('/api/ia/status', [ChatIAController::class, 'status']);
 });
 
 require __DIR__.'/auth.php';

@@ -8,7 +8,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,17 +16,12 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans:   ['"Plus Jakarta Sans"', 'sans-serif'],
-                        outfit: ['"Outfit"', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['"Outfit"', 'sans-serif'] },
                     colors: {
-                        trigestion: {
-                            50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',
-                            400:'#38bdf8',500:'#009ee3',600:'#0081c2',700:'#00669e',
-                            800:'#005282',900:'#082f49',
-                        }
-                    }
+                        trigestion: { 50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',400:'#38bdf8',500:'#0ea5e9',600:'#0284c7',700:'#00669e',800:'#005282',900:'#082f49' }
+                    },
+                    animation: { 'fade': 'fadeIn 0.5s ease-out' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
@@ -34,125 +29,182 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        body { font-family:'Outfit','Plus Jakarta Sans',sans-serif; }
-        .bg-blobs { position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#f8fafc; }
-        .blob-1,.blob-2,.blob-3 { position:absolute;filter:blur(80px);border-radius:50%;opacity:.45;animation:float 20s infinite alternate ease-in-out; }
-        .blob-1 { top:-10%;left:-10%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(14,165,233,.18) 0,rgba(255,255,255,0) 70%); }
-        .blob-2 { bottom:-20%;right:-10%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(99,102,241,.12) 0,rgba(255,255,255,0) 70%);animation-delay:-5s; }
-        .blob-3 { top:40%;left:30%;width:40vw;height:40vw;background:radial-gradient(circle,rgba(16,185,129,.08) 0,rgba(255,255,255,0) 70%);animation-delay:-10s; }
-        @keyframes float { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(5%,5%) scale(1.1)} }
-        .glass-card,.glass-panel { background:rgba(255,255,255,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.55);box-shadow:0 10px 30px -10px rgba(0,0,0,.06); }
+        body { font-family: 'Outfit', sans-serif; }
+        .bg-blobs { position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none; }
+        .blob-1 { position:absolute;top:-10%;right:-5%;width:500px;height:500px;border-radius:9999px;background:rgba(56,189,248,0.08);filter:blur(80px); }
+        .blob-2 { position:absolute;bottom:-10%;left:10%;width:450px;height:450px;border-radius:9999px;background:rgba(79,70,229,0.05);filter:blur(90px); }
+        .blob-3 { position:absolute;top:40%;left:30%;width:350px;height:350px;border-radius:9999px;background:rgba(14,165,233,0.05);filter:blur(70px); }
+        .glass-card { background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.8); }
+        .glass-panel { background:rgba(255,255,255,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,0.8); }
+        .premium-shadow { box-shadow:0 20px 40px -15px rgba(14,165,233,0.08); }
+        .custom-scrollbar::-webkit-scrollbar { width:5px;height:5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background:rgba(15,23,42,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background:rgba(14,165,233,0.2);border-radius:10px; }
         ::-webkit-scrollbar { width:8px;height:8px; }
         ::-webkit-scrollbar-track { background:#f1f5f9; }
         ::-webkit-scrollbar-thumb { background:#cbd5e1;border-radius:4px; }
-        ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
     </style>
 </head>
-<body class="font-sans antialiased text-slate-800 min-h-screen">
+<body class="font-sans antialiased text-slate-800 min-h-screen bg-slate-50">
 
     <div class="bg-blobs"><div class="blob-1"></div><div class="blob-2"></div><div class="blob-3"></div></div>
 
     <div class="flex min-h-screen relative z-10">
-
-        <!-- SIDEBAR -->
         @include('partials.sidebar')
 
-        <!-- ═══ MAIN ═══ -->
-        <div class="flex-1 ml-72 flex flex-col min-w-0">
+        <div class="flex-1 ml-[280px] flex flex-col min-w-0">
+            @include('partials.topbar', ['title' => 'Mi Dashboard', 'subtitle' => 'Bienvenido a tu panel personal de Trigestion'])
 
-            <!-- TOP HEADER -->
-            <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20 shadow-sm px-8 py-4 flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">Mi Dashboard</h1>
-                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Bienvenido a tu panel personal de Trigestion</p>
-                </div>
-                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                    <button @click="open = !open" class="flex items-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl transition-all shadow-sm cursor-pointer">
-                        <div class="w-9 h-9 rounded-xl bg-trigestion-500 text-white flex items-center justify-center font-black text-base shadow-md shrink-0">
-                            {{ strtoupper(substr(Auth::user()->nombres ?? Auth::user()->name ?? 'C', 0, 1)) }}
-                        </div>
-                        <p class="text-xs font-extrabold text-slate-900 hidden sm:block truncate max-w-[160px]">{{ Auth::user()->nombres ?? Auth::user()->name }}</p>
-                        <svg class="w-4 h-4 text-slate-400 shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <div x-show="open" x-transition class="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50" style="display:none">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold text-red-600 bg-red-50/60 hover:bg-red-100/80 border border-red-200/50 transition-all">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                                Cerrar Sesión
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </header>
-
-            <!-- BODY (Replicando la vista cliente.php original) -->
-            <main class="p-8 space-y-8 flex-1 font-outfit">
-
-                <!-- HERO DE BIENVENIDA -->
-                <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-sky-500 via-indigo-600 to-indigo-700 p-10 text-white shadow-[0_20px_60px_rgba(14,165,233,0.35)]">
-                    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-                        <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-                    </div>
-                    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/20 text-white/90 text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-md">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping"></span>
-                                Cuenta Activa
-                            </div>
-                            <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-tight mb-2">
-                                ¡Hola, {{ explode(' ', Auth::user()->nombres ?? Auth::user()->name)[0] }}! 👋
-                            </h1>
-                            <p class="text-white/80 text-base font-medium max-w-lg">Bienvenido a tu panel personal de Trigestion. Aquí puedes ver el resumen de tus compras y gestionar tus pedidos.</p>
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
-                            <a href="{{ route('productos.catalogo') }}" class="flex items-center justify-center gap-2 bg-white text-sky-600 px-7 py-4 rounded-2xl font-extrabold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-                                <i class="fas fa-store text-lg"></i> Ir al Catálogo
-                            </a>
-                            <a href="{{ route('cliente.misCompras') }}" class="flex items-center justify-center gap-2 bg-white/15 border border-white/25 text-white px-7 py-4 rounded-2xl font-extrabold backdrop-blur-md hover:bg-white/25 transition-all transform hover:-translate-y-0.5">
-                                <i class="fas fa-bag-shopping text-lg"></i> Mis Pedidos
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- KPI CARDS -->
+            <main class="p-4 sm:p-8 md:p-10 flex-1 min-w-0 space-y-8 animate-fade">
                 @php
                     $userVentas = \DB::table('venta')->where('id_usuario', Auth::id())->get();
                     $totalPedidos = count($userVentas);
                     $totalGastado = $userVentas->sum('total');
+                    $pedidosEntregados = $userVentas->where('estado', 'Entregado')->count();
+                    $pedidosEnProceso = $userVentas->where('estado', 'En Proceso')->count();
+                    $ultimosPedidos = $userVentas->sortByDesc('id_venta')->take(5);
                 @endphp
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="glass-card rounded-[2rem] p-6 relative overflow-hidden group">
-                        <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xl mb-4 font-black"><i class="fas fa-receipt"></i></div>
-                        <div class="text-4xl font-black text-slate-800">{{ $totalPedidos }}</div>
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Pedidos Totales</div>
+
+                {{-- HERO WELCOME BANNER (ClienteDashboard style) --}}
+                <div class="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-sky-500 via-indigo-600 to-indigo-700 p-8 sm:p-12 text-white shadow-2xl shadow-sky-500/20">
+                    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div class="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+                        <div class="absolute bottom-0 left-10 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
                     </div>
-                    <div class="glass-card rounded-[2rem] p-6 relative overflow-hidden group">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4 font-black"><i class="fas fa-dollar-sign"></i></div>
-                        <div class="text-3xl font-black text-slate-800">${{ number_format($totalGastado, 0) }}</div>
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Total Gastado</div>
-                    </div>
-                    <div class="glass-card rounded-[2rem] p-6 border border-emerald-100 relative overflow-hidden group">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mb-4 font-black"><i class="fas fa-circle-check"></i></div>
-                        <div class="text-4xl font-black text-emerald-700">0</div>
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">Entregados</div>
-                    </div>
-                    <div class="glass-card rounded-[2rem] p-6 border border-amber-100 relative overflow-hidden group">
-                        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl mb-4 font-black"><i class="fas fa-clock"></i></div>
-                        <div class="text-4xl font-black text-amber-700">0</div>
-                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">En Curso</div>
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div>
+                            <div class="inline-block px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white font-bold text-xs mb-4">
+                                <i class="fas fa-droplet mr-1.5 text-sky-200"></i>Agua Purificada de M&aacute;xima Calidad
+                            </div>
+                            <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+                                &iexcl;Hola, {{ explode(' ', Auth::user()->nombres ?? Auth::user()->name ?? 'Cliente')[0] }}!
+                            </h1>
+                            <p class="text-sky-100 text-sm sm:text-base mt-2 max-w-lg font-medium opacity-90">
+                                Bienvenido a tu panel de cliente. Monitorea el estado de tus pedidos y solicita nuevos garrafones o botellas cuando lo desees.
+                            </p>
+                        </div>
+                        <a href="{{ route('productos.catalogo') }}" class="px-8 py-4 rounded-2xl bg-white text-indigo-700 font-black shadow-xl hover:bg-sky-50 transform hover:-translate-y-1 transition-all flex items-center gap-3 shrink-0 text-base">
+                            <i class="fas fa-cart-shopping text-sky-600"></i>
+                            <span>Comprar Ahora</span>
+                        </a>
                     </div>
                 </div>
 
-                <!-- ACCESOS DIRECTOS -->
+                {{-- KPI STATS --}}
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {{-- Pedidos Realizados --}}
+                    <div class="glass-card rounded-2xl sm:rounded-[2rem] p-6 border border-white/80 premium-shadow hover:shadow-sky-100 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center text-white text-xl shadow-md">
+                                <i class="fas fa-bag-shopping"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Historial</span>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight mb-1">{{ $totalPedidos }}</div>
+                            <div class="text-xs sm:text-sm font-semibold text-slate-500">Pedidos Realizados</div>
+                        </div>
+                    </div>
+                    {{-- Total Invertido --}}
+                    <div class="glass-card rounded-2xl sm:rounded-[2rem] p-6 border border-white/80 premium-shadow hover:shadow-indigo-100 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl shadow-md">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Compras</span>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight mb-1">${{ number_format($totalGastado, 2) }}</div>
+                            <div class="text-xs sm:text-sm font-semibold text-slate-500">Total Invertido</div>
+                        </div>
+                    </div>
+                    {{-- Entregados --}}
+                    <div class="glass-card rounded-2xl sm:rounded-[2rem] p-6 border border-white/80 premium-shadow hover:shadow-emerald-100 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-xl shadow-md">
+                                <i class="fas fa-circle-check"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">Completados</span>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight mb-1">{{ $pedidosEntregados }}</div>
+                            <div class="text-xs sm:text-sm font-semibold text-slate-500">Entregados</div>
+                        </div>
+                    </div>
+                    {{-- En Camino --}}
+                    <div class="glass-card rounded-2xl sm:rounded-[2rem] p-6 border border-white/80 premium-shadow hover:shadow-amber-100 transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xl shadow-md">
+                                <i class="fas fa-truck-fast"></i>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-400 tracking-wider uppercase">En Proceso</span>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight mb-1">{{ $pedidosEnProceso }}</div>
+                            <div class="text-xs sm:text-sm font-semibold text-slate-500">En Camino</div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- RECENT ORDERS CARD (ClienteDashboard style) --}}
+                <div class="glass-card rounded-[2rem] p-6 sm:p-8 border border-white/80 premium-shadow">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-black text-slate-800 tracking-tight">Pedidos Recientes</h2>
+                        <a href="{{ route('cliente.misCompras') }}" class="text-xs font-bold text-sky-600 hover:text-sky-700 hover:underline">
+                            Ver todos los pedidos <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    @if ($ultimosPedidos->isEmpty())
+                    <div class="py-12 text-center text-slate-400">
+                        <div class="w-16 h-16 rounded-full bg-sky-50 text-sky-400 flex items-center justify-center text-2xl mx-auto mb-3">
+                            <i class="fas fa-bag-shopping"></i>
+                        </div>
+                        <p class="font-bold text-slate-700">A&uacute;n no has realizado pedidos</p>
+                        <p class="text-xs text-slate-400 mt-1">Visita el cat&aacute;logo para solicitar tus productos de agua pura.</p>
+                    </div>
+                    @else
+                    <div class="divide-y divide-slate-100">
+                        @foreach ($ultimosPedidos as $p)
+                        @php
+                            $estado = $p->estado ?? 'Pendiente';
+                            $estadoStyles = [
+                                'Entregado' => 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+                                'En Proceso' => 'bg-amber-50 text-amber-600 border border-amber-100',
+                                'Cancelado' => 'bg-rose-50 text-rose-600 border border-rose-100',
+                                'Pendiente' => 'bg-sky-50 text-sky-600 border border-sky-100',
+                            ][$estado] ?? 'bg-sky-50 text-sky-600 border border-sky-100';
+                        @endphp
+                        <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-sm">
+                                    #{{ $p->id_venta }}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 text-sm">Pedido de productos</div>
+                                    <div class="text-xs text-slate-400">
+                                        {{ optional(\Carbon\Carbon::parse($p->fecha))->format('d/m/Y') ?? '' }} &bull; {{ $p->metodo_pago ?? 'Efectivo' }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between sm:justify-end gap-4">
+                                <div class="text-sm font-black text-slate-800">${{ number_format($p->total, 2) }}</div>
+                                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold {{ $estadoStyles }}">{{ $estado }}</span>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
+                </div>
+
+                {{-- ACCESOS DIRECTOS --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <a href="{{ route('productos.catalogo') }}" class="glass-card rounded-[2.5rem] border border-slate-100 p-8 flex items-center gap-5 hover:border-sky-300 hover:shadow-xl transition-all group">
                         <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg group-hover:scale-110 transition-transform">
                             <i class="fas fa-store"></i>
                         </div>
                         <div>
-                            <h4 class="font-extrabold text-slate-800 text-lg">Catálogo de Productos</h4>
+                            <h4 class="font-extrabold text-slate-800 text-lg">Cat&aacute;logo de Productos</h4>
                             <p class="text-sm text-slate-400 font-semibold mt-0.5">Explora y compra nuestros productos</p>
                         </div>
                         <i class="fas fa-arrow-right ml-auto text-slate-300 group-hover:text-sky-500 transition-colors"></i>
@@ -168,7 +220,6 @@
                         <i class="fas fa-arrow-right ml-auto text-slate-300 group-hover:text-indigo-500 transition-colors"></i>
                     </a>
                 </div>
-
             </main>
         </div>
     </div>

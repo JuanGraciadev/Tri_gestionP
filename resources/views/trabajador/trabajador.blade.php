@@ -8,7 +8,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,17 +16,12 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans:   ['"Plus Jakarta Sans"', 'sans-serif'],
-                        outfit: ['"Outfit"', 'sans-serif'],
-                    },
+                    fontFamily: { sans: ['"Outfit"', 'sans-serif'] },
                     colors: {
-                        trigestion: {
-                            50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',
-                            400:'#38bdf8',500:'#009ee3',600:'#0081c2',700:'#00669e',
-                            800:'#005282',900:'#082f49',
-                        }
-                    }
+                        trigestion: { 50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',400:'#38bdf8',500:'#0ea5e9',600:'#0284c7',700:'#00669e',800:'#005282',900:'#082f49' }
+                    },
+                    animation: { 'fade': 'fadeIn 0.5s ease-out' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
                 }
             }
         }
@@ -34,114 +29,100 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        body { font-family:'Outfit','Plus Jakarta Sans',sans-serif; }
-        .bg-blobs { position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#f8fafc; }
-        .blob-1,.blob-2,.blob-3 { position:absolute;filter:blur(80px);border-radius:50%;opacity:.45;animation:float 20s infinite alternate ease-in-out; }
-        .blob-1 { top:-10%;left:-10%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(14,165,233,.18) 0,rgba(255,255,255,0) 70%); }
-        .blob-2 { bottom:-20%;right:-10%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(245,158,11,.12) 0,rgba(255,255,255,0) 70%);animation-delay:-5s; }
-        .blob-3 { top:40%;left:30%;width:40vw;height:40vw;background:radial-gradient(circle,rgba(16,185,129,.08) 0,rgba(255,255,255,0) 70%);animation-delay:-10s; }
-        @keyframes float { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(5%,5%) scale(1.1)} }
-        .glass-card,.glass-panel { background:rgba(255,255,255,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.55);box-shadow:0 10px 30px -10px rgba(0,0,0,.06); }
+        body { font-family: 'Outfit', sans-serif; }
+        .bg-blobs { position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none; }
+        .blob-1 { position:absolute;top:-10%;right:-5%;width:500px;height:500px;border-radius:9999px;background:rgba(56,189,248,0.08);filter:blur(80px); }
+        .blob-2 { position:absolute;bottom:-10%;left:10%;width:450px;height:450px;border-radius:9999px;background:rgba(79,70,229,0.05);filter:blur(90px); }
+        .blob-3 { position:absolute;top:40%;left:30%;width:350px;height:350px;border-radius:9999px;background:rgba(14,165,233,0.05);filter:blur(70px); }
+        .glass-card { background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.8); }
+        .glass-panel { background:rgba(255,255,255,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(226,232,240,0.8); }
+        .premium-gradient-text { background:linear-gradient(135deg, #0ea5e9 0%, #4f46e5 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .premium-shadow { box-shadow:0 20px 40px -15px rgba(14,165,233,0.08); }
+        .custom-scrollbar::-webkit-scrollbar { width:5px;height:5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background:rgba(15,23,42,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background:rgba(14,165,233,0.2);border-radius:10px; }
         ::-webkit-scrollbar { width:8px;height:8px; }
         ::-webkit-scrollbar-track { background:#f1f5f9; }
         ::-webkit-scrollbar-thumb { background:#cbd5e1;border-radius:4px; }
-        ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
     </style>
 </head>
-<body class="font-sans antialiased text-slate-800 min-h-screen">
+<body class="font-sans antialiased text-slate-800 min-h-screen bg-slate-50">
 
     <div class="bg-blobs"><div class="blob-1"></div><div class="blob-2"></div><div class="blob-3"></div></div>
 
     <div class="flex min-h-screen relative z-10">
-
-        <!-- SIDEBAR -->
         @include('partials.sidebar')
 
-        <!-- ═══ MAIN ═══ -->
-        <div class="flex-1 ml-72 flex flex-col min-w-0">
+        <div class="flex-1 ml-[280px] flex flex-col min-w-0">
+            @include('partials.topbar', ['title' => 'Panel de Trabajador', 'subtitle' => 'Control operativo y gesti&oacute;n de planta'])
 
-            <!-- TOP HEADER -->
-            <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20 shadow-sm px-8 py-4 flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">Panel de Trabajador</h1>
-                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Control operativo y gestión de planta</p>
-                </div>
-                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                    <button @click="open = !open" class="flex items-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl transition-all shadow-sm cursor-pointer">
-                        <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-base shadow-md shrink-0">
-                            {{ strtoupper(substr(Auth::user()->nombres ?? Auth::user()->name ?? 'T', 0, 1)) }}
-                        </div>
-                        <p class="text-xs font-extrabold text-slate-900 hidden sm:block truncate max-w-[160px]">{{ Auth::user()->nombres ?? Auth::user()->name }}</p>
-                        <svg class="w-4 h-4 text-slate-400 shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                    </button>
-                    <div x-show="open" x-transition class="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50" style="display:none">
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold text-red-600 bg-red-50/60 hover:bg-red-100/80 border border-red-200/50 transition-all">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                                Cerrar Sesión
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </header>
-
-            <!-- BODY (Replicando la vista trabajador.php original) -->
-            <main class="p-8 space-y-8 flex-1 font-outfit">
-
-                <!-- WELCOME BANNER -->
-                <div class="glass-card rounded-[2.5rem] border border-slate-100 overflow-hidden relative p-8 md:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <main class="p-4 sm:p-8 md:p-10 flex-1 min-w-0 space-y-8 animate-fade">
+                {{-- WELCOME BANNER (TrabajadorDashboard style) --}}
+                <div class="glass-card rounded-[2.5rem] p-8 sm:p-10 border border-white/80 premium-shadow relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div class="absolute top-0 right-0 -mr-10 -mt-10 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                    <div>
-                        <h2 class="text-2xl sm:text-3xl font-black text-slate-800 mb-2">Bienvenido a tu <span class="text-sky-600">Área de Trabajo</span></h2>
-                        <p class="text-slate-500 text-base font-medium">Selecciona una de las herramientas de operaciones para comenzar.</p>
+                    <div class="text-center sm:text-left z-10">
+                        <div class="inline-block px-3 py-1 rounded-full bg-sky-50 border border-sky-100 text-sky-600 font-bold text-xs mb-3 shadow-sm">
+                            <i class="fas fa-hard-hat mr-1.5"></i>&Aacute;rea Operativa
+                        </div>
+                        <h2 class="text-2xl sm:text-4xl font-black text-slate-800 tracking-tight mb-2">
+                            Panel de Operaciones de <span class="premium-gradient-text">Planta</span>
+                        </h2>
+                        <p class="text-slate-500 text-sm sm:text-base font-medium max-w-xl">
+                            Gestiona producci&oacute;n, materia prima y control de inventario desde aqu&iacute;.
+                        </p>
                     </div>
-                    <div class="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center text-sky-600 text-3xl shadow-sm shrink-0">
-                        <i class="fas fa-hard-hat"></i>
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-sky-400 to-indigo-600 text-white rounded-3xl flex items-center justify-center text-3xl shadow-lg shadow-sky-500/20 z-10 shrink-0">
+                        <i class="fas fa-flask"></i>
                     </div>
                 </div>
 
-                <!-- CARDS DE ÁREA DE TRABAJO -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                    <!-- Producción -->
-                    <a href="{{ route('produccion.index') }}" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-sky-300 hover:shadow-2xl hover:shadow-sky-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center text-2xl font-bold mb-4 transition-all shadow-sm">
+                {{-- QUICK ACTION GRID (TrabajadorDashboard style) --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {{-- Producci&oacute;n --}}
+                    <a href="{{ route('produccion.index') }}" class="glass-card rounded-[2rem] p-8 border border-white/80 premium-shadow transition-all duration-300 group flex flex-col items-center text-center hover:-translate-y-2 hover:border-sky-300 hover:shadow-sky-100">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center text-2xl font-bold mb-5 transition-all shadow-inner group-hover:bg-sky-500 group-hover:text-white">
                             <i class="fas fa-industry"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-sky-600 transition-colors">Producción</h3>
-                        <p class="text-sm text-slate-500">Registra y controla el flujo de producción diaria.</p>
+                        <h3 class="text-xl font-black text-slate-800 mb-2 group-hover:text-sky-600 transition-colors">Producci&oacute;n</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 font-medium">Registra y finaliza &oacute;rdenes de producci&oacute;n diaria.</p>
                     </a>
 
-                    <!-- Inventario Materia Prima -->
-                    <a href="{{ route('inventario-mp.index') }}" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-emerald-300 hover:shadow-2xl hover:shadow-emerald-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-emerald-500 group-hover:text-white flex items-center justify-center text-2xl font-bold mb-4 transition-all shadow-sm">
-                            <i class="fas fa-boxes-stacked"></i>
+                    {{-- Entrada de Insumos --}}
+                    <a href="{{ route('inventario-mp.index') }}" class="glass-card rounded-[2rem] p-8 border border-white/80 premium-shadow transition-all duration-300 group flex flex-col items-center text-center hover:-translate-y-2 hover:border-emerald-300 hover:shadow-emerald-100">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center text-2xl font-bold mb-5 transition-all shadow-inner group-hover:bg-emerald-500 group-hover:text-white">
+                            <i class="fas fa-truck-ramp-box"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-emerald-600 transition-colors">Inventario MP</h3>
-                        <p class="text-sm text-slate-500">Consulta insumos y materia prima disponible.</p>
+                        <h3 class="text-xl font-black text-slate-800 mb-2 group-hover:text-emerald-600 transition-colors">Entrada de Insumos</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 font-medium">Registra compras y recepciones de materia prima al almac&eacute;n.</p>
                     </a>
 
-                    <!-- Gestión de Lotes -->
-                    <a href="{{ route('lotes.index') }}" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-amber-300 hover:shadow-2xl hover:shadow-amber-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-amber-500 group-hover:text-white flex items-center justify-center text-2xl font-bold mb-4 transition-all shadow-sm">
+                    {{-- Inventario MP --}}
+                    <a href="{{ route('inventario-mp.index') }}" class="glass-card rounded-[2rem] p-8 border border-white/80 premium-shadow transition-all duration-300 group flex flex-col items-center text-center hover:-translate-y-2 hover:border-teal-300 hover:shadow-teal-100">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center text-2xl font-bold mb-5 transition-all shadow-inner group-hover:bg-teal-500 group-hover:text-white">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-slate-800 mb-2 group-hover:text-teal-600 transition-colors">Inventario MP</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 font-medium">Consulta gr&aacute;ficas de stock y trazabilidad de insumos.</p>
+                    </a>
+
+                    {{-- Gesti&oacute;n de Lotes --}}
+                    <a href="{{ route('lotes.index') }}" class="glass-card rounded-[2rem] p-8 border border-white/80 premium-shadow transition-all duration-300 group flex flex-col items-center text-center hover:-translate-y-2 hover:border-indigo-300 hover:shadow-indigo-100">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center text-2xl font-bold mb-5 transition-all shadow-inner group-hover:bg-indigo-500 group-hover:text-white">
                             <i class="fas fa-box-open"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-amber-600 transition-colors">Gestión de Lotes</h3>
-                        <p class="text-sm text-slate-500">Administra lotes y detalles de envases.</p>
+                        <h3 class="text-xl font-black text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">Gesti&oacute;n de Lotes</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 font-medium">Registra lotes de botellas y asigna caracter&iacute;sticas de envases.</p>
                     </a>
 
-                    <!-- Inventario Productos -->
-                    <a href="{{ route('inventario-productos.index') }}" class="glass-card rounded-[2.5rem] p-8 border border-slate-100 hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-100 transition-all group flex flex-col items-center text-center hover:-translate-y-2">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-indigo-500 group-hover:text-white flex items-center justify-center text-2xl font-bold mb-4 transition-all shadow-sm">
+                    {{-- Inventario Productos --}}
+                    <a href="{{ route('inventario-productos.index') }}" class="glass-card rounded-[2rem] p-8 border border-white/80 premium-shadow transition-all duration-300 group flex flex-col items-center text-center hover:-translate-y-2 hover:border-amber-300 hover:shadow-amber-100">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center text-2xl font-bold mb-5 transition-all shadow-inner group-hover:bg-amber-500 group-hover:text-white">
                             <i class="fas fa-cubes"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">Inventario Prod.</h3>
-                        <p class="text-sm text-slate-500">Visualiza y controla el stock de producto terminado.</p>
+                        <h3 class="text-xl font-black text-slate-800 mb-2 group-hover:text-amber-600 transition-colors">Inventario Productos</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 font-medium">Verifica stock terminado y listo para distribuci&oacute;n.</p>
                     </a>
-
                 </div>
-
             </main>
         </div>
     </div>

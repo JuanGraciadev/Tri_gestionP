@@ -1,46 +1,74 @@
 {{--
-    Top header bar: title + subtitle + user dropdown with logout.
+    Top header bar: glass-panel, title + subtitle + user dropdown with logout.
+    PATri-Gestion style.
     Props:
       $title    - page title (required)
       $subtitle - subtitle text (optional)
 --}}
-<header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20 shadow-sm px-8 py-4 flex items-center justify-between">
-    <div>
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight">{{ $title ?? 'TRIGESTION' }}</h1>
-        @if (!empty($subtitle))
-            <p class="text-xs font-semibold text-slate-500 mt-0.5">{{ $subtitle }}</p>
-        @endif
+<header class="h-20 sm:h-24 glass-panel px-4 sm:px-8 flex items-center justify-between sticky top-0 z-20 gap-3">
+    {{-- Left: Page Title --}}
+    <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+        <div class="min-w-0">
+            <h1 class="text-lg sm:text-2xl font-black text-slate-800 tracking-tight truncate">{{ $title ?? 'TRIGESTION' }}</h1>
+            @if (!empty($subtitle))
+                <p class="text-xs text-slate-400 font-medium hidden sm:block">{{ $subtitle }}</p>
+            @else
+                <p class="text-xs text-slate-400 font-medium hidden sm:block">Bienvenido al panel de control de Trigestion!</p>
+            @endif
+        </div>
     </div>
 
-    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-        <button @click="open = !open"
-                class="flex items-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl transition-all shadow-sm cursor-pointer">
-            <div class="w-9 h-9 rounded-xl bg-trigestion-500 text-white flex items-center justify-center font-black text-base shadow-md shrink-0">
-                {{ strtoupper(substr(Auth::user()->nombres ?? Auth::user()->name ?? 'U', 0, 1)) }}
-            </div>
-            <p class="text-xs font-extrabold text-slate-900 hidden sm:block truncate max-w-[160px]">
-                {{ Auth::user()->nombres ?? Auth::user()->name }}
-            </p>
-            <svg class="w-4 h-4 text-slate-400 shrink-0" :class="{ 'rotate-180': open }"
-                 fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
+    {{-- Right: Actions & User Profile --}}
+    <div class="flex items-center gap-3 sm:gap-5">
+        {{-- Bell Notifications --}}
+        <button class="w-11 h-11 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 hover:shadow-lg transition-all relative flex items-center justify-center" title="Sin notificaciones">
+            <i class="fas fa-bell text-[17px]"></i>
+            <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-slate-300 rounded-full border border-white"></span>
         </button>
 
-        <div x-show="open" x-transition
-             class="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50"
-             style="display:none">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                        class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold text-red-600 bg-red-50/60 hover:bg-red-100/80 border border-red-200/50 transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    Cerrar Sesión
-                </button>
-            </form>
+        <div class="h-9 w-[1px] bg-slate-200 hidden sm:block"></div>
+
+        {{-- User Profile Dropdown --}}
+        <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+            <button @click="open = !open"
+                    class="flex items-center gap-3 rounded-2xl px-2 py-1.5 hover:bg-slate-100 transition-all cursor-pointer select-none">
+                <div class="text-right hidden sm:block">
+                    <div class="text-sm font-bold text-slate-800 truncate max-w-[140px]">{{ Auth::user()->nombres ?? Auth::user()->name }}</div>
+                    <div class="text-[11px] text-emerald-500 font-bold tracking-wide uppercase flex items-center justify-end gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Online
+                    </div>
+                </div>
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center text-indigo-600 text-base font-bold shadow-sm border border-indigo-200/50">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <i class="fas fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 hidden sm:block" :class="{ 'rotate-180': open }"></i>
+            </button>
+
+            {{-- Dropdown panel --}}
+            <div x-show="open" x-transition
+                 class="absolute right-0 top-[calc(100%+0.5rem)] w-56 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50"
+                 style="display:none">
+                {{-- User info --}}
+                <div class="px-4 py-3 bg-slate-50 border-b border-slate-100">
+                    <p class="text-sm font-bold text-slate-800 truncate">{{ Auth::user()->nombres ?? Auth::user()->name }}</p>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">
+                        @php
+                            $rolId = (int)(Auth::user()->id_rol ?? 0);
+                            echo $rolId === 1 ? 'Administrador' : ($rolId === 2 ? 'Trabajador' : 'Cliente');
+                        @endphp
+                    </p>
+                </div>
+                {{-- Cerrar sesi&oacute;n --}}
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                            class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-500 hover:bg-rose-50 transition-all">
+                        <i class="fas fa-right-from-bracket text-sm"></i>
+                        <span>Cerrar Sesi&oacute;n</span>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </header>

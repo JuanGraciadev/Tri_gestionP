@@ -22,13 +22,23 @@ class Producto extends Model
         'id_categoria',
         'estado',
         'retornable',
+        'receta_base',
     ];
 
     protected $casts = [
         'precio' => 'decimal:2',
         'estado' => 'boolean',
         'retornable' => 'boolean',
+        'receta_base' => 'array',
     ];
+
+    /**
+     * Presentaciones (Pacas) del producto.
+     */
+    public function presentaciones()
+    {
+        return $this->hasMany(PresentacionProducto::class, 'id_producto', 'id_producto');
+    }
 
     /**
      * Relationship: Product belongs to a Category.

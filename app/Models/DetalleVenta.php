@@ -17,11 +17,19 @@ class DetalleVenta extends Model
         'cantidad',
         'precio_unitario',
         'descuento',
+        'tipo_venta',
+        'id_presentacion',
+        'nombre_presentacion',
+        'cantidad_pacas',
+        'unidades_por_paca',
     ];
 
     protected $casts = [
         'precio_unitario' => 'float',
         'descuento'       => 'float',
+        'cantidad'        => 'integer',
+        'cantidad_pacas'  => 'integer',
+        'unidades_por_paca'=> 'integer',
     ];
 
     public function venta(): BelongsTo
