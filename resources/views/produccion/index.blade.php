@@ -170,6 +170,10 @@
                                             <span class="px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm flex items-center gap-1">
                                                 <i class="fas fa-check-circle"></i> Finalizada
                                             </span>
+                                        @elseif ($prod->estado === 'Cancelada')
+                                            <span class="px-3 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm flex items-center gap-1">
+                                                <i class="fas fa-times-circle"></i> Cancelada
+                                            </span>
                                         @else
                                             <span class="px-3 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm animate-pulse flex items-center gap-1">
                                                 <i class="fas fa-spinner fa-spin"></i> En Proceso
@@ -220,16 +224,29 @@
                                     </div>
 
                                     <!-- Action button -->
-                                    @if ($prod->estado !== 'Finalizada')
-                                        <button type="button"
-                                            onclick="confirmarFinalizar({{ $prod->id_produccion }}, '{{ addslashes($prod->lote_produccion) }}')"
-                                            class="w-full block text-center py-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 transition-all transform active:scale-95 text-[13px] cursor-pointer">
-                                            <i class="fas fa-flag-checkered mr-1.5"></i> Finalizar Producción
-                                        </button>
+                                    @if ($prod->estado === 'En Producción')
+                                        <div class="flex items-center gap-2">
+                                            <button type="button"
+                                                onclick="confirmarFinalizar({{ $prod->id_produccion }}, '{{ addslashes($prod->lote_produccion) }}')"
+                                                class="flex-1 text-center py-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 transition-all transform active:scale-95 text-[13px] cursor-pointer">
+                                                <i class="fas fa-flag-checkered mr-1.5"></i> Finalizar
+                                            </button>
+                                            <button type="button"
+                                                onclick="confirmarCancelar({{ $prod->id_produccion }}, '{{ addslashes($prod->lote_produccion) }}')"
+                                                class="px-4 py-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 font-bold hover:bg-rose-500 hover:text-white hover:border-rose-500 hover:shadow-lg hover:shadow-rose-200 transition-all transform active:scale-95 text-[13px] cursor-pointer"
+                                                title="Cancelar producción">
+                                                <i class="fas fa-times mr-1"></i> Cancelar
+                                            </button>
+                                        </div>
                                         <form id="finalizarForm{{ $prod->id_produccion }}" action="{{ route('produccion.finalizar', $prod->id_produccion) }}" method="POST" class="hidden">@csrf</form>
-                                    @else
+                                        <form id="cancelarForm{{ $prod->id_produccion }}" action="{{ route('produccion.cancelar', $prod->id_produccion) }}" method="POST" class="hidden">@csrf</form>
+                                    @elseif ($prod->estado === 'Finalizada')
                                         <button disabled class="w-full block text-center py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-bold cursor-not-allowed text-[13px]">
                                             <i class="fas fa-check-double mr-1.5"></i> Lote Completado
+                                        </button>
+                                    @else
+                                        <button disabled class="w-full block text-center py-3.5 rounded-xl border border-rose-200 bg-rose-50/50 text-rose-400 font-bold cursor-not-allowed text-[13px]">
+                                            <i class="fas fa-ban mr-1.5"></i> Cancelada
                                         </button>
                                     @endif
                                 </div>
@@ -315,11 +332,15 @@
                             <option value="">No deducir / Lote Genérico...</option>
                             @foreach ($materiaPrima as $mp)
                                 <option value="{{ $mp->id_inventario_materia }}">
-                                    MP-{{ $mp->id_inventario_materia }}:
-                                    {{ $mp->detalle->tipo_envase ?? '—' }}
-                                    {{ $mp->detalle->capacidad ?? '' }}
-                                    (Lote: {{ $mp->detalle->lote->codigo_lote ?? 'N/A' }})
-                                    — Qty: {{ $mp->ingreso ?? 0 }}
+                                    @if ($mp->id_retornables)
+                                        MP-{{ $mp->id_inventario_materia }} (Retornables #{{ $mp->id_retornables }}) — Qty: {{ $mp->ingreso ?? 0 }}
+                                    @else
+                                        MP-{{ $mp->id_inventario_materia }}:
+                                        {{ $mp->detalle->tipo_envase ?? '—' }}
+                                        {{ $mp->detalle->capacidad ?? '' }}
+                                        (Lote: {{ $mp->detalle->lote->codigo_lote ?? 'N/A' }})
+                                        — Qty: {{ $mp->ingreso ?? 0 }}
+                                    @endif
                                 </option>
                             @endforeach
                         </select>
@@ -354,8 +375,8 @@
         function confirmarFinalizar(id, lote) {
             Swal.fire({
                 title: '¿Finalizar producción?',
-                html:  `<p class="text-slate-600">El lote <strong>${lote}</strong> pasará a estado <strong>Finalizada</strong>.<br>Se registrará el ingreso al inventario de productos terminados y se descontará la materia prima utilizada.</p>`,
-                icon:  'warning',
+                html:  `<p class="text-slate-600">El lote <strong>${lote}</strong> pasará a estado <strong>Finalizada</strong>.<br>Se registrará el ingreso al inventario de productos terminados.</p>`,
+                icon:  'question',
                 showCancelButton:    true,
                 confirmButtonColor:  '#10b981',
                 cancelButtonColor:   '#94a3b8',
@@ -365,6 +386,24 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('finalizarForm' + id).submit();
+                }
+            });
+        }
+
+        function confirmarCancelar(id, lote) {
+            Swal.fire({
+                title: '¿Cancelar producción?',
+                html:  `<p class="text-slate-600">El lote <strong>${lote}</strong> pasará a estado <strong>Cancelada</strong>.<br>La materia prima descontada al inicio será devuelta al inventario.</p>`,
+                icon:  'warning',
+                showCancelButton:    true,
+                confirmButtonColor:  '#ef4444',
+                cancelButtonColor:   '#94a3b8',
+                confirmButtonText:   '<i class="fas fa-times mr-2"></i>Sí, cancelar producción',
+                cancelButtonText:    'Volver',
+                customClass: { popup: 'rounded-[2rem] font-outfit' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('cancelarForm' + id).submit();
                 }
             });
         }

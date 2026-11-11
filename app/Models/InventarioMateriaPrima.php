@@ -33,6 +33,14 @@ class InventarioMateriaPrima extends Model
     }
 
     /**
+     * The retornables record if this inventory entry came from returns.
+     */
+    public function retornable(): BelongsTo
+    {
+        return $this->belongsTo(DevolucionRetornables::class, 'id_retornables', 'id_retornables');
+    }
+
+    /**
      * Producciones that consumed this raw-material inventory entry.
      */
     public function producciones(): HasMany

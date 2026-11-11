@@ -85,6 +85,7 @@ Route::middleware(['auth', 'role:2'])->group(function () {
     Route::get('/produccion', [ProduccionController::class, 'index'])->name('produccion.index');
     Route::post('/produccion', [ProduccionController::class, 'store'])->name('produccion.store');
     Route::post('/produccion/{id}/finalizar', [ProduccionController::class, 'finalizar'])->name('produccion.finalizar');
+    Route::post('/produccion/{id}/cancelar', [ProduccionController::class, 'cancelar'])->name('produccion.cancelar');
 });
 
 // ── ROLE 1 & 2: Operaciones compartidas ──────────────────────
