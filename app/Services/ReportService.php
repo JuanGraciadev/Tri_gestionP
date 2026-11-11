@@ -318,7 +318,7 @@ class ReportService
 
     /**
      * Detailed Inventory Status for all active products.
-     * Classification: Normal (>5), Bajo Stock (1..5), Agotado (0).
+     * Classification: Normal (> stock_minimo), Bajo Stock (1..stock_minimo), Agotado (0).
      */
     public function getEstadoInventario(): array
     {
@@ -328,10 +328,11 @@ class ReportService
             ->get()
             ->map(function ($p) {
                 $stock = StockService::disponible($p->id_producto);
+                $minimo = $p->stock_minimo ?? 10;
                 $estado = match (true) {
-                    $stock > 5  => 'Normal',
-                    $stock > 0  => 'Bajo Stock',
-                    default     => 'Agotado',
+                    $stock > $minimo => 'Normal',
+                    $stock > 0       => 'Bajo Stock',
+                    default          => 'Agotado',
                 };
                 $badgeStyle = match ($estado) {
                     'Normal'     => 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -344,11 +345,46 @@ class ReportService
                     'categoria'   => $p->categoria->nombre ?? 'General',
                     'precio'      => $p->precio,
                     'stock'       => $stock,
+                    'stock_minimo'=> $minimo,
                     'estado'      => $estado,
                     'badge'       => $badgeStyle,
                 ];
             })
             ->toArray();
+    }
+
+    /**
+     * Reporte de disponibilidad agrupado por categoría (HU-003, RF 7.13).
+     */
+    public function getDisponibilidadPorCategoria(): array
+    {
+        $productos = $this->getEstadoInventario();
+        $agrupado = [];
+
+        foreach ($productos as $p) {
+            $cat = $p['categoria'];
+            if (!isset($agrupado[$cat])) {
+                $agrupado[$cat] = [
+                    'categoria'       => $cat,
+                    'total_productos' => 0,
+                    'stock_total'     => 0,
+                    'disponibles'     => 0,
+                    'bajo_stock'      => 0,
+                    'agotados'        => 0,
+                ];
+            }
+            $agrupado[$cat]['total_productos']++;
+            $agrupado[$cat]['stock_total'] += $p['stock'];
+            if ($p['estado'] === 'Normal') {
+                $agrupado[$cat]['disponibles']++;
+            } elseif ($p['estado'] === 'Bajo Stock') {
+                $agrupado[$cat]['bajo_stock']++;
+            } else {
+                $agrupado[$cat]['agotados']++;
+            }
+        }
+
+        return array_values($agrupado);
     }
 
     /**

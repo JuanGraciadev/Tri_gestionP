@@ -169,27 +169,67 @@
                     </div>
                 </div>
 
-                <!-- CATEGORY FILTERS & SEARCH -->
-                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
-                    <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar">
-                        <a href="{{ route('productos.catalogo') }}" 
-                           class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all shrink-0 {{ !$filtroCat ? 'bg-trigestion-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                            Todas las Categorías
-                        </a>
-                        @foreach ($categorias as $cat)
-                        <a href="{{ route('productos.catalogo', ['cat' => $cat->id_categoria]) }}" 
-                           class="px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all shrink-0 {{ $filtroCat == $cat->id_categoria ? 'bg-trigestion-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
-                            {{ $cat->nombre }}
-                        </a>
-                        @endforeach
+                <!-- CATEGORY FILTERS & SEARCH (HU-003 / RF 7.13) -->
+                <form method="GET" action="{{ route('productos.catalogo') }}" class="glass-panel p-5 rounded-3xl space-y-4">
+                    <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+                        {{-- Categorías rápidas --}}
+                        <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 custom-scrollbar">
+                            <a href="{{ route('productos.catalogo', array_filter(['buscar' => $buscar, 'precio_min' => $precioMin, 'precio_max' => $precioMax])) }}" 
+                               class="px-4 py-2 rounded-xl text-xs font-extrabold transition-all shrink-0 {{ !$filtroCat ? 'bg-trigestion-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                                Todas
+                            </a>
+                            @foreach ($categorias as $cat)
+                            <a href="{{ route('productos.catalogo', array_filter(['cat' => $cat->id_categoria, 'buscar' => $buscar, 'precio_min' => $precioMin, 'precio_max' => $precioMax])) }}" 
+                               class="px-4 py-2 rounded-xl text-xs font-extrabold transition-all shrink-0 {{ $filtroCat == $cat->id_categoria ? 'bg-trigestion-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">
+                                {{ $cat->nombre }}
+                            </a>
+                            @endforeach
+                        </div>
+
+                        {{-- Input Búsqueda --}}
+                        <div class="relative min-w-[240px]">
+                            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+                            <input type="text" name="buscar" value="{{ $buscar ?? '' }}" placeholder="Buscar por nombre o código..."
+                                class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-trigestion-500/10 focus:border-trigestion-400 outline-none transition-all text-xs font-semibold shadow-sm">
+                        </div>
                     </div>
 
-                    <div class="relative min-w-[240px]">
-                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
-                        <input type="text" id="searchCatalogo" placeholder="Buscar producto..."
-                            class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-trigestion-500/10 focus:border-trigestion-400 outline-none transition-all text-xs font-semibold shadow-sm">
+                    {{-- Filtros avanzados: Categoría + Rango de Precio --}}
+                    <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100 text-xs font-bold text-slate-600">
+                        @if ($filtroCat)
+                            <input type="hidden" name="cat" value="{{ $filtroCat }}">
+                        @endif
+
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-400 uppercase tracking-wider text-[10px]">Precio Mín:</span>
+                            <div class="relative w-24">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                                <input type="number" step="0.01" min="0" name="precio_min" value="{{ $precioMin ?? '' }}" placeholder="0.00"
+                                    class="w-full pl-6 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-trigestion-500 font-semibold">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-400 uppercase tracking-wider text-[10px]">Precio Máx:</span>
+                            <div class="relative w-24">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                                <input type="number" step="0.01" min="0" name="precio_max" value="{{ $precioMax ?? '' }}" placeholder="99.00"
+                                    class="w-full pl-6 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-trigestion-500 font-semibold">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 ml-auto">
+                            <button type="submit" class="px-4 py-2 bg-trigestion-500 hover:bg-trigestion-600 text-white rounded-xl text-xs font-black shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
+                            @if ($buscar || $filtroCat || $precioMin || $precioMax)
+                            <a href="{{ route('productos.catalogo') }}" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
+                                <i class="fas fa-rotate-left mr-1"></i> Limpiar
+                            </a>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                </form>
 
                 <!-- PRODUCTS GRID -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="catalogoGrid">
@@ -261,8 +301,19 @@
                     @endforeach
 
                     @if ($productos->isEmpty())
-                    <div class="col-span-full py-16 text-center text-slate-400 font-medium">
-                        No hay productos disponibles en esta categoría.
+                    <div class="col-span-full py-20 text-center">
+                        <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4 text-2xl">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4 class="text-base font-extrabold text-slate-700 mb-1">
+                            {{ $mensajeVacio ?? 'No hay productos disponibles.' }}
+                        </h4>
+                        <p class="text-xs text-slate-400 font-medium max-w-sm mx-auto">
+                            Intenta ajustar los términos de búsqueda, la categoría o el rango de precio para encontrar lo que necesitas.
+                        </p>
+                        <a href="{{ route('productos.catalogo') }}" class="inline-flex items-center gap-2 mt-4 px-5 py-2.5 rounded-xl bg-trigestion-500 text-white font-bold text-xs shadow-md hover:bg-trigestion-600 transition-all">
+                            <i class="fas fa-rotate-left"></i> Restablecer Catálogo
+                        </a>
                     </div>
                     @endif
                 </div>

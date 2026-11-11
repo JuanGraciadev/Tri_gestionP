@@ -188,11 +188,33 @@ class ProductoController extends Controller
     public function catalogo(Request $request): View
     {
         $filtroCat = $request->query('cat');
+        $buscar    = trim((string) $request->query('buscar'));
+        $precioMin = $request->query('precio_min');
+        $precioMax = $request->query('precio_max');
 
         $query = Producto::with('categoria')->where('estado', true);
 
+        $categoriaExiste = true;
         if ($filtroCat) {
+            $categoriaExiste = Categoria::where('id_categoria', $filtroCat)->exists();
             $query->where('id_categoria', $filtroCat);
+        }
+
+        if ($buscar !== '') {
+            $query->where(function ($q) use ($buscar) {
+                $q->where('nombre', 'like', "%{$buscar}%");
+                if (is_numeric($buscar)) {
+                    $q->orWhere('id_producto', (int) $buscar);
+                }
+            });
+        }
+
+        if ($precioMin !== null && $precioMin !== '') {
+            $query->where('precio', '>=', (float) $precioMin);
+        }
+
+        if ($precioMax !== null && $precioMax !== '') {
+            $query->where('precio', '<=', (float) $precioMax);
         }
 
         $productos = $query->orderBy('id_producto', 'desc')->get()->map(function ($p) {
@@ -200,9 +222,30 @@ class ProductoController extends Controller
             return $p;
         });
 
+        $mensajeVacio = null;
+        if ($productos->isEmpty()) {
+            if ($filtroCat && !$categoriaExiste) {
+                $mensajeVacio = 'La categoría ingresada no existe';
+            } elseif ($buscar !== '') {
+                $mensajeVacio = 'El producto ingresado no existe';
+            } elseif ($filtroCat) {
+                $mensajeVacio = 'La categoría ingresada no existe';
+            } else {
+                $mensajeVacio = 'No hay productos disponibles.';
+            }
+        }
+
         $categorias = Categoria::where('estado', true)->get();
 
-        return view('productos.catalogo', compact('productos', 'categorias', 'filtroCat'));
+        return view('productos.catalogo', compact(
+            'productos',
+            'categorias',
+            'filtroCat',
+            'buscar',
+            'precioMin',
+            'precioMax',
+            'mensajeVacio'
+        ));
     }
 
     /**

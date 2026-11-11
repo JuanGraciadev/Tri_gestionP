@@ -379,6 +379,60 @@
                         </div>
                     </div>
 
+                    <!-- TABLA DISPONIBILIDAD POR CATEGORÍA (HU-003, RF 7.13) -->
+                    <div class="glass-card rounded-[2.5rem] p-8 border border-white/80 shadow-sm">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                            <div>
+                                <h3 class="text-lg font-black text-slate-800">Disponibilidad por Categoría</h3>
+                                <p class="text-xs font-semibold text-slate-400">Resumen consolidado del stock disponible clasificado por categorías</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-50/80 text-slate-500 uppercase text-[11px] font-black tracking-widest border-b border-slate-200">
+                                    <tr>
+                                        <th class="px-6 py-4">Categoría</th>
+                                        <th class="px-6 py-4 text-center">Variedad de Productos</th>
+                                        <th class="px-6 py-4 text-center">Stock Total</th>
+                                        <th class="px-6 py-4 text-center">Normal</th>
+                                        <th class="px-6 py-4 text-center">Bajo Stock</th>
+                                        <th class="px-6 py-4 text-center">Agotados</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-sm">
+                                    @forelse ($disponibilidadCategorias as $disp)
+                                    <tr class="hover:bg-slate-50/50 transition-colors">
+                                        <td class="px-6 py-4 font-black text-slate-800">{{ $disp['categoria'] }}</td>
+                                        <td class="px-6 py-4 text-center font-bold text-slate-600">{{ $disp['total_productos'] }}</td>
+                                        <td class="px-6 py-4 text-center font-black font-mono text-base text-trigestion-600">{{ $disp['stock_total'] }}</td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                                                {{ $disp['disponibles'] }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
+                                                {{ $disp['bajo_stock'] }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-700">
+                                                {{ $disp['agotados'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-10 text-center text-slate-400 font-medium">
+                                            Sin datos de categorías disponibles.
+                                        </td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
 
             </main>

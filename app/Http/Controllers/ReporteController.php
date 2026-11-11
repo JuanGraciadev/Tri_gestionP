@@ -38,6 +38,7 @@ class ReporteController extends Controller
         $topProductos     = $this->reportService->getTopProductos($start, $end, 10);
         $ventasCategoria  = $this->reportService->getVentasPorCategoria($start, $end);
         $estadoInventario = $this->reportService->getEstadoInventario();
+        $disponibilidadCategorias = $this->reportService->getDisponibilidadPorCategoria();
         $produccion       = $this->reportService->getReporteProduccion();
         $lotes            = $this->reportService->getReporteLotes();
 
@@ -50,6 +51,7 @@ class ReporteController extends Controller
             'topProductos',
             'ventasCategoria',
             'estadoInventario',
+            'disponibilidadCategorias',
             'produccion',
             'lotes'
         ));
