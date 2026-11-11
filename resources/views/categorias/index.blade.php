@@ -352,12 +352,15 @@
                                         </button>
 
                                         <!-- Toggle Status -->
-                                        <a href="{{ route('categorias.toggleEstado', $c->id_categoria) }}"
-                                            class="w-10 h-10 rounded-2xl bg-slate-50 border-2 border-slate-100 transition-all flex items-center justify-center shrink-0
-                                            {{ $activa ? 'text-slate-400 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200' : 'text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200' }}"
-                                            title="{{ $activa ? 'Inhabilitar' : 'Activar' }}">
-                                            <i class="fas {{ $activa ? 'fa-ban' : 'fa-check-circle' }} text-xs"></i>
-                                        </a>
+                                        <form method="POST" action="{{ route('categorias.toggleEstado', $c->id_categoria) }}" class="inline">
+                                            @csrf
+                                            <button type="submit"
+                                                class="w-10 h-10 rounded-2xl bg-slate-50 border-2 border-slate-100 transition-all flex items-center justify-center shrink-0 cursor-pointer
+                                                {{ $activa ? 'text-slate-400 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200' : 'text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200' }}"
+                                                title="{{ $activa ? 'Inhabilitar' : 'Activar' }}">
+                                                <i class="fas {{ $activa ? 'fa-ban' : 'fa-check-circle' }} text-xs"></i>
+                                            </button>
+                                        </form>
 
                                         <!-- Delete Category -->
                                         <form action="{{ route('categorias.destroy', $c->id_categoria) }}" method="POST" class="inline" id="deleteForm{{ $c->id_categoria }}">

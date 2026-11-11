@@ -226,7 +226,7 @@
                                             class="w-full block text-center py-3.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600 font-bold hover:bg-emerald-500 hover:text-white hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-200 transition-all transform active:scale-95 text-[13px] cursor-pointer">
                                             <i class="fas fa-flag-checkered mr-1.5"></i> Finalizar Producción
                                         </button>
-                                        <form id="finalizarForm{{ $prod->id_produccion }}" action="{{ route('produccion.finalizar', $prod->id_produccion) }}" method="GET" class="hidden"></form>
+                                        <form id="finalizarForm{{ $prod->id_produccion }}" action="{{ route('produccion.finalizar', $prod->id_produccion) }}" method="POST" class="hidden">@csrf</form>
                                     @else
                                         <button disabled class="w-full block text-center py-3.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-bold cursor-not-allowed text-[13px]">
                                             <i class="fas fa-check-double mr-1.5"></i> Lote Completado

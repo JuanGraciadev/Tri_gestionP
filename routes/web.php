@@ -45,7 +45,7 @@ Route::middleware(['auth', 'role:1'])->group(function () {
         Route::get('/dashboard', [AdminUsuarioController::class, 'index'])->name('admin.dashboard');
         Route::post('/usuarios', [AdminUsuarioController::class, 'store'])->name('admin.usuarios.store');
         Route::put('/usuarios/{usuario}', [AdminUsuarioController::class, 'update'])->name('admin.usuarios.update');
-        Route::get('/usuarios/{usuario}/toggle-estado', [AdminUsuarioController::class, 'toggleEstado'])->name('admin.usuarios.toggleEstado');
+        Route::post('/usuarios/{usuario}/toggle-estado', [AdminUsuarioController::class, 'toggleEstado'])->name('admin.usuarios.toggleEstado');
     });
 
     // Categorías (Admin)
@@ -53,7 +53,7 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     Route::post('/categorias', [CategoriaController::class, 'store'])->name('categorias.store');
     Route::put('/categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
     Route::delete('/categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');
-    Route::get('/categorias/{categoria}/toggle-estado', [CategoriaController::class, 'toggleEstado'])->name('categorias.toggleEstado');
+    Route::post('/categorias/{categoria}/toggle-estado', [CategoriaController::class, 'toggleEstado'])->name('categorias.toggleEstado');
     Route::post('/categorias/agregar-producto', [CategoriaController::class, 'agregarProducto'])->name('categorias.agregarProducto');
 
     // Productos Admin Management
@@ -61,7 +61,7 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
     Route::put('/productos/{producto}', [ProductoController::class, 'update'])->name('productos.update');
     Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
-    Route::get('/productos/{producto}/toggle-estado', [ProductoController::class, 'toggleEstado'])->name('productos.toggleEstado');
+    Route::post('/productos/{producto}/toggle-estado', [ProductoController::class, 'toggleEstado'])->name('productos.toggleEstado');
 
     // Ventas Admin Management
     Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
@@ -84,7 +84,7 @@ Route::middleware(['auth', 'role:2'])->group(function () {
     // Producción (solo trabajador)
     Route::get('/produccion', [ProduccionController::class, 'index'])->name('produccion.index');
     Route::post('/produccion', [ProduccionController::class, 'store'])->name('produccion.store');
-    Route::get('/produccion/{id}/finalizar', [ProduccionController::class, 'finalizar'])->name('produccion.finalizar');
+    Route::post('/produccion/{id}/finalizar', [ProduccionController::class, 'finalizar'])->name('produccion.finalizar');
 });
 
 // ── ROLE 1 & 2: Operaciones compartidas ──────────────────────
@@ -125,7 +125,6 @@ Route::middleware(['auth', 'role:3'])->group(function () {
     Route::post('/carrito/actualizar', [VentaController::class, 'actualizarCarrito'])->name('carrito.actualizar');
     Route::post('/carrito/eliminar', [VentaController::class, 'eliminarDelCarrito'])->name('carrito.eliminar');
     Route::post('/carrito/finalizar', [VentaController::class, 'finalizarCompra'])->name('carrito.finalizar');
-    route::post("carritot");
 });
 
 // ── API: Materias Primas (Admin & Trabajador) ──────────────────
@@ -136,7 +135,7 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
     Route::delete('/api/materias-primas/{materiaPrima}', [MateriaPrimaController::class, 'destroy']);
     Route::post('/api/materias-primas/entrada', [MateriaPrimaController::class, 'registrarEntrada']);
     Route::get('/api/materias-primas/alertas', [MateriaPrimaController::class, 'alertas']);
-    Route::get('/api/materias-primas/{materiaPrima}/toggle-estado', [MateriaPrimaController::class, 'toggleEstado']);
+    Route::post('/api/materias-primas/{materiaPrima}/toggle-estado', [MateriaPrimaController::class, 'toggleEstado']);
 
     // Presentaciones (Pacas)
     Route::get('/api/presentaciones', [PresentacionProductoController::class, 'index']);

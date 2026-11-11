@@ -313,13 +313,16 @@
                                         </span>
                                     </td>
                                     <td class="py-4 px-4">
-                                        <a href="{{ route('admin.usuarios.toggleEstado', $u->id_usuario) }}"
-                                           class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border
-                                           {{ $estado ? 'bg-emerald-50 text-emerald-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 border-emerald-200' : 'bg-rose-50 text-rose-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 border-rose-200' }}">
-                                            <span class="w-2 h-2 rounded-full {{ $estado ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
-                                            <span>{{ $estado ? 'Habilitado' : 'Inhabilitado' }}</span>
-                                            <i class="fas {{ $estado ? 'fa-toggle-on text-emerald-600' : 'fa-toggle-off text-rose-400' }} text-sm ml-1"></i>
-                                        </a>
+                                        <form method="POST" action="{{ route('admin.usuarios.toggleEstado', $u->id_usuario) }}" class="inline">
+                                            @csrf
+                                            <button type="submit"
+                                               class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-sm border cursor-pointer
+                                               {{ $estado ? 'bg-emerald-50 text-emerald-700 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 border-emerald-200' : 'bg-rose-50 text-rose-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 border-rose-200' }}">
+                                                <span class="w-2 h-2 rounded-full {{ $estado ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500' }}"></span>
+                                                <span>{{ $estado ? 'Habilitado' : 'Inhabilitado' }}</span>
+                                                <i class="fas {{ $estado ? 'fa-toggle-on text-emerald-600' : 'fa-toggle-off text-rose-400' }} text-sm ml-1"></i>
+                                            </button>
+                                        </form>
                                     </td>
                                     <td class="py-4 px-4 text-right">
                                         <div class="inline-flex items-center gap-1.5">
