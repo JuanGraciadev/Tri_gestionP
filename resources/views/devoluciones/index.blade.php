@@ -1,73 +1,10 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Control de Retornables - TRIGESTION</title>
+@extends('layouts.panel')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+@section('title', 'Control de Retornables')
+@section('subtitle', 'Supervisa envases entregados, en consumo con clientes y registra devoluciones a bodega')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans:   ['"Plus Jakarta Sans"', 'sans-serif'],
-                        outfit: ['"Outfit"', 'sans-serif'],
-                    },
-                    colors: {
-                        trigestion: {
-                            50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',
-                            400:'#38bdf8',500:'#009ee3',600:'#0081c2',700:'#00669e',
-                            800:'#005282',900:'#082f49',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <style>
-        body { font-family:'Outfit','Plus Jakarta Sans',sans-serif; }
-        .bg-blobs { position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#f8fafc; }
-        .blob-1,.blob-2,.blob-3 { position:absolute;filter:blur(80px);border-radius:50%;opacity:.45;animation:float 20s infinite alternate ease-in-out; }
-        .blob-1 { top:-10%;left:-10%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(56,189,248,.18) 0,rgba(255,255,255,0) 70%); }
-        .blob-2 { bottom:-20%;right:-10%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(99,102,241,.12) 0,rgba(255,255,255,0) 70%);animation-delay:-5s; }
-        .blob-3 { top:40%;left:30%;width:40vw;height:40vw;background:radial-gradient(circle,rgba(16,185,129,.08) 0,rgba(255,255,255,0) 70%);animation-delay:-10s; }
-        @keyframes float { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(5%,5%) scale(1.1)} }
-        .glass-card,.glass-panel { background:rgba(255,255,255,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.55);box-shadow:0 10px 30px -10px rgba(0,0,0,.06); }
-        ::-webkit-scrollbar { width:8px;height:8px; }
-        ::-webkit-scrollbar-track { background:#f1f5f9; }
-        ::-webkit-scrollbar-thumb { background:#cbd5e1;border-radius:4px; }
-        ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
-    </style>
-</head>
-<body class="font-sans antialiased text-slate-800 min-h-screen">
-
-    <div class="bg-blobs"><div class="blob-1"></div><div class="blob-2"></div><div class="blob-3"></div></div>
-
-    <div class="flex min-h-screen relative z-10">
-
-        <!-- SIDEBAR -->
-        @include('partials.sidebar')
-
-        <!-- MAIN -->
-        <div class="flex-1 ml-72 flex flex-col min-w-0">
-
-            <!-- TOPBAR -->
-            @include('partials.topbar', ['title' => 'Control de Retornables', 'subtitle' => 'Supervisa envases entregados, en consumo con clientes y registra devoluciones a bodega'])
-
-            <!-- BODY -->
-            <main class="p-8 space-y-10 flex-1 font-outfit">
-
-                <!-- Alert Flash -->
+@section('content')
+<!-- Alert Flash -->
                 @if (session('alert'))
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
@@ -297,11 +234,7 @@
                     </div>
                 </div>
 
-            </main>
-        </div>
-    </div>
-
-    <!-- MODAL REGISTRAR DEVOLUCIÓN -->
+<!-- MODAL REGISTRAR DEVOLUCIÓN -->
     <div id="modalReturn" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="glass-card rounded-[2.5rem] w-full max-w-lg overflow-hidden border border-white shadow-2xl">
             <div class="p-8 bg-gradient-to-r from-sky-500 to-indigo-600 text-white flex justify-between items-center">
@@ -378,8 +311,10 @@
             </form>
         </div>
     </div>
+@endsection
 
-    <script>
+@push('scripts')
+<script>
         const balancesJS = @json($balances);
 
         document.getElementById('searchBalances')?.addEventListener('input', function() {
@@ -449,5 +384,4 @@
             if (e.target.id === 'modalReturn') closeModalReturn();
         });
     </script>
-</body>
-</html>
+@endpush

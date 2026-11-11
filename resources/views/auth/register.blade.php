@@ -1,122 +1,9 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+@extends('layouts.guest')
 
-    <title>Crear Cuenta - TRIGESTION</title>
+@section('title', 'Crear Cuenta')
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Outfit"', 'sans-serif'],
-                    },
-                    colors: {
-                        trigestion: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#00669e',
-                            800: '#005282',
-                            900: '#082f49',
-                        }
-                    },
-                    animation: {
-                        'fade': 'fadeIn 0.6s ease-out',
-                        'slide': 'slideIn 0.5s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'scale(0.98)' },
-                            '100%': { opacity: '1', transform: 'scale(1)' },
-                        },
-                        slideIn: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Outfit', sans-serif; }
-
-        /* Glassmorphism */
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-        .glass-input {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(8px);
-        }
-
-        /* Water gradient */
-        .water-gradient {
-            background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
-        }
-
-        /* Background Blobs */
-        .bg-blobs {
-            position: fixed;
-            inset: 0;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .blob-1 {
-            position: absolute;
-            top: -10%;
-            right: -5%;
-            width: 500px;
-            height: 500px;
-            border-radius: 9999px;
-            background: rgba(56, 189, 248, 0.08);
-            filter: blur(80px);
-        }
-        .blob-2 {
-            position: absolute;
-            bottom: -10%;
-            left: 10%;
-            width: 450px;
-            height: 450px;
-            border-radius: 9999px;
-            background: rgba(79, 70, 229, 0.05);
-            filter: blur(90px);
-        }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.05); }
-        ::-webkit-scrollbar-thumb { background: rgba(14, 165, 233, 0.2); border-radius: 10px; }
-    </style>
-</head>
-<body class="font-sans bg-slate-50 min-h-screen flex items-center justify-center p-3 sm:p-6 relative overflow-hidden">
-
-    <!-- Background Ambience Blobs -->
-    <div class="bg-blobs">
-        <div class="blob-1"></div>
-        <div class="blob-2"></div>
-    </div>
+@section('content')
+    <div class="w-full flex flex-col items-center justify-center">
 
     <!-- Success Modal -->
     @if (session('success'))
@@ -349,6 +236,5 @@
 
         </div>
     </div>
-
-</body>
-</html>
+    </div>
+@endsection

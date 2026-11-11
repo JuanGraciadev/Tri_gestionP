@@ -1,67 +1,19 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Catálogo de Productos - TRIGESTION</title>
+@extends('layouts.panel')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+@section('title', 'Catálogo de Productos')
+@section('subtitle', 'Explora nuestros productos y realiza tus pedidos')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                        outfit: ['"Outfit"', 'sans-serif'],
-                    },
-                    colors: {
-                        trigestion: {
-                            50: '#f0f9ff',100: '#e0f2fe',200: '#bae6fd',300: '#7dd3fc',
-                            400: '#38bdf8',500: '#009ee3',600: '#0081c2',700: '#00669e',
-                            800: '#005282',900: '#082f49',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@section('topbar-actions')
+<button onclick="openCart()"
+   class="relative flex items-center gap-2.5 bg-sky-500 hover:bg-sky-600 text-white px-5 py-2.5 rounded-2xl font-bold text-sm transition-all shadow-md shadow-sky-500/20 cursor-pointer">
+    <i class="fas fa-cart-shopping"></i>
+    <span class="hidden sm:inline">Carrito</span>
+    <span id="cartBadge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">0</span>
+</button>
+@endsection
 
-    <style>
-        body { font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif; }
-        .bg-blobs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background-color: #f8fafc; }
-        .blob-1, .blob-2, .blob-3 { position: absolute; filter: blur(80px); border-radius: 50%; opacity: 0.5; animation: float 20s infinite alternate ease-in-out; }
-        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(56,189,248,0.2) 0%, rgba(255,255,255,0) 70%); }
-        .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(255,255,255,0) 70%); animation-delay: -5s; }
-        .blob-3 { top: 40%; left: 30%; width: 40vw; height: 40vw; background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, rgba(255,255,255,0) 70%); animation-delay: -10s; }
-        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(5%, 5%) scale(1.1); } }
-
-        .glass-card, .glass-panel { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05); }
-
-        /* Cart Overlay & Sidebar */
-        .cart-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 40; opacity: 0; visibility: hidden; transition: all 0.4s ease; }
-        .cart-overlay.open { opacity: 1; visibility: visible; }
-        .cart-sidebar { position: fixed; top: 0; right: -100%; width: 90%; max-width: 450px; height: 100vh; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); z-index: 50; box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1); transition: right 0.4s ease; display: flex; flex-direction: column; }
-        .cart-sidebar.open { right: 0; }
-
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
-</head>
-<body class="font-sans antialiased bg-slate-100/90 text-slate-800 min-h-screen">
-
-    <div class="bg-blobs"><div class="blob-1"></div><div class="blob-2"></div><div class="blob-3"></div></div>
-
-    <!-- Cart Overlay -->
+@section('content')
+<!-- Cart Overlay -->
     <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 
     <!-- Cart Sidebar Drawer -->
@@ -98,61 +50,8 @@
         </div>
     </div>
 
-    <div class="flex min-h-screen relative z-10">
 
-        <!-- SIDEBAR -->
-        @include('partials.sidebar')
-
-        <!-- MAIN CONTENT -->
-        <div class="flex-1 ml-72 flex flex-col min-w-0">
-
-            <!-- TOPBAR -->
-            <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20 shadow-sm px-8 py-4 flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">Catálogo de Productos</h1>
-                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Explora nuestros productos y realiza tus pedidos</p>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <!-- Cart trigger button -->
-                    <button onclick="openCart()"
-                       class="relative flex items-center gap-2.5 bg-trigestion-500 hover:bg-trigestion-600 text-white px-5 py-2.5 rounded-2xl font-bold text-sm transition-all shadow-md shadow-trigestion-500/20 cursor-pointer">
-                        <i class="fas fa-cart-shopping"></i>
-                        <span class="hidden sm:inline">Carrito</span>
-                        <span id="carritoCount"
-                              class="w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-sm hidden">
-                            0
-                        </span>
-                    </button>
-
-                    <!-- Profile dropdown -->
-                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                        <button @click="open = !open" type="button" 
-                                class="flex items-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl transition-all shadow-sm cursor-pointer">
-                            <div class="w-9 h-9 rounded-xl bg-trigestion-400 text-slate-950 flex items-center justify-center font-black text-base shadow-md shrink-0">
-                                {{ strtoupper(substr(Auth::user()->nombres ?? Auth::user()->name ?? 'C', 0, 1)) }}
-                            </div>
-                            <p class="text-xs font-extrabold text-slate-900 hidden sm:block truncate max-w-[160px]">
-                                {{ Auth::user()->nombres ?? Auth::user()->name }}
-                            </p>
-                            <svg class="w-4 h-4 text-slate-400 shrink-0" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-                        <div x-show="open" x-transition class="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50" style="display:none">
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold text-red-600 bg-red-50/60 hover:bg-red-100/80 border border-red-200/50 transition-all">
-                                    <i class="fas fa-right-from-bracket"></i> Cerrar Sesión
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- BODY -->
-            <main class="p-8 space-y-8 flex-1 font-outfit">
-
-                <!-- HERO BANNER -->
+<!-- HERO BANNER -->
                 <div class="bg-gradient-to-r from-trigestion-500 via-trigestion-600 to-sky-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-trigestion-500/20">
                     <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
@@ -317,12 +216,10 @@
                     </div>
                     @endif
                 </div>
+@endsection
 
-            </main>
-        </div>
-    </div>
-
-    <script>
+@push('scripts')
+<script>
         const CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         // Search
@@ -494,5 +391,4 @@
                 });
         });
     </script>
-</body>
-</html>
+@endpush

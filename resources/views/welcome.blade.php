@@ -1,73 +1,8 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TRIGESTION &mdash; Agua Purificada Premium</title>
+@extends('layouts.public')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+@section('title', 'Agua Purificada Premium')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['"Outfit"', 'sans-serif'] },
-                    colors: {
-                        trigestion: {
-                            50:'#f0f9ff', 100:'#e0f2fe', 200:'#bae6fd', 300:'#7dd3fc',
-                            400:'#38bdf8', 500:'#0ea5e9', 600:'#0284c7', 700:'#00669e',
-                            800:'#005282', 900:'#082f49',
-                        }
-                    },
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Outfit', sans-serif; }
-
-        /* Reveal on scroll */
-        .reveal-el { opacity: 0; transform: translateY(40px); transition: opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1); }
-        .reveal-active { opacity: 1 !important; transform: translateY(0) !important; }
-
-        /* Floating animation */
-        @keyframes floating { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
-        .animate-float { animation: floating 5s ease-in-out infinite; }
-
-        /* Blob animation */
-        @keyframes blob { 0% { transform: translate(0px,0px) scale(1); } 33% { transform: translate(30px,-50px) scale(1.1); } 66% { transform: translate(-20px,20px) scale(0.9); } 100% { transform: translate(0px,0px) scale(1); } }
-        .animate-blob { animation: blob 8s infinite alternate; }
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
-
-        /* Glass effects */
-        .water-glass { background: rgba(255,255,255,0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 40px -10px rgba(14,165,233,0.15); }
-        .glass-card-index { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); }
-        .premium-shadow-index { box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); }
-
-        /* Text gradient */
-        .text-water-gradient { background: linear-gradient(to right, #0ea5e9, #0284c7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-
-        /* Background gradient */
-        .bg-water-gradient { background: linear-gradient(135deg,#0ea5e9 0%,#3b82f6 100%); }
-
-        /* Button shine */
-        .btn-shine { position: relative; overflow: hidden; }
-        .btn-shine::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%); transform: rotate(30deg) translateY(-100%); transition: all 0.6s ease; }
-        .btn-shine:hover::after { transform: rotate(30deg) translateY(100%); }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
-    </style>
-</head>
-
-<body class="font-sans bg-white text-slate-900 antialiased">
-
+@section('content')
     <div class="relative overflow-x-hidden" style="font-family: 'Outfit', sans-serif; background-color: #f0f9ff; color: #0f172a;">
 
         @php $navScrolled = false; @endphp
@@ -397,7 +332,9 @@
         </footer>
 
     </div>
+@endsection
 
+@push('scripts')
     <!-- JS for navbar scroll, mobile menu, and reveal animations -->
     <script>
         // Navbar scroll effect
@@ -440,6 +377,4 @@
 
         document.querySelectorAll('.reveal-el').forEach((el) => revealObserver.observe(el));
     </script>
-
-</body>
-</html>
+@endpush

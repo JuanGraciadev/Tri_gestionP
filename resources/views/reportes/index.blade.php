@@ -1,98 +1,11 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Reportes Generales e Inteligencia de Negocio - TRIGESTION</title>
+@extends('layouts.panel')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+@section('title', 'Reportes Generales e Inteligencia de Negocio')
+@section('subtitle', 'Métricas completas de rendimiento y estado operacional')
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans:   ['"Plus Jakarta Sans"', 'sans-serif'],
-                        outfit: ['"Outfit"', 'sans-serif'],
-                    },
-                    colors: {
-                        trigestion: {
-                            50:'#f0f9ff',100:'#e0f2fe',200:'#bae6fd',300:'#7dd3fc',
-                            400:'#38bdf8',500:'#009ee3',600:'#0081c2',700:'#00669e',
-                            800:'#005282',900:'#082f49',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- Chart.js & PDF Export Plugins -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <style>
-        body { font-family:'Outfit','Plus Jakarta Sans',sans-serif; }
-        .bg-blobs { position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#f8fafc; }
-        .blob-1,.blob-2,.blob-3 { position:absolute;filter:blur(80px);border-radius:50%;opacity:.45;animation:float 20s infinite alternate ease-in-out; }
-        .blob-1 { top:-10%;left:-10%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(79,70,229,.15) 0,rgba(255,255,255,0) 70%); }
-        .blob-2 { bottom:-20%;right:-10%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(16,185,129,.10) 0,rgba(255,255,255,0) 70%);animation-delay:-5s; }
-        .blob-3 { top:40%;left:30%;width:40vw;height:40vw;background:radial-gradient(circle,rgba(245,158,11,.07) 0,rgba(255,255,255,0) 70%);animation-delay:-10s; }
-        @keyframes float { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(5%,5%) scale(1.1)} }
-
-        .glass-card,.glass-panel { background:rgba(255,255,255,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.6);box-shadow:0 10px 30px -10px rgba(0,0,0,.05); }
-
-        /* Print & PDF styling */
-        @media print {
-            body > *:not(#reporteWrapper) { display: none !important; }
-            #reporteWrapper { display: block !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
-            aside, header, nav, .no-print, button, form { display: none !important; }
-            .glass-card, .glass-panel { background: white !important; backdrop-filter: none !important; box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            .page-break { page-break-after: always; }
-        }
-
-        #pdfOverlay {
-            display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px);
-            z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 1rem;
-        }
-        #pdfOverlay.active { display: flex; }
-        #pdfSpinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2); border-top-color: #38bdf8; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
-</head>
-<body class="font-sans antialiased text-slate-800 min-h-screen">
-
-    <div class="bg-blobs"><div class="blob-1"></div><div class="blob-2"></div><div class="blob-3"></div></div>
-
-    <!-- PDF Loading Overlay -->
-    <div id="pdfOverlay">
-        <div id="pdfSpinner"></div>
-        <p class="text-white font-bold text-base">Generando PDF oficial, por favor espera...</p>
-    </div>
-
-    <div class="flex min-h-screen relative z-10" id="reporteWrapper">
-
-        <!-- SIDEBAR -->
-        @include('partials.sidebar')
-
-        <!-- MAIN -->
-        <div class="flex-1 ml-72 flex flex-col min-w-0">
-
-            <!-- TOPBAR -->
-            @include('partials.topbar', ['title' => 'Reportes Generales e Inteligencia de Negocio', 'subtitle' => 'Métricas completas de rendimiento y estado operacional'])
-
-            <!-- BODY -->
-            <main class="p-8 space-y-8 flex-1 font-outfit" id="reporteContenido">
-
-                <!-- HEADER SECTION & FILTER BAR -->
+@section('content')
+<div id="reporteContenido" class="space-y-8">
+<!-- HEADER SECTION & FILTER BAR -->
                 <div class="glass-card rounded-[2.5rem] border border-slate-100 p-8 flex flex-col xl:flex-row xl:items-center justify-between gap-6 relative overflow-hidden">
                     <div class="absolute -top-10 -right-10 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -440,13 +353,16 @@
                     </div>
 
                 </div>
+</div>
 
-            </main>
-        </div>
-    </div>
+<!-- SCRIPTS DE CONFIGURACIÓN DE GRÁFICOS Y PDF -->
+@endsection
 
-    <!-- SCRIPTS DE CONFIGURACIÓN DE GRÁFICOS Y PDF -->
-    <script>
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
         function toggleCustomDates() {
             const select = document.getElementById('filtroSelect');
             const wrapper = document.getElementById('customDatesWrapper');
@@ -609,5 +525,4 @@
             }
         }
     </script>
-</body>
-</html>
+@endpush

@@ -1,30 +1,36 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
+    @include('layouts.partials.head')
+</head>
+<body class="font-sans antialiased text-slate-800 min-h-screen bg-slate-50 relative flex items-center justify-center p-4 selection:bg-sky-500 selection:text-white">
+    {{-- Fondo decorativo (blobs) --}}
+    <div class="bg-blobs" aria-hidden="true">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+        <div class="blob-3"></div>
+    </div>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+    @hasSection('content')
+        <div class="relative z-10 w-full flex items-center justify-center">
+            @yield('content')
+        </div>
+    @else
+        <div class="relative z-10 w-full sm:max-w-md bg-white/85 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-white/60">
+            <div class="flex justify-center mb-6">
+                <a href="{{ url('/') }}" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center text-white text-lg shadow-md group-hover:scale-105 transition-transform">
+                        <i class="fas fa-droplet"></i>
+                    </div>
+                    <span class="text-xl font-black text-slate-800 tracking-tight">TRIGESTION</span>
                 </a>
             </div>
-
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
+            {{ $slot ?? '' }}
         </div>
-    </body>
+    @endif
+
+    @include('layouts.partials.alertas')
+
+    @stack('scripts')
+</body>
 </html>

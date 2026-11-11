@@ -1,61 +1,17 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Detalle Pedido #{{ $venta->id_venta }} - TRIGESTION</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config={theme:{extend:{fontFamily:{sans:['"Plus Jakarta Sans"','sans-serif'],outfit:['"Outfit"','sans-serif']},colors:{trigestion:{50:'#f0f9ff',100:'#e0f2fe',500:'#009ee3',600:'#0081c2',800:'#005282',900:'#082f49'}}}}}</script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        body{font-family:'Outfit','Plus Jakarta Sans',sans-serif;}
-        .bg-blobs{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#f8fafc;}
-        .blob-1{position:absolute;filter:blur(80px);border-radius:50%;opacity:.3;animation:float 20s infinite alternate ease-in-out;top:-10%;left:-10%;width:50vw;height:50vw;background:radial-gradient(circle,rgba(14,165,233,.18) 0,rgba(255,255,255,0) 70%);}
-        @keyframes float{0%{transform:translate(0,0) scale(1)}100%{transform:translate(5%,5%) scale(1.1)}}
-        .glass-card{background:rgba(255,255,255,.8);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.6);box-shadow:0 10px 30px -10px rgba(0,0,0,.07);}
-        ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:#f1f5f9}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
-    </style>
-</head>
-<body class="font-sans antialiased text-slate-800 min-h-screen">
-<div class="bg-blobs"><div class="blob-1"></div></div>
+@extends('layouts.panel')
 
-<div class="flex min-h-screen relative z-10">
-    @include('partials.sidebar')
+@section('title', 'Detalle del Pedido #{{ $venta->id_venta }}')
+@section('subtitle', 'Información y comprobante del pedido')
 
-    <div class="flex-1 ml-72 flex flex-col min-w-0">
-        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20 shadow-sm px-8 py-4 flex items-center justify-between">
-            <div>
-                <div class="flex items-center gap-2 text-sm text-slate-400 font-bold mb-1">
-                    <a href="{{ route('ventas.index') }}" class="hover:text-trigestion-500 transition-colors"><i class="fas fa-arrow-left mr-1"></i> Ventas</a>
-                    <span>/</span>
-                    <span class="text-slate-700">Pedido #{{ $venta->id_venta }}</span>
-                </div>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Detalle del Pedido #{{ $venta->id_venta }}</h1>
-            </div>
-            <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                <button @click="open = !open" class="flex items-center gap-3 bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl transition-all shadow-sm cursor-pointer">
-                    <div class="w-9 h-9 rounded-xl bg-trigestion-500 text-white flex items-center justify-center font-black text-base shadow-md shrink-0">{{ strtoupper(substr(Auth::user()->nombres ?? Auth::user()->name ?? 'A', 0, 1)) }}</div>
-                    <p class="text-xs font-extrabold text-slate-900 hidden sm:block truncate max-w-[160px]">{{ Auth::user()->nombres ?? Auth::user()->name }}</p>
-                    <svg class="w-4 h-4 text-slate-400 shrink-0" :class="{'rotate-180':open}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="open" x-transition class="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50" style="display:none">
-                    <form method="POST" action="{{ route('logout') }}">@csrf
-                        <button type="submit" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-extrabold text-red-600 bg-red-50/60 hover:bg-red-100/80 border border-red-200/50 transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                            Cerrar Sesión
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </header>
+@section('content')
+<div class="mb-4">
+    <a href="{{ route('ventas.index') }}" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-sky-600 transition-colors">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver a Ventas</span>
+    </a>
+</div>
 
-        <main class="p-8 flex-1 font-outfit">
-            @php
+@php
                 $estadoColor = match($venta->estado) {
                     'Completada' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                     'Cancelada'  => 'bg-rose-50 text-rose-700 border-rose-200',
@@ -179,8 +135,4 @@
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
-</div>
-</body>
-</html>
+@endsection
