@@ -26,7 +26,7 @@ class LoteController extends Controller
             ->orderBy('id_lote', 'desc')
             ->paginate(15);
 
-        return view('lotes.index', compact('lotes'));
+        return view('inventario.lotes', compact('lotes'));
     }
 
     /**
@@ -140,7 +140,7 @@ class LoteController extends Controller
     {
         $detalles = $lote->detalles()->orderBy('id_detalles', 'desc')->get();
 
-        return view('lotes.detalles', compact('lote', 'detalles'));
+        return view('inventario.lotes-detalles', compact('lote', 'detalles'));
     }
 
     /**

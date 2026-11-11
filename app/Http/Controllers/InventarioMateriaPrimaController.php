@@ -29,7 +29,7 @@ class InventarioMateriaPrimaController extends Controller
         $totalRegistros = InventarioMateriaPrima::count();
         $conStock       = InventarioMateriaPrima::where('ingreso', '>', 0)->count();
 
-        return view('inventario_mp.index', compact(
+        return view('inventario.materia-prima', compact(
             'inventario',
             'totalIngreso',
             'totalRegistros',

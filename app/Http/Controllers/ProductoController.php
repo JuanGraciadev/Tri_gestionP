@@ -28,7 +28,7 @@ class ProductoController extends Controller
         $inactivos      = $totalProductos - $activos;
         $totalCategorias = $categorias->count();
 
-        return view('productos.index', compact(
+        return view('catalogo.productos', compact(
             'productos',
             'categorias',
             'totalProductos',
@@ -237,7 +237,7 @@ class ProductoController extends Controller
 
         $categorias = Categoria::where('estado', true)->get();
 
-        return view('productos.catalogo', compact(
+        return view('catalogo.catalogo-cliente', compact(
             'productos',
             'categorias',
             'filtroCat',

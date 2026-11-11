@@ -29,7 +29,7 @@ class InventarioProductosController extends Controller
         $totalEntradas     = InventarioProductos::count();
         $productosConStock = $stockPorProducto->count();
 
-        return view('inventario_productos.index', compact(
+        return view('inventario.productos', compact(
             'inventario',
             'stockPorProducto',
             'totalUnidades',

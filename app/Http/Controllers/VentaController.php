@@ -294,7 +294,7 @@ class VentaController extends Controller
 
         $clientes = User::where('id_rol', 3)->orderBy('nombres')->get();
 
-        return view('ventas.index', compact('ventas', 'stats', 'productosActivos', 'clientes'));
+        return view('ventas.pedidos', compact('ventas', 'stats', 'productosActivos', 'clientes'));
     }
 
     public function cambiarEstado(Request $request): RedirectResponse

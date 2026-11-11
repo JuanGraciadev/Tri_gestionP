@@ -25,7 +25,7 @@ class CategoriaController extends Controller
         $catsActivas = Categoria::where('estado', true)->count();
         $totalProds  = Categoria::withCount('productos')->get()->sum('productos_count');
 
-        return view('categorias.index', compact('categorias', 'totalCats', 'catsActivas', 'totalProds'));
+        return view('catalogo.categorias', compact('categorias', 'totalCats', 'catsActivas', 'totalProds'));
     }
 
     /**

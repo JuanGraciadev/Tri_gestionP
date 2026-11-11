@@ -18,7 +18,7 @@ use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('public.welcome');
 });
 
 // Smart redirector: sends authenticated user to their role-specific dashboard
@@ -80,7 +80,7 @@ Route::middleware(['auth', 'role:1'])->group(function () {
 Route::middleware(['auth', 'role:2'])->group(function () {
     Route::prefix('trabajador')->group(function () {
         Route::get('/dashboard', function () {
-            return view('trabajador.trabajador');
+            return view('dashboards.trabajador');
         })->name('trabajador.dashboard');
     });
 
@@ -115,7 +115,7 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
 Route::middleware(['auth', 'role:3'])->group(function () {
     Route::prefix('cliente')->group(function () {
         Route::get('/dashboard', function () {
-            return view('cliente.cliente');
+            return view('dashboards.cliente');
         })->name('cliente.dashboard');
     });
 

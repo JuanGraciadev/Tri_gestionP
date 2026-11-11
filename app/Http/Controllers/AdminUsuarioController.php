@@ -20,7 +20,7 @@ class AdminUsuarioController extends Controller
         $usuarios = User::with('rol')->orderBy('id_usuario', 'desc')->paginate(15);
         $roles    = Rol::all();
 
-        return view('admin.admin', compact('usuarios', 'roles'));
+        return view('dashboards.admin', compact('usuarios', 'roles'));
     }
 
     /**
