@@ -20,41 +20,23 @@
                 </script>
                 @endif
 
-                <!-- HEADER BANNER -->
-                <div class="glass-card rounded-[2.5rem] border border-white overflow-hidden">
-                    <div class="p-8 md:p-10 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-slate-50 to-white relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-                        <div class="relative z-10">
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm mb-3">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Stock de Insumos y Envases</span>
-                            </div>
-                            <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-800 tracking-tight">
-                                Inventario de <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600">Materia Prima</span>
-                            </h2>
-                            <p class="text-slate-500 mt-2 font-medium">Registros de ingreso generados al añadir detalles a los lotes. El stock se descuenta al finalizar una producción.</p>
-                        </div>
-                        <a href="{{ route('lotes.index') }}"
-                           class="relative z-10 inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-[0_10px_25px_-5px_rgba(16,185,129,.4)] text-white px-8 py-4 rounded-[1.25rem] font-bold transition-all transform hover:-translate-y-1 tracking-wide cursor-pointer w-full md:w-auto justify-center">
-                            <i class="fas fa-box-open"></i> Gestionar Lotes
-                        </a>
-                    </div>
-
-                    <!-- KPI STATS -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-px bg-slate-100 border-b border-slate-100">
-                        <div class="bg-white/80 p-6 text-center">
-                            <div class="text-3xl font-black text-emerald-500">{{ $totalRegistros }}</div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Registros Totales</div>
-                        </div>
-                        <div class="bg-white/80 p-6 text-center">
-                            <div class="text-3xl font-black text-trigestion-500">{{ number_format($totalIngreso) }}</div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Unidades Disponibles</div>
-                        </div>
-                        <div class="bg-white/80 p-6 text-center">
-                            <div class="text-3xl font-black text-amber-500">{{ $conStock }}</div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Registros con Stock</div>
-                        </div>
-                    </div>
+                <x-page-header
+                    tag="Stock de Insumos y Envases"
+                    title="Inventario de"
+                    highlight="Materia Prima"
+                    subtitle="Registros de ingreso generados al añadir detalles a los lotes. El stock se descuenta al finalizar una producción."
+                    color="emerald">
+                    <x-slot:action>
+                        <x-btn href="{{ route('lotes.index') }}" variant="emerald" icon="fas fa-box-open" size="lg">
+                            Gestionar Lotes
+                        </x-btn>
+                    </x-slot:action>
+                    <x-slot:stats>
+                        <x-stat-card label="Registros Totales" :value="$totalRegistros" color="emerald" />
+                        <x-stat-card label="Unidades Disponibles" :value="number_format($totalIngreso)" color="sky" />
+                        <x-stat-card label="Registros con Stock" :value="$conStock" color="amber" />
+                    </x-slot:stats>
+                </x-page-header>
 
                     <!-- SEARCH BAR -->
                     <div class="p-6 border-b border-slate-100 bg-slate-50/50">

@@ -34,37 +34,18 @@
                     </div>
                 </div>
 
-                <!-- HEADER BANNER -->
-                <div class="glass-card rounded-[2.5rem] border border-white overflow-hidden">
-                    <div class="p-8 md:p-10 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-slate-50 to-white relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-                        <div class="relative z-10">
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm mb-3">
-                                <span class="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></span>
-                                <span class="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Stock de Productos Terminados</span>
-                            </div>
-                            <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-800 tracking-tight">
-                                Inventario de <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-600">Productos</span>
-                            </h2>
-                            <p class="text-slate-500 mt-2 font-medium">Registro de entradas al inventario generadas al finalizar producciones.</p>
-                        </div>
-                    </div>
-
-                    <!-- KPI STATS -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-px bg-slate-100 border-b border-slate-100">
-                        <div class="bg-white/80 p-6 text-center">
-                            <div class="text-3xl font-black text-violet-500">{{ $totalEntradas }}</div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Entradas Registradas</div>
-                        </div>
-                        <div class="bg-white/80 p-6 text-center">
-                            <div class="text-3xl font-black text-emerald-500">{{ number_format($totalUnidades) }}</div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Total Unidades en Stock</div>
-                        </div>
-                        <div class="bg-white/80 p-6 text-center">
-                            <div class="text-3xl font-black text-trigestion-500">{{ $productosConStock }}</div>
-                            <div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Productos con Stock</div>
-                        </div>
-                    </div>
+                <x-page-header
+                    tag="Stock de Productos Terminados"
+                    title="Inventario de"
+                    highlight="Productos"
+                    subtitle="Registro de entradas al inventario generadas al finalizar producciones."
+                    color="indigo">
+                    <x-slot:stats>
+                        <x-stat-card label="Entradas Registradas" :value="$totalEntradas" color="indigo" />
+                        <x-stat-card label="Unidades Producidas" :value="number_format($totalUnidades)" color="emerald" />
+                        <x-stat-card label="Productos Distintos" :value="$productosDistintos" color="amber" />
+                    </x-slot:stats>
+                </x-page-header>
 
                     <!-- SEARCH BAR -->
                     <div class="p-6 border-b border-slate-100 bg-slate-50/50">

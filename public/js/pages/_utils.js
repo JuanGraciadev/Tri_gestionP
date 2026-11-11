@@ -64,3 +64,4 @@ window.APP.toast = function (title, icon = 'success') {
     });
     return Toast.fire({ icon, title });
 };
+

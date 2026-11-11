@@ -104,13 +104,13 @@
                     </div>
 
                     @if ($ultimosPedidos->isEmpty())
-                    <div class="py-12 text-center text-slate-400">
-                        <div class="w-16 h-16 rounded-full bg-sky-50 text-sky-400 flex items-center justify-center text-2xl mx-auto mb-3">
-                            <i class="fas fa-bag-shopping"></i>
-                        </div>
-                        <p class="font-bold text-slate-700">A&uacute;n no has realizado pedidos</p>
-                        <p class="text-xs text-slate-400 mt-1">Visita el cat&aacute;logo para solicitar tus productos de agua pura.</p>
-                    </div>
+                    <x-empty-state
+                        icon="fas fa-bag-shopping"
+                        title="Aún no has realizado pedidos"
+                        message="Visita el catálogo para solicitar tus productos de agua pura."
+                        actionLabel="Ir al Catálogo"
+                        actionUrl="{{ route('productos.catalogo') }}"
+                        actionIcon="fas fa-store" />
                     @else
                     <div class="divide-y divide-slate-100">
                         @foreach ($ultimosPedidos as $p)
