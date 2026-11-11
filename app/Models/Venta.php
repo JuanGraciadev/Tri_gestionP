@@ -119,4 +119,27 @@ class Venta extends Model
     {
         return round((float) $this->total, 2);
     }
+
+    // ── Accessors ─────────────────────────────────────────────────────────────
+
+    /**
+     * Nombre del cliente a través de la relación cliente → usuario.
+     */
+    public function getClienteNombreAttribute(): ?string
+    {
+        return $this->cliente?->usuario?->nombres
+            ?? $this->cliente?->usuario?->name
+            ?? $this->usuario?->nombres
+            ?? null;
+    }
+
+    /**
+     * Email del cliente a través de la relación cliente → usuario.
+     */
+    public function getClienteEmailAttribute(): ?string
+    {
+        return $this->cliente?->usuario?->email
+            ?? $this->usuario?->email
+            ?? null;
+    }
 }

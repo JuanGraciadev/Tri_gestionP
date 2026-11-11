@@ -32,19 +32,25 @@ class PedidoController extends Controller
             return $p;
         });
 
-        $totalIngresos    = Venta::where('estado', '!=', 'Cancelado')->sum('total');
+        $totalIngresos     = Venta::where('estado', '!=', 'Cancelado')->sum('total');
         $pedidosPendientes = Venta::where('estado', 'Pendiente')->count();
         $pedidosEnProceso  = Venta::where('estado', 'En Proceso')->count();
         $pedidosEntregados = Venta::where('estado', 'Entregado')->count();
+        $pedidosCancelados = Venta::where('estado', 'Cancelado')->count();
+
+        $stats = [
+            'Pendiente'      => $pedidosPendientes,
+            'En Proceso'     => $pedidosEnProceso,
+            'Entregado'      => $pedidosEntregados,
+            'Cancelado'      => $pedidosCancelados,
+            'total_ingresos' => $totalIngresos,
+        ];
 
         return view('ventas.pedidos', compact(
             'ventas',
             'clientes',
             'productos',
-            'totalIngresos',
-            'pedidosPendientes',
-            'pedidosEnProceso',
-            'pedidosEntregados'
+            'stats'
         ));
     }
 

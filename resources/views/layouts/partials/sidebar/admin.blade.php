@@ -55,6 +55,14 @@
                 <span class="flex-1 truncate">Gestión de Lotes</span>
             </a>
 
+            {{-- Producción --}}
+            <a href="{{ route('produccion.index') }}"
+               class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all relative overflow-hidden group
+               {{ request()->routeIs('produccion.*') ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-[0_10px_20px_-10px_rgba(14,165,233,0.5)] font-bold border border-sky-400/50 scale-[1.02] transform' : 'text-slate-400 hover:bg-slate-800/80 hover:text-white border border-transparent font-medium' }}">
+                <i class="fas fa-industry text-base {{ request()->routeIs('produccion.*') ? 'text-white' : 'text-slate-400 group-hover:text-sky-400' }} shrink-0"></i>
+                <span class="flex-1 truncate">Producción</span>
+            </a>
+
             {{-- Categorías --}}
             <a href="{{ route('categorias.index') }}"
                class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm transition-all relative overflow-hidden group

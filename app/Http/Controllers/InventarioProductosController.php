@@ -25,16 +25,18 @@ class InventarioProductosController extends Controller
             ->groupBy('id_producto')
             ->pluck('total_stock', 'id_producto');
 
-        $totalUnidades     = InventarioProductos::sum('cantidad');
-        $totalEntradas     = InventarioProductos::count();
-        $productosConStock = $stockPorProducto->count();
+        $totalUnidades      = InventarioProductos::sum('cantidad');
+        $totalEntradas      = InventarioProductos::count();
+        $productosConStock  = $stockPorProducto->count();
+        $productosDistintos = $productosConStock;
 
         return view('inventario.productos', compact(
             'inventario',
             'stockPorProducto',
             'totalUnidades',
             'totalEntradas',
-            'productosConStock'
+            'productosConStock',
+            'productosDistintos'
         ));
     }
 }

@@ -88,7 +88,10 @@ Route::middleware(['auth', 'role:2'])->group(function () {
     Route::prefix('trabajador')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'trabajador'])->name('trabajador.dashboard');
     });
+});
 
+// ── ROLES 1 Y 2: Operaciones de Planta e Inventarios (Admin & Trabajador) ────
+Route::middleware(['auth', 'role:1,2'])->group(function () {
     // Producción
     Route::get('/produccion', [ProduccionController::class, 'index'])->name('produccion.index');
     Route::post('/produccion', [ProduccionController::class, 'store'])->name('produccion.store');

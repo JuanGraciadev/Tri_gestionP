@@ -43,7 +43,7 @@
                     <x-slot:stats>
                         <x-stat-card label="Entradas Registradas" :value="$totalEntradas" color="indigo" />
                         <x-stat-card label="Unidades Producidas" :value="number_format($totalUnidades)" color="emerald" />
-                        <x-stat-card label="Productos Distintos" :value="$productosDistintos" color="amber" />
+                        <x-stat-card label="Productos Distintos" :value="$productosDistintos ?? $productosConStock ?? 0" color="amber" />
                     </x-slot:stats>
                 </x-page-header>
 
