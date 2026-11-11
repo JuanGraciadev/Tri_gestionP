@@ -580,6 +580,7 @@ CREATE TABLE `producto` (
   `estado` tinyint(1) NOT NULL DEFAULT '1',
   `retornable` tinyint(1) NOT NULL DEFAULT '0',
   `receta_base` json DEFAULT NULL,
+  `stock_minimo` int NOT NULL DEFAULT '10',
   PRIMARY KEY (`id_producto`),
   KEY `producto_id_usuario_foreign` (`id_usuario`),
   KEY `producto_id_categoria_foreign` (`id_categoria`),

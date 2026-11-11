@@ -115,6 +115,23 @@
                     </div>
                 </div>
 
+                {{-- ALERTA DE STOCK BAJO DE PRODUCTOS (HU-010 / HU-023 / RF 7.10) --}}
+                <div id="contenedorAlertasStockAdmin" class="hidden rounded-[2rem] p-6 border border-amber-200 bg-amber-50/90 shadow-sm animate-fade">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-base font-extrabold text-amber-900 tracking-tight">Alerta de Stock en Productos Terminados</h3>
+                            <p class="text-xs text-amber-700 font-medium mt-0.5">Existen productos con stock disponible menor o igual a su stock mínimo.</p>
+                            <div id="listaAlertasStockAdmin" class="mt-3 flex flex-wrap gap-2"></div>
+                        </div>
+                        <a href="{{ route('inventario-productos.index') }}" class="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-colors shrink-0">
+                            Ver Inventario
+                        </a>
+                    </div>
+                </div>
+
                 {{-- KPI CARDS --}}
                 @php
                     $totalUsuarios    = count($usuarios);
@@ -490,6 +507,32 @@
                 row.style.display = text.includes(q) ? '' : 'none';
             });
         }
+
+        // Cargar alertas de stock de productos
+        fetch('/api/productos/alertas')
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok && data.hayAlertas) {
+                    const container = document.getElementById('contenedorAlertasStockAdmin');
+                    const lista = document.getElementById('listaAlertasStockAdmin');
+                    if (!container || !lista) return;
+
+                    let html = '';
+                    (data.agotados || []).forEach(p => {
+                        html += `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-rose-100 text-rose-800 border border-rose-200 text-xs font-black">
+                            <i class="fas fa-times-circle text-rose-500"></i> ${p.nombre} (Agotado)
+                        </span>`;
+                    });
+                    (data.stockBajo || []).forEach(p => {
+                        html += `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-100 text-amber-800 border border-amber-200 text-xs font-black">
+                            <i class="fas fa-exclamation-circle text-amber-500"></i> ${p.nombre} (${p.disponible}/${p.stock_minimo})
+                        </span>`;
+                    });
+                    lista.innerHTML = html;
+                    container.classList.remove('hidden');
+                }
+            })
+            .catch(() => {});
     </script>
 </body>
 </html>

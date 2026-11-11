@@ -139,6 +139,9 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
     Route::get('/api/materias-primas/alertas', [MateriaPrimaController::class, 'alertas']);
     Route::post('/api/materias-primas/{materiaPrima}/toggle-estado', [MateriaPrimaController::class, 'toggleEstado']);
 
+    // Alertas de Productos Terminados
+    Route::get('/api/productos/alertas', [ProductoController::class, 'alertas']);
+
     // Presentaciones (Pacas)
     Route::get('/api/presentaciones', [PresentacionProductoController::class, 'index']);
     Route::post('/api/presentaciones', [PresentacionProductoController::class, 'store']);

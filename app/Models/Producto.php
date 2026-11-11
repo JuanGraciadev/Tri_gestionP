@@ -23,6 +23,7 @@ class Producto extends Model
         'estado',
         'retornable',
         'receta_base',
+        'stock_minimo',
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class Producto extends Model
         'estado' => 'boolean',
         'retornable' => 'boolean',
         'receta_base' => 'array',
+        'stock_minimo' => 'integer',
     ];
 
     /**

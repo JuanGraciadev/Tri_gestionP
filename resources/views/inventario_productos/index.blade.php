@@ -106,6 +106,20 @@
                 </script>
                 @endif
 
+                <!-- CONTENEDOR ALERTAS STOCK BAJO (RF 7.10 / HU-010 / HU-023) -->
+                <div id="contenedorAlertasStock" class="hidden glass-card rounded-[2rem] p-6 border border-amber-200 bg-amber-50/70 shadow-sm mb-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-base font-extrabold text-amber-900 tracking-tight">Atención: Productos con Stock Bajo o Agotados</h3>
+                            <p class="text-xs text-amber-700 font-medium mt-0.5">Los siguientes productos terminados han alcanzado o están por debajo del stock mínimo configurado.</p>
+                            <div id="listaAlertasStock" class="mt-3 flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- HEADER BANNER -->
                 <div class="glass-card rounded-[2.5rem] border border-white overflow-hidden">
                     <div class="p-8 md:p-10 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-slate-50 to-white relative overflow-hidden">
@@ -270,6 +284,32 @@
                 noResults.classList.toggle('hidden', visible > 0);
             }
         });
+
+        // Consulta de alertas de bajo stock
+        fetch('/api/productos/alertas')
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok && data.hayAlertas) {
+                    const container = document.getElementById('contenedorAlertasStock');
+                    const lista = document.getElementById('listaAlertasStock');
+                    if (!container || !lista) return;
+
+                    let html = '';
+                    (data.agotados || []).forEach(p => {
+                        html += `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-100 text-rose-800 border border-rose-200 text-xs font-black">
+                            <i class="fas fa-times-circle text-rose-500"></i> ${p.nombre} (Agotado - 0 un.)
+                        </span>`;
+                    });
+                    (data.stockBajo || []).forEach(p => {
+                        html += `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 border border-amber-200 text-xs font-black">
+                            <i class="fas fa-exclamation-circle text-amber-500"></i> ${p.nombre} (Stock: ${p.disponible} / Mín: ${p.stock_minimo})
+                        </span>`;
+                    });
+                    lista.innerHTML = html;
+                    container.classList.remove('hidden');
+                }
+            })
+            .catch(() => {});
     </script>
 </body>
 </html>

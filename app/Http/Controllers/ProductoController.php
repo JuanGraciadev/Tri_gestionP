@@ -64,6 +64,7 @@ class ProductoController extends Controller
             'id_usuario' => $idUsuario,
             'id_categoria' => $request->validated('id_categoria'),
             'retornable' => $request->boolean('retornable'),
+            'stock_minimo' => $request->filled('stock_minimo') ? (int) $request->input('stock_minimo') : 10,
             'estado' => true,
         ]);
 
@@ -106,6 +107,7 @@ class ProductoController extends Controller
             'img' => $imagenPath ?? ($request->input('img_actual') ?? ''),
             'id_categoria' => $request->validated('id_categoria'),
             'retornable' => $request->boolean('retornable'),
+            'stock_minimo' => $request->filled('stock_minimo') ? (int) $request->input('stock_minimo') : ($producto->stock_minimo ?? 10),
         ]);
 
         if ($updated) {
@@ -238,5 +240,21 @@ class ProductoController extends Controller
         $file->move($uploadDir, $newName);
 
         return 'img/productos/' . $newName;
+    }
+
+    /**
+     * API: Alertas de bajo stock de productos terminados.
+     */
+    public function alertas()
+    {
+        $alertas = StockService::alertas();
+
+        return response()->json([
+            'ok'         => true,
+            'hayAlertas' => $alertas['hayAlertas'],
+            'agotados'   => $alertas['agotados'],
+            'stockBajo'  => $alertas['stockBajo'],
+            'total'      => $alertas['total'],
+        ]);
     }
 }

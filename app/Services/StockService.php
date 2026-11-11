@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\InventarioProductos;
 use App\Models\DetalleVenta;
+use App\Models\Producto;
 
 /**
  * Calcula el stock disponible de un producto.
@@ -33,5 +34,52 @@ class StockService
             ->sum('detalle_venta.cantidad');
 
         return (int) max(0, $ingresado - $vendido);
+    }
+
+    /**
+     * Retorna productos activos con stock disponible menor o igual a su stock_minimo.
+     *
+     * @return array
+     */
+    public static function productosConBajoStock(): array
+    {
+        $productos = Producto::where('estado', true)->get();
+        $resultado = [];
+
+        foreach ($productos as $producto) {
+            $disponible = self::disponible($producto->id_producto);
+            $minimo = $producto->stock_minimo ?? 10;
+            if ($disponible <= $minimo) {
+                $resultado[] = [
+                    'id_producto'  => $producto->id_producto,
+                    'nombre'       => $producto->nombre,
+                    'disponible'   => $disponible,
+                    'stock_minimo' => $minimo,
+                    'agotado'      => $disponible <= 0,
+                    'producto'     => $producto,
+                ];
+            }
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * Devuelve las alertas formateadas para la API / vistas, similar a MateriaPrima::obtenerAlertas.
+     *
+     * @return array
+     */
+    public static function alertas(): array
+    {
+        $bajos = self::productosConBajoStock();
+        $agotados = array_values(array_filter($bajos, fn($p) => $p['disponible'] <= 0));
+        $stockBajo = array_values(array_filter($bajos, fn($p) => $p['disponible'] > 0));
+
+        return [
+            'hayAlertas' => count($bajos) > 0,
+            'agotados'   => $agotados,
+            'stockBajo'  => $stockBajo,
+            'total'      => count($bajos),
+        ];
     }
 }

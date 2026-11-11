@@ -26,6 +26,7 @@ class StoreProductoRequest extends FormRequest
             'precio' => ['required', 'numeric', 'min:0'],
             'id_categoria' => ['required', 'exists:categoria,id_categoria'],
             'retornable' => ['nullable', 'boolean'],
+            'stock_minimo' => ['nullable', 'integer', 'min:0'],
             'img_file' => ['nullable', 'image', 'mimes:jpeg,png,webp,gif,jpg', 'max:5120'],
         ];
     }
