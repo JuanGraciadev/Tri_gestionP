@@ -300,18 +300,53 @@ class VentaController extends Controller
             'estado'   => ['required', 'in:Pendiente,En Proceso,Entregado,Cancelado'],
         ]);
 
-        $venta = Venta::findOrFail($request->id_venta);
-        $venta->update([
-            'estado'     => $request->estado,
-            'id_usuario' => Auth::user()->id_usuario,
-        ]);
+        $nuevoEstado = $request->estado;
 
-        return redirect()->route('ventas.index')
-            ->with('alert', [
-                'icon'  => 'success',
-                'title' => 'Estado Actualizado',
-                'text'  => "El pedido #{$venta->id_venta} ahora está en estado: {$request->estado}",
+        return DB::transaction(function () use ($request, $nuevoEstado) {
+            $venta = Venta::with('detalles.producto')->where('id_venta', $request->id_venta)->lockForUpdate()->firstOrFail();
+            $estadoActual = $venta->estado;
+
+            // 1. Verificar que la transición sea válida
+            if (!$venta->puedeTransicionarA($nuevoEstado)) {
+                $estadosPermitidos = implode(', ', Venta::TRANSICIONES_VALIDAS[$estadoActual] ?? []);
+                $detallePermitidos = empty($estadosPermitidos) ? 'Es un estado final.' : "Estados permitidos desde \"{$estadoActual}\": {$estadosPermitidos}.";
+                return redirect()->route('ventas.index')
+                    ->with('alert', [
+                        'icon'  => 'error',
+                        'title' => 'Transición no permitida',
+                        'text'  => "No se puede cambiar de \"{$estadoActual}\" a \"{$nuevoEstado}\". {$detallePermitidos}",
+                    ]);
+            }
+
+            // 2. Si pasa a "En Proceso", bloquear inventario y validar que hay stock suficiente
+            if ($nuevoEstado === 'En Proceso') {
+                $idsProductos = $venta->detalles->pluck('id_producto')->unique()->toArray();
+                \App\Models\InventarioProductos::whereIn('id_producto', $idsProductos)->lockForUpdate()->get();
+
+                $validacion = $venta->validarStockParaProcesar();
+                if (!$validacion['ok']) {
+                    return redirect()->route('ventas.index')
+                        ->with('alert', [
+                            'icon'  => 'error',
+                            'title' => 'Stock insuficiente',
+                            'text'  => $validacion['mensaje'] . ' El pedido sigue en Pendiente.',
+                        ]);
+                }
+            }
+
+            // 3. Actualizar el estado
+            $venta->update([
+                'estado'     => $nuevoEstado,
+                'id_usuario' => Auth::user()->id_usuario,
             ]);
+
+            return redirect()->route('ventas.index')
+                ->with('alert', [
+                    'icon'  => 'success',
+                    'title' => 'Estado Actualizado',
+                    'text'  => "El pedido #{$venta->id_venta} ahora está en estado: {$nuevoEstado}",
+                ]);
+        });
     }
 
     public function crearPOS(Request $request): RedirectResponse

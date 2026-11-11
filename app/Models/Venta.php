@@ -48,9 +48,68 @@ class Venta extends Model
 
     const ESTADOS_VALIDOS = ['Pendiente', 'En Proceso', 'Entregado', 'Cancelado'];
 
+    /**
+     * Transiciones de estado permitidas.
+     * Clave = estado actual, Valor = estados a los que se puede cambiar.
+     */
+    const TRANSICIONES_VALIDAS = [
+        'Pendiente'  => ['En Proceso', 'Cancelado'],
+        'En Proceso' => ['Entregado', 'Cancelado'],
+        'Entregado'  => [],   // Estado terminal: no se puede cambiar
+        'Cancelado'  => [],   // Estado terminal: no se puede cambiar
+    ];
+
+    /**
+     * Estados que descuentan stock real del inventario.
+     */
+    const ESTADOS_QUE_DESCUENTAN = ['En Proceso', 'Entregado'];
+
     public function esEditable(): bool
     {
         return !in_array($this->estado, ['Cancelado', 'Entregado']);
+    }
+
+    /**
+     * Verifica si la venta puede cambiar al nuevo estado solicitado.
+     */
+    public function puedeTransicionarA(string $nuevoEstado): bool
+    {
+        $permitidos = self::TRANSICIONES_VALIDAS[$this->estado] ?? [];
+        return in_array($nuevoEstado, $permitidos);
+    }
+
+    /**
+     * Verifica si al cambiar a "En Proceso" hay stock suficiente
+     * para todos los productos de esta venta.
+     *
+     * @return array ['ok' => bool, 'mensaje' => string]
+     */
+    public function validarStockParaProcesar(): array
+    {
+        if ($this->estado !== 'Pendiente') {
+            return ['ok' => true, 'mensaje' => ''];
+        }
+
+        // Calcular stock que esta venta consumiría, sumando
+        // lo que ya descuentan otras ventas confirmadas + esta venta
+        foreach ($this->detalles as $detalle) {
+            $stockDisponible = StockService::disponible($detalle->id_producto);
+
+            // StockService::disponible ya resta las ventas En Proceso/Entregado
+            // pero NO resta esta venta porque está Pendiente.
+            // Al pasar a En Proceso, esta venta pasaría a descontar.
+            // Verificamos que el stock actual (sin contar esta venta) cubra la cantidad.
+            if ($stockDisponible < $detalle->cantidad) {
+                $producto = $detalle->producto;
+                $nombre = $producto ? $producto->nombre : "ID {$detalle->id_producto}";
+                return [
+                    'ok'      => false,
+                    'mensaje' => "Stock insuficiente para \"{$nombre}\". Disponible: {$stockDisponible}, solicitado: {$detalle->cantidad}.",
+                ];
+            }
+        }
+
+        return ['ok' => true, 'mensaje' => ''];
     }
 
     public function subtotal(): float
