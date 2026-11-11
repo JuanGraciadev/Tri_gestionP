@@ -137,11 +137,17 @@
                             </button>
                         </form>
 
-                        <div class="flex items-center gap-2">
-                            <button onclick="generarPDF()" class="px-5 py-3 bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-bold text-xs rounded-2xl shadow-md shadow-indigo-500/20 transition-all flex items-center gap-1.5 cursor-pointer">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <a href="{{ route('reportes.exportar.excel', request()->query()) }}" class="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5 cursor-pointer" title="Exportar a Microsoft Excel">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </a>
+                            <a href="{{ route('reportes.exportar.csv', request()->query()) }}" class="px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-2xl shadow-md shadow-teal-500/20 transition-all flex items-center gap-1.5 cursor-pointer" title="Exportar a CSV">
+                                <i class="fas fa-file-csv"></i> CSV
+                            </a>
+                            <button onclick="generarPDF()" class="px-4 py-3 bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-bold text-xs rounded-2xl shadow-md shadow-indigo-500/20 transition-all flex items-center gap-1.5 cursor-pointer" title="Exportar a PDF">
                                 <i class="fas fa-file-pdf"></i> PDF
                             </button>
-                            <button onclick="window.print()" class="px-5 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-bold text-xs rounded-2xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                            <button onclick="window.print()" class="px-4 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 font-bold text-xs rounded-2xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer" title="Imprimir reporte">
                                 <i class="fas fa-print"></i> Imprimir
                             </button>
                         </div>

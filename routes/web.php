@@ -72,6 +72,8 @@ Route::middleware(['auth', 'role:1'])->group(function () {
 
     // Reportes (Admin)
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
+    Route::get('/reportes/exportar-csv', [ReporteController::class, 'exportarCSV'])->name('reportes.exportar.csv');
+    Route::get('/reportes/exportar-excel', [ReporteController::class, 'exportarExcel'])->name('reportes.exportar.excel');
 });
 
 // ── ROLE 2: Trabajador Dashboard & Producción ────────────────
