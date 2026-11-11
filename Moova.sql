@@ -734,6 +734,7 @@ CREATE TABLE `venta` (
   `cantidad` int DEFAULT NULL,
   `precio` decimal(10,2) DEFAULT NULL,
   `estado` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado_pago` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Pendiente',
   `id_cliente` bigint unsigned DEFAULT NULL,
   `id_usuario` bigint unsigned DEFAULT NULL,
   `id_producto` bigint unsigned DEFAULT NULL,

@@ -66,6 +66,7 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     // Ventas Admin Management
     Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
     Route::post('/ventas/cambiar-estado', [VentaController::class, 'cambiarEstado'])->name('ventas.cambiarEstado');
+    Route::post('/ventas/cambiar-estado-pago', [VentaController::class, 'cambiarEstadoPago'])->name('ventas.cambiarEstadoPago');
     Route::post('/ventas/crear-pos', [VentaController::class, 'crearPOS'])->name('ventas.crearPOS');
     Route::get('/ventas/factura/{id_venta}', [VentaController::class, 'obtenerFactura'])->name('ventas.factura');
 

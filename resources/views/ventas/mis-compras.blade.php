@@ -182,9 +182,22 @@
                                                 <p class="text-xs text-slate-400 uppercase font-bold tracking-wider">Total</p>
                                                 <p class="text-2xl font-black text-sky-600">${{ number_format($v->total, 2) }}</p>
                                             </div>
-                                            <span class="px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 {{ $estadoCls }}">
-                                                <i class="fas {{ $estadoIco }}"></i> {{ $estado }}
-                                            </span>
+                                            <div class="flex flex-col gap-1.5 items-end">
+                                                <span class="px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 {{ $estadoCls }}">
+                                                    <i class="fas {{ $estadoIco }}"></i> {{ $estado }}
+                                                </span>
+                                                @php
+                                                    $pago = $v->estado_pago ?? 'Pendiente';
+                                                    $pagoCls = match($pago) {
+                                                        'Confirmado' => 'bg-emerald-100 text-emerald-700',
+                                                        'Rechazado'  => 'bg-rose-100 text-rose-700',
+                                                        default      => 'bg-amber-100 text-amber-700',
+                                                    };
+                                                @endphp
+                                                <span class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 {{ $pagoCls }}">
+                                                    <i class="fas fa-credit-card text-[10px]"></i> Pago: {{ $pago }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -216,9 +229,15 @@
                                         </div>
                                     </div>
                                     @else
-                                    <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-600 font-medium flex items-center gap-2">
-                                        <i class="fas fa-circle-xmark"></i> Este pedido fue cancelado.
-                                    </div>
+                                        @if (($v->estado_pago ?? '') === 'Rechazado')
+                                        <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-600 font-bold flex items-center gap-2">
+                                            <i class="fas fa-circle-xmark"></i> Pago rechazado, intenta nuevamente
+                                        </div>
+                                        @else
+                                        <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-600 font-medium flex items-center gap-2">
+                                            <i class="fas fa-circle-xmark"></i> Este pedido fue cancelado.
+                                        </div>
+                                        @endif
                                     @endif
                                 </div>
                             </div>

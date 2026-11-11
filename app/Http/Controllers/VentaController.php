@@ -161,6 +161,7 @@ class VentaController extends Controller
                     'id_cliente'  => $cliente->id_cliente,
                     'id_usuario'  => $idUsuario,
                     'estado'      => 'Pendiente',
+                    'estado_pago' => 'Pendiente',
                     'total'       => $total,
                     'notas'       => $notas,
                     'metodo_pago' => $metodoPago,
@@ -249,6 +250,7 @@ class VentaController extends Controller
                 'telefono'    => $clienteUser->telefono ?? $authUser->telefono ?? '',
                 'direccion'   => $clienteUser->direccion ?? $authUser->direccion ?? '',
                 'metodo_pago' => $venta->metodo_pago ?? 'Efectivo',
+                'estado_pago' => $venta->estado_pago ?? 'Pendiente',
                 'notas'       => $venta->notas ?? '',
                 'items'       => $detalles,
                 'total'       => $venta->total,
@@ -351,6 +353,42 @@ class VentaController extends Controller
         });
     }
 
+    public function cambiarEstadoPago(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'id_venta'    => ['required', 'integer', 'exists:venta,id_venta'],
+            'estado_pago' => ['required', 'in:Pendiente,Confirmado,Rechazado'],
+        ]);
+
+        return DB::transaction(function () use ($request) {
+            $venta = Venta::lockForUpdate()->findOrFail($request->id_venta);
+            $nuevoEstadoPago = $request->estado_pago;
+
+            $updateData = [
+                'estado_pago' => $nuevoEstadoPago,
+                'id_usuario'  => Auth::user()->id_usuario,
+            ];
+
+            // Si es Rechazado: la venta pasa a Cancelado
+            if ($nuevoEstadoPago === 'Rechazado') {
+                $updateData['estado'] = 'Cancelado';
+            }
+
+            $venta->update($updateData);
+
+            $mensaje = ($nuevoEstadoPago === 'Rechazado')
+                ? "El pago del pedido #{$venta->id_venta} fue marcado como Rechazado y el pedido ha sido cancelado."
+                : "El pago del pedido #{$venta->id_venta} ahora está: {$nuevoEstadoPago}.";
+
+            return redirect()->route('ventas.index')
+                ->with('alert', [
+                    'icon'  => 'success',
+                    'title' => 'Estado de Pago Actualizado',
+                    'text'  => $mensaje,
+                ]);
+        });
+    }
+
     public function crearPOS(Request $request): RedirectResponse
     {
         $request->validate([
@@ -412,6 +450,7 @@ class VentaController extends Controller
                     'id_cliente'  => $cliente->id_cliente,
                     'id_usuario'  => $idAdmin,
                     'estado'      => 'Entregado',
+                    'estado_pago' => 'Confirmado',
                     'total'       => $total,
                     'notas'       => $notas,
                     'metodo_pago' => $metodoPago,

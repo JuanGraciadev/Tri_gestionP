@@ -15,6 +15,7 @@ class Venta extends Model
     protected $fillable = [
         'fecha',
         'estado',
+        'estado_pago',
         'total',
         'notas',
         'metodo_pago',
@@ -47,6 +48,7 @@ class Venta extends Model
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     const ESTADOS_VALIDOS = ['Pendiente', 'En Proceso', 'Entregado', 'Cancelado'];
+    const ESTADOS_PAGO = ['Pendiente', 'Confirmado', 'Rechazado'];
 
     /**
      * Transiciones de estado permitidas.

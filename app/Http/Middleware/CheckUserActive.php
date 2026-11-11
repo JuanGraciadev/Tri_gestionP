@@ -38,3 +38,4 @@ class CheckUserActive
         return $next($request);
     }
 }
+

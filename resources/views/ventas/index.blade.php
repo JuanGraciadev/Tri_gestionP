@@ -291,9 +291,24 @@
                                         <span class="text-sm font-black text-emerald-600">${{ number_format($v->total, 2) }}</span>
                                     </td>
                                     <td class="px-6 py-5 text-center">
-                                        <span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-black uppercase border {{ $badgeStyles }}">
-                                            {{ $estado }}
-                                        </span>
+                                        <div class="flex flex-col items-center gap-1.5">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-xl text-xs font-black uppercase border {{ $badgeStyles }}">
+                                                {{ $estado }}
+                                            </span>
+                                            @php
+                                                $pago = $v->estado_pago ?? 'Pendiente';
+                                                $pagoBadge = match($pago) {
+                                                    'Confirmado' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                                    'Rechazado'  => 'bg-rose-50 text-rose-700 border-rose-200',
+                                                    default      => 'bg-amber-50 text-amber-700 border-amber-200',
+                                                };
+                                            @endphp
+                                            <button type="button" onclick="openModalPago({{ $v->id_venta }}, '{{ $pago }}')"
+                                                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border {{ $pagoBadge }} hover:opacity-80 transition-all cursor-pointer"
+                                                title="Cambiar Estado de Pago">
+                                                <i class="fas fa-credit-card text-[9px]"></i> Pago: {{ $pago }}
+                                            </button>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-5 text-center rounded-r-2xl">
                                         <div class="flex items-center justify-center gap-1.5">
@@ -353,6 +368,34 @@
                 <div class="flex justify-end gap-3 pt-3">
                     <button type="button" onclick="closeModal()" class="px-5 py-2.5 text-slate-500 font-bold text-sm cursor-pointer">Cancelar</button>
                     <button type="submit" class="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md cursor-pointer">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PAGO -->
+    <div id="modalPago" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-[2.5rem] w-full max-w-sm overflow-hidden border border-white">
+            <div class="p-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white flex justify-between items-center">
+                <h3 class="text-lg font-bold"><i class="fas fa-credit-card mr-2"></i>Estado de Pago</h3>
+                <button onclick="closeModalPago()" class="text-white/70 hover:text-white cursor-pointer"><i class="fas fa-times"></i></button>
+            </div>
+            <form action="{{ route('ventas.cambiarEstadoPago') }}" method="POST" class="p-6 space-y-4">
+                @csrf
+                <input type="hidden" name="id_venta" id="modalPagoIdVenta">
+                <p class="text-xs text-slate-500 font-medium">Selecciona el nuevo estado de pago para esta venta.</p>
+                <div class="space-y-2">
+                    @foreach (['Pendiente' => ['fa-clock', 'amber'], 'Confirmado' => ['fa-circle-check', 'emerald'], 'Rechazado' => ['fa-circle-xmark', 'rose']] as $opt => [$ico, $col])
+                    <label class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                        <input type="radio" name="estado_pago" value="{{ $opt }}" class="pago-radio text-indigo-600" required>
+                        <i class="fas {{ $ico }} text-{{ $col }}-500"></i>
+                        <span class="font-bold text-sm text-slate-700">{{ $opt }}</span>
+                    </label>
+                    @endforeach
+                </div>
+                <div class="flex justify-end gap-3 pt-3">
+                    <button type="button" onclick="closeModalPago()" class="px-5 py-2.5 text-slate-500 font-bold text-sm cursor-pointer">Cancelar</button>
+                    <button type="submit" class="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-md cursor-pointer">Guardar</button>
                 </div>
             </form>
         </div>
@@ -423,6 +466,17 @@
         function closeModal() {
             document.getElementById('modalEstado').classList.add('hidden');
             document.getElementById('modalEstado').classList.remove('flex');
+        }
+
+        function openModalPago(id, estadoPago) {
+            document.getElementById('modalPagoIdVenta').value = id;
+            document.querySelectorAll('.pago-radio').forEach(r => r.checked = (r.value === estadoPago));
+            document.getElementById('modalPago').classList.remove('hidden');
+            document.getElementById('modalPago').classList.add('flex');
+        }
+        function closeModalPago() {
+            document.getElementById('modalPago').classList.add('hidden');
+            document.getElementById('modalPago').classList.remove('flex');
         }
 
         function openModalPOS() {
