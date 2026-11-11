@@ -2,227 +2,141 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\InventarioProductos;
 use App\Models\Producto;
+use App\Services\StockService;
+use App\Services\VentaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use RuntimeException;
 
-/**
- * Carrito de compras basado en sesión.
- *
- * Estructura de la sesión:
- * carrito = [
- *   id_producto => [
- *     'id_producto' => int,
- *     'nombre'      => string,
- *     'precio'      => float,
- *     'cantidad'    => int,
- *     'img'         => string|null,
- *     'subtotal'    => float,
- *   ],
- *   ...
- * ]
- */
 class CarritoController extends Controller
 {
-    // ── Helpers ────────────────────────────────────────────────────────────────
+    public function __construct(
+        protected VentaService $ventaService = new VentaService()
+    ) {}
 
-    /**
-     * Calcula el stock disponible de un producto sumando inventario_productos
-     * menos las ventas confirmadas (estado != 'Cancelada').
-     */
-    private function stockDisponible(int $idProducto): int
-    {
-        $entradas = InventarioProductos::where('id_producto', $idProducto)->sum('cantidad');
-
-        $vendido = \App\Models\DetalleVenta::whereHas('venta', function ($q) {
-                $q->whereNotIn('estado', ['Cancelado']);
-            })
-            ->where('id_producto', $idProducto)
-            ->sum('cantidad');
-
-        return max(0, (int) $entradas - (int) $vendido);
-    }
-
-    // ── Agregar / Aumentar ─────────────────────────────────────────────────────
-
-    /**
-     * POST /carrito/agregar
-     * Body: { id_producto, cantidad }
-     * Response JSON: { ok, mensaje, carrito_count, total }
-     */
     public function agregar(Request $request): JsonResponse
     {
-        $request->validate([
-            'id_producto' => 'required|exists:producto,id_producto',
-            'cantidad'    => 'required|integer|min:1',
-        ]);
+        $idProducto = (int) $request->input('id_producto', 0);
+        $cantidad   = max(1, (int) $request->input('cantidad', 1));
 
-        $idProducto = (int) $request->id_producto;
-        $cantidad   = (int) $request->cantidad;
-
-        $producto = Producto::where('id_producto', $idProducto)
-            ->where('estado', 1)
-            ->first();
-
-        if (!$producto) {
-            return response()->json([
-                'ok'      => false,
-                'mensaje' => 'Producto no disponible.',
-            ], 422);
+        $prod = Producto::where('id_producto', $idProducto)->where('estado', 1)->first();
+        if (!$prod) {
+            return response()->json(['ok' => false, 'msg' => 'Producto no encontrado']);
         }
 
-        $carrito         = session('carrito', []);
-        $cantidadActual  = $carrito[$idProducto]['cantidad'] ?? 0;
-        $cantidadNueva   = $cantidadActual + $cantidad;
-        $stock           = $this->stockDisponible($idProducto);
-
-        if ($cantidadNueva > $stock) {
-            return response()->json([
-                'ok'      => false,
-                'mensaje' => "Stock insuficiente. Disponibles: {$stock} unidad(es).",
-            ], 422);
+        $stock = StockService::disponible($idProducto);
+        if ($stock < 1) {
+            return response()->json(['ok' => false, 'msg' => 'Sin stock disponible para este producto']);
         }
 
-        $carrito[$idProducto] = [
-            'id_producto' => $idProducto,
-            'nombre'      => $producto->nombre,
-            'precio'      => (float) $producto->precio,
-            'cantidad'    => $cantidadNueva,
-            'img'         => $producto->img,
-            'subtotal'    => round((float) $producto->precio * $cantidadNueva, 2),
-        ];
+        $carrito = session('carrito', []);
+
+        if (isset($carrito[$idProducto])) {
+            $nueva = $carrito[$idProducto]['cantidad'] + $cantidad;
+            if ($nueva > $stock) {
+                return response()->json(['ok' => false, 'msg' => "Stock máximo disponible: {$stock} unidades"]);
+            }
+            $carrito[$idProducto]['cantidad'] = $nueva;
+        } else {
+            $carrito[$idProducto] = [
+                'id_producto'     => $idProducto,
+                'nombre'          => $prod->nombre,
+                'precio_unitario' => (float) $prod->precio,
+                'img'             => $prod->img ?? '',
+                'cantidad'        => $cantidad,
+            ];
+        }
 
         session(['carrito' => $carrito]);
 
-        return response()->json([
-            'ok'           => true,
-            'mensaje'      => 'Producto agregado al carrito.',
-            'carrito_count' => $this->contarItems($carrito),
-            'total'        => $this->calcularTotal($carrito),
-        ]);
+        $totalItems = array_sum(array_column($carrito, 'cantidad'));
+        return response()->json(['ok' => true, 'total_items' => $totalItems, 'msg' => 'Producto añadido al carrito']);
     }
 
-    // ── Actualizar cantidad ────────────────────────────────────────────────────
-
-    /**
-     * POST /carrito/actualizar
-     * Body: { id_producto, cantidad }
-     */
-    public function actualizar(Request $request): JsonResponse
-    {
-        $request->validate([
-            'id_producto' => 'required|integer',
-            'cantidad'    => 'required|integer|min:0',
-        ]);
-
-        $idProducto = (int) $request->id_producto;
-        $cantidad   = (int) $request->cantidad;
-        $carrito    = session('carrito', []);
-
-        if (!isset($carrito[$idProducto])) {
-            return response()->json(['ok' => false, 'mensaje' => 'Producto no está en el carrito.'], 422);
-        }
-
-        if ($cantidad === 0) {
-            unset($carrito[$idProducto]);
-            session(['carrito' => $carrito]);
-            return response()->json([
-                'ok'            => true,
-                'mensaje'       => 'Producto eliminado del carrito.',
-                'eliminado'     => true,
-                'carrito_count' => $this->contarItems($carrito),
-                'total'         => $this->calcularTotal($carrito),
-            ]);
-        }
-
-        $stock = $this->stockDisponible($idProducto);
-
-        if ($cantidad > $stock) {
-            return response()->json([
-                'ok'      => false,
-                'mensaje' => "Stock insuficiente. Disponibles: {$stock} unidad(es).",
-            ], 422);
-        }
-
-        $carrito[$idProducto]['cantidad'] = $cantidad;
-        $carrito[$idProducto]['subtotal'] = round($carrito[$idProducto]['precio'] * $cantidad, 2);
-
-        session(['carrito' => $carrito]);
-
-        return response()->json([
-            'ok'            => true,
-            'mensaje'       => 'Cantidad actualizada.',
-            'subtotal'      => number_format($carrito[$idProducto]['subtotal'], 2),
-            'carrito_count' => $this->contarItems($carrito),
-            'total'         => $this->calcularTotal($carrito),
-        ]);
-    }
-
-    // ── Eliminar ítem ──────────────────────────────────────────────────────────
-
-    /**
-     * POST /carrito/eliminar
-     * Body: { id_producto }
-     */
-    public function eliminar(Request $request): JsonResponse
-    {
-        $request->validate(['id_producto' => 'required|integer']);
-
-        $idProducto = (int) $request->id_producto;
-        $carrito    = session('carrito', []);
-
-        unset($carrito[$idProducto]);
-        session(['carrito' => $carrito]);
-
-        return response()->json([
-            'ok'            => true,
-            'mensaje'       => 'Producto eliminado del carrito.',
-            'carrito_count' => $this->contarItems($carrito),
-            'total'         => $this->calcularTotal($carrito),
-        ]);
-    }
-
-    // ── Obtener carrito ────────────────────────────────────────────────────────
-
-    /**
-     * GET /carrito
-     * Response JSON: { items, total, count }
-     */
     public function obtener(): JsonResponse
     {
         $carrito = session('carrito', []);
-
-        return response()->json([
-            'ok'    => true,
-            'items' => array_values($carrito),
-            'count' => $this->contarItems($carrito),
-            'total' => $this->calcularTotal($carrito),
-        ]);
+        $total   = 0;
+        foreach ($carrito as $item) {
+            $total += $item['precio_unitario'] * $item['cantidad'];
+        }
+        return response()->json(['ok' => true, 'carrito' => array_values($carrito), 'total' => $total]);
     }
 
-    // ── Vaciar ────────────────────────────────────────────────────────────────
-
-    /**
-     * POST /carrito/vaciar
-     */
-    public function vaciar(): JsonResponse
+    public function actualizar(Request $request): JsonResponse
     {
-        session()->forget('carrito');
+        $idProducto = (int) $request->input('id_producto', 0);
+        $cantidad   = (int) $request->input('cantidad', 0);
+        $carrito    = session('carrito', []);
 
-        return response()->json(['ok' => true, 'mensaje' => 'Carrito vaciado.']);
+        if ($cantidad <= 0) {
+            unset($carrito[$idProducto]);
+        } else {
+            $stock = StockService::disponible($idProducto);
+            if ($cantidad > $stock) {
+                $cantidad = $stock;
+            }
+            if (isset($carrito[$idProducto])) {
+                $carrito[$idProducto]['cantidad'] = $cantidad;
+            }
+        }
+
+        session(['carrito' => $carrito]);
+
+        $total = $totalItems = 0;
+        foreach ($carrito as $item) {
+            $total      += $item['precio_unitario'] * $item['cantidad'];
+            $totalItems += $item['cantidad'];
+        }
+
+        return response()->json(['ok' => true, 'carrito' => array_values($carrito), 'total' => $total, 'total_items' => $totalItems]);
     }
 
-    // ── Helpers internos ──────────────────────────────────────────────────────
-
-    private function contarItems(array $carrito): int
+    public function eliminar(Request $request): JsonResponse
     {
-        return array_sum(array_column($carrito, 'cantidad'));
+        $idProducto = (int) $request->input('id_producto', 0);
+        $carrito    = session('carrito', []);
+        unset($carrito[$idProducto]);
+        session(['carrito' => $carrito]);
+
+        $total = $totalItems = 0;
+        foreach ($carrito as $item) {
+            $total      += $item['precio_unitario'] * $item['cantidad'];
+            $totalItems += $item['cantidad'];
+        }
+
+        return response()->json(['ok' => true, 'carrito' => array_values($carrito), 'total' => $total, 'total_items' => $totalItems]);
     }
 
-    private function calcularTotal(array $carrito): string
+    public function finalizar(Request $request): JsonResponse
     {
-        $total = array_sum(array_column($carrito, 'subtotal'));
-        return number_format($total, 2);
+        $carrito = session('carrito', []);
+        if (empty($carrito)) {
+            return response()->json(['ok' => false, 'msg' => 'El carrito está vacío.']);
+        }
+
+        $notas     = $request->input('notas');
+        $idUsuario = Auth::user()->id_usuario;
+
+        try {
+            $result = $this->ventaService->procesarCompraOnline($carrito, $notas, $idUsuario);
+
+            session()->forget('carrito');
+
+            return response()->json([
+                'ok'       => true,
+                'id_venta' => $result['id'],
+                'total'    => $result['total'],
+                'msg'      => '¡Pedido registrado con éxito!',
+            ]);
+        } catch (RuntimeException $e) {
+            return response()->json(['ok' => false, 'msg' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            Log::error('Error en finalizarCompra: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['ok' => false, 'msg' => 'No se pudo procesar la operación. Intenta de nuevo.']);
+        }
     }
 }

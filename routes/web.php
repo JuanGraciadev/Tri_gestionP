@@ -1,13 +1,18 @@
 <?php
 
 use App\Http\Controllers\AdminUsuarioController;
+use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ChatIAController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\InventarioMateriaPrimaController;
 use App\Http\Controllers\InventarioProductosController;
 use App\Http\Controllers\LoteController;
 use App\Http\Controllers\MateriaPrimaController;
+use App\Http\Controllers\MisComprasController;
+use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\PosController;
 use App\Http\Controllers\PresentacionProductoController;
 use App\Http\Controllers\ProduccionController;
 use App\Http\Controllers\ProductoController;
@@ -17,30 +22,32 @@ use App\Http\Controllers\SolicitudDevolucionController;
 use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// ── Rutas Públicas ───────────────────────────────────────────
 Route::get('/', function () {
     return view('public.welcome');
 });
 
-// Smart redirector: sends authenticated user to their role-specific dashboard
-Route::get('/dashboard', function () {
-    $user = auth()->user();
-    return match ((int) $user?->id_rol) {
-        1 => redirect()->route('admin.dashboard'),
-        2 => redirect()->route('trabajador.dashboard'),
-        3 => redirect()->route('cliente.dashboard'),
-        default => redirect()->route('cliente.dashboard'),
-    };
-})->middleware(['auth', 'verified'])->name('dashboard');
+// ── Dashboard Inteligente (Redirección por rol) ──────────────
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
-// ── Profile Routes (All Authenticated) ───────────────────────
+// ── Perfil de Usuario (Autenticado) ──────────────────────────
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// ── ROLE 1: Administrador Routes ──────────────────────────────
+// ── ROL 1: Administrador ─────────────────────────────────────
 Route::middleware(['auth', 'role:1'])->group(function () {
+    // Usuarios Admin
     Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminUsuarioController::class, 'index'])->name('admin.dashboard');
         Route::post('/usuarios', [AdminUsuarioController::class, 'store'])->name('admin.usuarios.store');
@@ -48,7 +55,7 @@ Route::middleware(['auth', 'role:1'])->group(function () {
         Route::post('/usuarios/{usuario}/toggle-estado', [AdminUsuarioController::class, 'toggleEstado'])->name('admin.usuarios.toggleEstado');
     });
 
-    // Categorías (Admin)
+    // Categorías
     Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
     Route::post('/categorias', [CategoriaController::class, 'store'])->name('categorias.store');
     Route::put('/categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
@@ -56,43 +63,38 @@ Route::middleware(['auth', 'role:1'])->group(function () {
     Route::post('/categorias/{categoria}/toggle-estado', [CategoriaController::class, 'toggleEstado'])->name('categorias.toggleEstado');
     Route::post('/categorias/agregar-producto', [CategoriaController::class, 'agregarProducto'])->name('categorias.agregarProducto');
 
-    // Productos Admin Management
+    // Productos
     Route::get('/productos', [ProductoController::class, 'index'])->name('productos.index');
     Route::post('/productos', [ProductoController::class, 'store'])->name('productos.store');
     Route::put('/productos/{producto}', [ProductoController::class, 'update'])->name('productos.update');
     Route::delete('/productos/{producto}', [ProductoController::class, 'destroy'])->name('productos.destroy');
     Route::post('/productos/{producto}/toggle-estado', [ProductoController::class, 'toggleEstado'])->name('productos.toggleEstado');
 
-    // Ventas Admin Management
-    Route::get('/ventas', [VentaController::class, 'index'])->name('ventas.index');
-    Route::post('/ventas/cambiar-estado', [VentaController::class, 'cambiarEstado'])->name('ventas.cambiarEstado');
-    Route::post('/ventas/cambiar-estado-pago', [VentaController::class, 'cambiarEstadoPago'])->name('ventas.cambiarEstadoPago');
-    Route::post('/ventas/crear-pos', [VentaController::class, 'crearPOS'])->name('ventas.crearPOS');
-    Route::get('/ventas/factura/{id_venta}', [VentaController::class, 'obtenerFactura'])->name('ventas.factura');
+    // Ventas y Pedidos (Admin)
+    Route::get('/ventas', [PedidoController::class, 'index'])->name('ventas.index');
+    Route::post('/ventas/cambiar-estado', [PedidoController::class, 'cambiarEstado'])->name('ventas.cambiarEstado');
+    Route::post('/ventas/cambiar-estado-pago', [PedidoController::class, 'cambiarEstadoPago'])->name('ventas.cambiarEstadoPago');
+    Route::post('/ventas/crear-pos', [PosController::class, 'crear'])->name('ventas.crearPOS');
+    Route::get('/ventas/factura/{id_venta}', [PosController::class, 'obtenerFactura'])->name('ventas.factura');
 
-    // Reportes (Admin)
+    // Reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
     Route::get('/reportes/exportar-csv', [ReporteController::class, 'exportarCSV'])->name('reportes.exportar.csv');
     Route::get('/reportes/exportar-excel', [ReporteController::class, 'exportarExcel'])->name('reportes.exportar.excel');
 });
 
-// ── ROLE 2: Trabajador Dashboard & Producción ────────────────
+// ── ROL 2: Trabajador (Operaciones y Planta) ─────────────────
 Route::middleware(['auth', 'role:2'])->group(function () {
     Route::prefix('trabajador')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('dashboards.trabajador');
-        })->name('trabajador.dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'trabajador'])->name('trabajador.dashboard');
     });
 
-    // Producción (solo trabajador)
+    // Producción
     Route::get('/produccion', [ProduccionController::class, 'index'])->name('produccion.index');
     Route::post('/produccion', [ProduccionController::class, 'store'])->name('produccion.store');
     Route::post('/produccion/{id}/finalizar', [ProduccionController::class, 'finalizar'])->name('produccion.finalizar');
     Route::post('/produccion/{id}/cancelar', [ProduccionController::class, 'cancelar'])->name('produccion.cancelar');
-});
 
-// ── ROLE 1 & 2: Operaciones compartidas ──────────────────────
-Route::middleware(['auth', 'role:1,2'])->group(function () {
     // Inventarios
     Route::get('/inventario-mp', [InventarioMateriaPrimaController::class, 'index'])->name('inventario-mp.index');
     Route::get('/inventario-productos', [InventarioProductosController::class, 'index'])->name('inventario-productos.index');
@@ -111,28 +113,27 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
     Route::post('/devoluciones', [DevolucionController::class, 'store'])->name('devoluciones.store');
 });
 
-// ── ROLE 3: Cliente Routes ───────────────────────────────────
+// ── ROL 3: Cliente ───────────────────────────────────────────
 Route::middleware(['auth', 'role:3'])->group(function () {
     Route::prefix('cliente')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('dashboards.cliente');
-        })->name('cliente.dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'cliente'])->name('cliente.dashboard');
     });
 
-    // Catálogo y Pedidos de Cliente
+    // Catálogo y Compras
     Route::get('/catalogo', [ProductoController::class, 'catalogo'])->name('productos.catalogo');
-    Route::get('/mis-compras', [VentaController::class, 'misCompras'])->name('cliente.misCompras');
+    Route::get('/mis-compras', [MisComprasController::class, 'index'])->name('cliente.misCompras');
 
-    // Carrito AJAX Routes
-    Route::post('/carrito/agregar', [VentaController::class, 'agregarAlCarrito'])->name('carrito.agregar');
-    Route::get('/carrito/obtener', [VentaController::class, 'obtenerCarrito'])->name('carrito.obtener');
-    Route::post('/carrito/actualizar', [VentaController::class, 'actualizarCarrito'])->name('carrito.actualizar');
-    Route::post('/carrito/eliminar', [VentaController::class, 'eliminarDelCarrito'])->name('carrito.eliminar');
-    Route::post('/carrito/finalizar', [VentaController::class, 'finalizarCompra'])->name('carrito.finalizar');
+    // Carrito de Compras (AJAX)
+    Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
+    Route::get('/carrito/obtener', [CarritoController::class, 'obtener'])->name('carrito.obtener');
+    Route::post('/carrito/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
+    Route::post('/carrito/eliminar', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
+    Route::post('/carrito/finalizar', [CarritoController::class, 'finalizar'])->name('carrito.finalizar');
 });
 
-// ── API: Materias Primas (Admin & Trabajador) ──────────────────
+// ── APIs Compartidas (Admin & Trabajador) ─────────────────────
 Route::middleware(['auth', 'role:1,2'])->group(function () {
+    // Materias Primas
     Route::get('/api/materias-primas', [MateriaPrimaController::class, 'index']);
     Route::post('/api/materias-primas', [MateriaPrimaController::class, 'store']);
     Route::put('/api/materias-primas/{materiaPrima}', [MateriaPrimaController::class, 'update']);
@@ -144,7 +145,7 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
     // Alertas de Productos Terminados
     Route::get('/api/productos/alertas', [ProductoController::class, 'alertas']);
 
-    // Presentaciones (Pacas)
+    // Presentaciones
     Route::get('/api/presentaciones', [PresentacionProductoController::class, 'index']);
     Route::post('/api/presentaciones', [PresentacionProductoController::class, 'store']);
     Route::put('/api/presentaciones/{presentacion}', [PresentacionProductoController::class, 'update']);
@@ -152,9 +153,8 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
     Route::get('/api/productos/{producto}/presentaciones', [PresentacionProductoController::class, 'porProducto']);
 });
 
-// ── API: Solicitudes de Devolución ─────────────────────────────
+// ── APIs: Solicitudes de Devolución ───────────────────────────
 Route::middleware(['auth'])->group(function () {
-    // Cliente
     Route::post('/api/solicitudes-devolucion/solicitar', [SolicitudDevolucionController::class, 'solicitar']);
     Route::get('/api/solicitudes-devolucion/mis-solicitudes', [SolicitudDevolucionController::class, 'misSolicitudes']);
 });
@@ -165,7 +165,7 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
     Route::post('/api/solicitudes-devolucion/marcar-leidas', [SolicitudDevolucionController::class, 'marcarLeidas']);
 });
 
-// ── API: Chat IA (Gemini) ──────────────────────────────────────
+// ── APIs: Asistente IA ─────────────────────────────────────────
 Route::middleware(['auth'])->group(function () {
     Route::post('/api/ia/chat', [ChatIAController::class, 'chat']);
     Route::get('/api/ia/status', [ChatIAController::class, 'status']);
