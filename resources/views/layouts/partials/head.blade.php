@@ -61,6 +61,9 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<!-- Utilidades JS Globales -->
+<script src="{{ asset('js/pages/_utils.js') }}"></script>
+
 <!-- Estilos Base Tri-gestión -->
 <link rel="stylesheet" href="{{ asset('css/trigestion.css') }}">
 
