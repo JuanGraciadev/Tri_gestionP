@@ -296,17 +296,24 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-5 text-center rounded-r-2xl">
-                                        @if ($v->esEditable())
-                                        <button onclick="openModalEstado({{ $v->id_venta }}, '{{ $estado }}')"
-                                            class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-500 transition-all flex items-center justify-center mx-auto cursor-pointer"
-                                            title="Cambiar Estado">
-                                            <i class="fas fa-pencil-alt text-xs"></i>
-                                        </button>
-                                        @else
-                                        <div class="w-9 h-9 rounded-xl bg-slate-50 text-slate-300 flex items-center justify-center mx-auto">
-                                            <i class="fas fa-lock text-xs"></i>
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            @if ($v->esEditable())
+                                            <button onclick="openModalEstado({{ $v->id_venta }}, '{{ $estado }}')"
+                                                class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-500 transition-all flex items-center justify-center cursor-pointer"
+                                                title="Cambiar Estado">
+                                                <i class="fas fa-pencil-alt text-xs"></i>
+                                            </button>
+                                            @else
+                                            <div class="w-9 h-9 rounded-xl bg-slate-50 text-slate-300 flex items-center justify-center">
+                                                <i class="fas fa-lock text-xs"></i>
+                                            </div>
+                                            @endif
+                                            <button onclick="imprimirFactura({{ $v->id_venta }})"
+                                                class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-500 transition-all flex items-center justify-center cursor-pointer"
+                                                title="Imprimir Factura / Ticket">
+                                                <i class="fas fa-print text-xs"></i>
+                                            </button>
                                         </div>
-                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -378,9 +385,19 @@
                     <div id="posProductRows" class="space-y-3 max-h-[250px] overflow-y-auto pr-1"></div>
                 </div>
 
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Notas</label>
-                    <input type="text" name="notas" placeholder="Venta en punto de venta..." class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase">Método de Pago</label>
+                        <select name="metodo_pago" required class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="Efectivo" selected>Efectivo</option>
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase">Notas</label>
+                        <input type="text" name="notas" placeholder="Venta en punto de venta..." class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                    </div>
                 </div>
 
                 <div class="flex justify-between items-center pt-4 border-t border-slate-100">
@@ -449,7 +466,79 @@
                     total += p * q;
                 }
             });
-            document.getElementById('posTotalDisplay').textContent = 'Total: $' + (total * 1.19).toFixed(2);
+            document.getElementById('posTotalDisplay').textContent = 'Total: $' + total.toFixed(2);
+        }
+
+        function imprimirFactura(idVenta) {
+            fetch(`/ventas/factura/${idVenta}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.ok) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.msg || 'No se pudo obtener la factura'
+                        });
+                        return;
+                    }
+                    const f = data.factura;
+                    let rows = f.items.map(item => `
+                        <tr>
+                            <td style="padding:6px;border-bottom:1px solid #ddd;">${item.producto_nombre}</td>
+                            <td style="padding:6px;border-bottom:1px solid #ddd;text-align:center;">${item.cantidad}</td>
+                            <td style="padding:6px;border-bottom:1px solid #ddd;text-align:right;">$${parseFloat(item.precio_unitario).toFixed(2)}</td>
+                            <td style="padding:6px;border-bottom:1px solid #ddd;text-align:right;">$${(item.cantidad * item.precio_unitario).toFixed(2)}</td>
+                        </tr>
+                    `).join('');
+
+                    const w = window.open('', '_blank');
+                    w.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="utf-8">
+                            <title>Factura #${f.id_venta} - TRIGESTION</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; padding: 24px; color: #1e293b; max-width: 600px; margin: auto; }
+                                h2 { text-align: center; margin-bottom: 4px; color: #0f172a; }
+                                .subtitle { text-align: center; font-size: 13px; color: #64748b; margin-bottom: 16px; }
+                                .info { font-size: 13px; line-height: 1.6; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+                                table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+                                th { background: #f1f5f9; padding: 8px; text-align: left; border-bottom: 2px solid #cbd5e1; }
+                                .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; color: #059669; }
+                                @media print { button { display: none; } }
+                            </style>
+                        </head>
+                        <body>
+                            <h2>TRIGESTION - MOOVA</h2>
+                            <div class="subtitle">Comprobante de Venta #${f.id_venta}</div>
+                            <div class="info">
+                                <strong>Fecha:</strong> ${f.fecha}<br>
+                                <strong>Cliente:</strong> ${f.cliente}<br>
+                                <strong>Método de Pago:</strong> ${f.metodo_pago}<br>
+                                ${f.notas ? '<strong>Notas:</strong> ' + f.notas + '<br>' : ''}
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th style="text-align:center;">Cant</th>
+                                        <th style="text-align:right;">Precio</th>
+                                        <th style="text-align:right;">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${rows}</tbody>
+                            </table>
+                            <div class="total">Total: $${parseFloat(f.total).toFixed(2)}</div>
+                            <script>window.onload = function() { window.print(); }<\/script>
+                        </body>
+                        </html>
+                    `);
+                    w.document.close();
+                })
+                .catch(() => {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error de conexión al obtener la factura' });
+                });
         }
 
         document.getElementById('searchVentas')?.addEventListener('input', function() {

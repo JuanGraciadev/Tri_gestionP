@@ -359,6 +359,7 @@ class VentaController extends Controller
             'pos_producto.*' => ['integer'],
             'pos_cantidad'   => ['required', 'array'],
             'pos_cantidad.*' => ['integer', 'min:1'],
+            'metodo_pago'    => ['required', 'string', 'in:Efectivo,Transferencia,Tarjeta'],
         ]);
 
         $idClienteUsuario = (int) $request->id_cliente;
@@ -366,6 +367,7 @@ class VentaController extends Controller
         $idAdmin          = Auth::user()->id_usuario;
         $productosIds     = $request->input('pos_producto', []);
         $cantidades       = $request->input('pos_cantidad', []);
+        $metodoPago       = $request->input('metodo_pago', 'Efectivo');
 
         $productosMap = Producto::whereIn('id_producto', $productosIds)->get()->keyBy('id_producto');
 
@@ -389,7 +391,7 @@ class VentaController extends Controller
         }
 
         try {
-            $result = DB::transaction(function () use ($idClienteUsuario, $items, $notas, $idAdmin) {
+            $result = DB::transaction(function () use ($idClienteUsuario, $items, $notas, $idAdmin, $metodoPago) {
                 foreach ($items as $item) {
                     $stock = StockService::disponible($item['id_producto']);
                     if ($stock < $item['cantidad']) {
@@ -406,15 +408,17 @@ class VentaController extends Controller
                 }
                 $total = $subtotal;
 
-                $venta = Venta::create([
+                $ventaData = [
                     'id_cliente'  => $cliente->id_cliente,
                     'id_usuario'  => $idAdmin,
                     'estado'      => 'Entregado',
                     'total'       => $total,
                     'notas'       => $notas,
-                    'metodo_pago' => 'Efectivo',
+                    'metodo_pago' => $metodoPago,
                     'fecha'       => now()->toDateString(),
-                ]);
+                ];
+
+                $venta = Venta::create($ventaData);
 
                 foreach ($items as $item) {
                     DetalleVenta::create([
