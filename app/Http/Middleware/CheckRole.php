@@ -16,6 +16,16 @@ class CheckRole
     {
         $user = $request->user();
 
+        if ($user && (int) $user->estado === 0) {
+            \Illuminate\Support\Facades\Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Tu usuario está inhabilitado. Contacta al administrador.',
+            ]);
+        }
+
         if (!$user || !in_array((string) $user->id_rol, $roles, true)) {
             // Redirect to the correct dashboard based on their actual role
             return match ((int) $user?->id_rol) {

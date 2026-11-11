@@ -42,6 +42,14 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
+        $user = \App\Models\User::where('email', $this->email)->first();
+
+        if ($user && (int) $user->estado === 0) {
+            throw ValidationException::withMessages([
+                'email' => 'Tu usuario está inhabilitado. Contacta al administrador.',
+            ]);
+        }
+
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
