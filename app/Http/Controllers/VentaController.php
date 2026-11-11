@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class VentaController extends Controller
@@ -215,7 +216,8 @@ class VentaController extends Controller
         } catch (\RuntimeException $e) {
             return response()->json(['ok' => false, 'msg' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            return response()->json(['ok' => false, 'msg' => 'Error al procesar la compra: ' . $e->getMessage()]);
+            Log::error('Error en finalizarCompra: ' . $e->getMessage(), ['exception' => $e]);
+            return response()->json(['ok' => false, 'msg' => 'No se pudo procesar la operación. Intenta de nuevo.']);
         }
     }
 
@@ -433,9 +435,13 @@ class VentaController extends Controller
                     'title' => '¡Venta Registrada!',
                     'text'  => "Venta #{$result['id']} registrada. Total: $" . number_format($result['total'], 2),
                 ]);
-        } catch (\Throwable $e) {
+        } catch (\RuntimeException $e) {
             return redirect()->route('ventas.index')
-                ->with('alert', ['icon' => 'error', 'title' => 'Error al registrar', 'text' => $e->getMessage()]);
+                ->with('alert', ['icon' => 'error', 'title' => 'Stock insuficiente', 'text' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            Log::error('Error en crearPOS: ' . $e->getMessage(), ['exception' => $e]);
+            return redirect()->route('ventas.index')
+                ->with('alert', ['icon' => 'error', 'title' => 'Error al registrar', 'text' => 'No se pudo procesar la operación. Intenta de nuevo.']);
         }
     }
 
