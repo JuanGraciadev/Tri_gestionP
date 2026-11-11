@@ -53,9 +53,25 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            if ($user) {
+                $user->increment('intentos_fallidos');
+
+                if ($user->intentos_fallidos >= \App\Models\User::MAX_INTENTOS_LOGIN) {
+                    $user->update(['estado' => 0]);
+
+                    throw ValidationException::withMessages([
+                        'email' => 'Cuenta bloqueada por intentos fallidos. Contacta al administrador.',
+                    ]);
+                }
+            }
+
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'Usuario o contraseña incorrectos',
             ]);
+        }
+
+        if ($user) {
+            $user->update(['intentos_fallidos' => 0]);
         }
 
         RateLimiter::clear($this->throttleKey());

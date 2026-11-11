@@ -111,7 +111,11 @@ class AdminUsuarioController extends Controller
     public function toggleEstado(User $usuario): RedirectResponse
     {
         $nuevoEstado = ($usuario->estado == 1) ? 0 : 1;
-        $usuario->update(['estado' => $nuevoEstado]);
+        $data = ['estado' => $nuevoEstado];
+        if ($nuevoEstado == 1) {
+            $data['intentos_fallidos'] = 0;
+        }
+        $usuario->update($data);
 
         $statusText = ($nuevoEstado == 1) ? 'activado' : 'suspendido';
 

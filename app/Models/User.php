@@ -14,6 +14,8 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    public const MAX_INTENTOS_LOGIN = 3;
+
     protected $table = 'usuarios';
     protected $primaryKey = 'id_usuario';
     public $timestamps = false;
@@ -32,6 +34,7 @@ class User extends Authenticatable
         'password',
         'id_rol',
         'estado',
+        'intentos_fallidos',
         'remember_token',
     ];
 

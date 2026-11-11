@@ -704,6 +704,7 @@ CREATE TABLE `usuarios` (
   `password` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `id_rol` bigint unsigned DEFAULT NULL,
   `estado` tinyint NOT NULL DEFAULT '1' COMMENT '1: activo, 0: inactivo',
+  `intentos_fallidos` int NOT NULL DEFAULT '0',
   `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id_usuario`),
   KEY `usuarios_id_rol_foreign` (`id_rol`),
