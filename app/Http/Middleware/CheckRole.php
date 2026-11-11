@@ -27,6 +27,10 @@ class CheckRole
         }
 
         if (!$user || !in_array((string) $user->id_rol, $roles, true)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'No autorizado para esta acción.'], 403);
+            }
+
             // Redirect to the correct dashboard based on their actual role
             return match ((int) $user?->id_rol) {
                 1 => redirect()->route('admin.dashboard'),
