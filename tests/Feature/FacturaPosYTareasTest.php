@@ -173,4 +173,48 @@ class FacturaPosYTareasTest extends TestCase
         $view = $component->render();
         $this->assertEquals('layouts.panel', $view->name());
     }
+
+    /**
+     * Módulo de Materias Primas e Insumos (Etiquetas, Bolsas para Pacas, Tapas).
+     */
+    public function test_modulo_materias_primas_web_carga_y_opera_correctamente(): void
+    {
+        $this->actingAs($this->admin);
+
+        // Crear insumo de prueba
+        $responseCreate = $this->post('/materias-primas', [
+            'codigo'        => 'BOL-TEST',
+            'nombre'        => 'Bolsas para Pacas de Prueba',
+            'unidad_medida' => 'Unidades',
+            'stock'         => 100,
+            'stock_minimo'  => 20,
+            'costo_unitario'=> 0.20,
+            'bodega'        => 'Bodega Insumos',
+        ]);
+        $responseCreate->assertRedirect();
+        $responseCreate->assertSessionHas('alert');
+
+        $this->assertDatabaseHas('materias_primas', [
+            'codigo' => 'BOL-TEST',
+            'nombre' => 'Bolsas para Pacas de Prueba',
+        ]);
+
+        // Ver módulo web
+        $response = $this->get('/materias-primas');
+        $response->assertStatus(200);
+        $response->assertViewIs('materias-primas.index');
+        $response->assertSee('Insumos y');
+        $response->assertSee('Bolsas para Pacas');
+
+        // Probar entrada rápida de stock
+        $insumo = \App\Models\MateriaPrima::where('codigo', 'BOL-TEST')->first();
+        $responseEntrada = $this->post('/materias-primas/entrada', [
+            'id_materia_prima' => $insumo->id_materia_prima,
+            'cantidad'         => 50,
+            'bodega'           => 'Bodega Insumos',
+        ]);
+        $responseEntrada->assertRedirect();
+        $this->assertEquals(150, (float) $insumo->fresh()->stock);
+    }
 }
+

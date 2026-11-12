@@ -102,6 +102,14 @@ Route::middleware(['auth', 'role:1,2'])->group(function () {
     Route::get('/inventario-mp', [InventarioMateriaPrimaController::class, 'index'])->name('inventario-mp.index');
     Route::get('/inventario-productos', [InventarioProductosController::class, 'index'])->name('inventario-productos.index');
 
+    // Insumos y Materias Primas (Etiquetas, Bolsas para Pacas, Tapas)
+    Route::get('/materias-primas', [MateriaPrimaController::class, 'index'])->name('materias-primas.index');
+    Route::post('/materias-primas', [MateriaPrimaController::class, 'store'])->name('materias-primas.store');
+    Route::put('/materias-primas/{materiaPrima}', [MateriaPrimaController::class, 'update'])->name('materias-primas.update');
+    Route::delete('/materias-primas/{materiaPrima}', [MateriaPrimaController::class, 'destroy'])->name('materias-primas.destroy');
+    Route::post('/materias-primas/entrada', [MateriaPrimaController::class, 'registrarEntrada'])->name('materias-primas.entrada');
+    Route::post('/materias-primas/{materiaPrima}/toggle-estado', [MateriaPrimaController::class, 'toggleEstado'])->name('materias-primas.toggleEstado');
+
     // Lotes
     Route::get('/lotes', [LoteController::class, 'index'])->name('lotes.index');
     Route::post('/lotes', [LoteController::class, 'store'])->name('lotes.store');

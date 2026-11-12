@@ -38,7 +38,18 @@ class MateriaPrimaController extends Controller
             ]);
         }
 
-        return redirect()->route('inventario-mp.index');
+        $totalInsumos = MateriaPrima::count();
+        $totalStock   = (float) MateriaPrima::sum('stock');
+        $bajoStock    = MateriaPrima::where('estado', true)->where('stock', '>', 0)->whereColumn('stock', '<=', 'stock_minimo')->count();
+        $agotados     = MateriaPrima::where('estado', true)->where('stock', '<=', 0)->count();
+
+        return view('materias-primas.index', compact(
+            'materias',
+            'totalInsumos',
+            'totalStock',
+            'bajoStock',
+            'agotados'
+        ));
     }
 
     /**
