@@ -134,6 +134,11 @@
                                                 <span class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 {{ $pagoCls }}">
                                                     <i class="fas fa-credit-card text-[10px]"></i> Pago: {{ $pago }}
                                                 </span>
+                                                <a href="{{ route('ventas.factura', $v->id_venta) }}" target="_blank"
+                                                   class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-600 border border-slate-200 transition-all cursor-pointer"
+                                                   title="Ver Factura / Ticket POS">
+                                                    <i class="fas fa-receipt text-[10px]"></i> Ticket POS
+                                                </a>
                                             </div>
                                         </div>
                                     </div>

@@ -30,7 +30,7 @@ class MateriaPrimaController extends Controller
 
         $materias = $query->orderBy('nombre')->get();
 
-        if ($request->wantsJson()) {
+        if ($request->wantsJson() || $request->is('api/*') || $request->query('format') === 'json') {
             return response()->json([
                 'ok'    => true,
                 'data'  => $materias,
@@ -38,7 +38,7 @@ class MateriaPrimaController extends Controller
             ]);
         }
 
-        return view('materias-primas.index', compact('materias'));
+        return redirect()->route('inventario-mp.index');
     }
 
     /**

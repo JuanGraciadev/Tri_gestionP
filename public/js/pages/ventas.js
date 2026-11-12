@@ -70,75 +70,13 @@ const productosDisponibles = @json($productosActivos);
         }
 
         function imprimirFactura(idVenta) {
-            fetch(`/ventas/factura/${idVenta}`)
-                .then(r => r.json())
-                .then(data => {
-                    if (!data.ok) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.msg || 'No se pudo obtener la factura'
-                        });
-                        return;
-                    }
-                    const f = data.factura;
-                    let rows = f.items.map(item => `
-                        <tr>
-                            <td style="padding:6px;border-bottom:1px solid #ddd;">${item.producto_nombre}</td>
-                            <td style="padding:6px;border-bottom:1px solid #ddd;text-align:center;">${item.cantidad}</td>
-                            <td style="padding:6px;border-bottom:1px solid #ddd;text-align:right;">$${parseFloat(item.precio_unitario).toFixed(2)}</td>
-                            <td style="padding:6px;border-bottom:1px solid #ddd;text-align:right;">$${(item.cantidad * item.precio_unitario).toFixed(2)}</td>
-                        </tr>
-                    `).join('');
-
-                    const w = window.open('', '_blank');
-                    w.document.write(`
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <meta charset="utf-8">
-                            <title>Factura #${f.id_venta} - TRIGESTION</title>
-                            <style>
-                                body { font-family: Arial, sans-serif; padding: 24px; color: #1e293b; max-width: 600px; margin: auto; }
-                                h2 { text-align: center; margin-bottom: 4px; color: #0f172a; }
-                                .subtitle { text-align: center; font-size: 13px; color: #64748b; margin-bottom: 16px; }
-                                .info { font-size: 13px; line-height: 1.6; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
-                                table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-                                th { background: #f1f5f9; padding: 8px; text-align: left; border-bottom: 2px solid #cbd5e1; }
-                                .total { text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; color: #059669; }
-                                @media print { button { display: none; } }
-                            </style>
-                        </head>
-                        <body>
-                            <h2>TRIGESTION - MOOVA</h2>
-                            <div class="subtitle">Comprobante de Venta #${f.id_venta}</div>
-                            <div class="info">
-                                <strong>Fecha:</strong> ${f.fecha}<br>
-                                <strong>Cliente:</strong> ${f.cliente}<br>
-                                <strong>Método de Pago:</strong> ${f.metodo_pago}<br>
-                                ${f.notas ? '<strong>Notas:</strong> ' + f.notas + '<br>' : ''}
-                            </div>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th style="text-align:center;">Cant</th>
-                                        <th style="text-align:right;">Precio</th>
-                                        <th style="text-align:right;">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${rows}</tbody>
-                            </table>
-                            <div class="total">Total: $${parseFloat(f.total).toFixed(2)}</div>
-                            <script>window.onload = function() { window.print(); }<\/script>
-                        </body>
-                        </html>
-                    `);
-                    w.document.close();
-                })
-                .catch(() => {
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error de conexión al obtener la factura' });
-                });
+            const url = `/ventas/factura/${idVenta}?autoprint=1`;
+            const win = window.open(url, 'TicketPOS_' + idVenta, 'width=420,height=750,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes');
+            if (win) {
+                win.focus();
+            } else {
+                window.location.href = url;
+            }
         }
 
         document.getElementById('searchVentas')?.addEventListener('input', function() {

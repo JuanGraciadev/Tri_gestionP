@@ -54,6 +54,13 @@ class PedidoController extends Controller
         ));
     }
 
+    public function show(int $id): View
+    {
+        $venta = Venta::with(['detalles.producto', 'cliente.usuario', 'usuario'])->findOrFail($id);
+
+        return view('ventas.show', compact('venta'));
+    }
+
     public function cambiarEstado(CambiarEstadoVentaRequest $request): RedirectResponse
     {
         $idVenta     = (int) $request->input('id_venta');

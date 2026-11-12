@@ -6,6 +6,7 @@ use App\Models\Producto;
 use App\Services\StockService;
 use App\Services\VentaService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -111,11 +112,33 @@ class CarritoController extends Controller
         return response()->json(['ok' => true, 'carrito' => array_values($carrito), 'total' => $total, 'total_items' => $totalItems]);
     }
 
-    public function finalizar(Request $request): JsonResponse
+    public function vaciar(Request $request): JsonResponse|RedirectResponse
+    {
+        session()->forget('carrito');
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'ok'          => true,
+                'carrito'     => [],
+                'total'       => 0,
+                'total_items' => 0,
+                'msg'         => 'Carrito vaciado correctamente',
+            ]);
+        }
+
+        return redirect()->route('productos.catalogo')
+            ->with('alert', ['icon' => 'info', 'title' => 'Carrito vaciado', 'text' => 'Se han retirado los productos del carrito.']);
+    }
+
+    public function finalizar(Request $request): JsonResponse|RedirectResponse
     {
         $carrito = session('carrito', []);
         if (empty($carrito)) {
-            return response()->json(['ok' => false, 'msg' => 'El carrito está vacío.']);
+            if ($request->wantsJson()) {
+                return response()->json(['ok' => false, 'msg' => 'El carrito está vacío.']);
+            }
+            return redirect()->back()
+                ->with('alert', ['icon' => 'warning', 'title' => 'Carrito vacío', 'text' => 'Agrega productos para continuar.']);
         }
 
         $notas     = $request->input('notas');
@@ -126,17 +149,34 @@ class CarritoController extends Controller
 
             session()->forget('carrito');
 
-            return response()->json([
-                'ok'       => true,
-                'id_venta' => $result['id'],
-                'total'    => $result['total'],
-                'msg'      => '¡Pedido registrado con éxito!',
-            ]);
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'ok'       => true,
+                    'id_venta' => $result['id'],
+                    'total'    => $result['total'],
+                    'msg'      => '¡Pedido registrado con éxito!',
+                ]);
+            }
+
+            return redirect()->route('cliente.misCompras')
+                ->with('alert', [
+                    'icon'  => 'success',
+                    'title' => '¡Pedido Registrado!',
+                    'text'  => "Tu pedido #{$result['id']} fue registrado exitosamente.",
+                ]);
         } catch (RuntimeException $e) {
-            return response()->json(['ok' => false, 'msg' => $e->getMessage()]);
+            if ($request->wantsJson()) {
+                return response()->json(['ok' => false, 'msg' => $e->getMessage()]);
+            }
+            return redirect()->back()
+                ->with('alert', ['icon' => 'error', 'title' => 'No se pudo procesar', 'text' => $e->getMessage()]);
         } catch (\Throwable $e) {
             Log::error('Error en finalizarCompra: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['ok' => false, 'msg' => 'No se pudo procesar la operación. Intenta de nuevo.']);
+            if ($request->wantsJson()) {
+                return response()->json(['ok' => false, 'msg' => 'No se pudo procesar la operación. Intenta de nuevo.']);
+            }
+            return redirect()->back()
+                ->with('alert', ['icon' => 'error', 'title' => 'Error', 'text' => 'No se pudo procesar la operación. Intenta de nuevo.']);
         }
     }
 }

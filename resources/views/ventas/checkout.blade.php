@@ -107,7 +107,7 @@
                         <h2 class="text-xl font-black text-slate-800 mb-5">
                             <i class="fas fa-credit-card text-trigestion-500 mr-2"></i> Pago
                         </h2>
-                        <form action="{{ route('ventas.confirmar') }}" method="POST" id="formCheckout" class="space-y-4">
+                        <form action="{{ route('carrito.finalizar') }}" method="POST" id="formCheckout" class="space-y-4">
                             @csrf
                             <div class="space-y-2">
                                 <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest">Método de Pago</label>

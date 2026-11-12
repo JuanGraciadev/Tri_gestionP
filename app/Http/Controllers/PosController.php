@@ -9,8 +9,10 @@ use App\Models\Venta;
 use App\Services\VentaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
 use RuntimeException;
 
 class PosController extends Controller
@@ -69,32 +71,58 @@ class PosController extends Controller
         }
     }
 
-    public function obtenerFactura(int $idVenta): JsonResponse
+    public function obtenerFactura(Request $request, int $idVenta): JsonResponse|View
     {
         $venta = Venta::with(['detalles.producto', 'cliente.usuario', 'usuario'])->find($idVenta);
         if (!$venta) {
-            return response()->json(['ok' => false, 'msg' => 'Venta no encontrada'], 404);
+            if ($request->wantsJson() || $request->query('format') === 'json') {
+                return response()->json(['ok' => false, 'msg' => 'Venta no encontrada'], 404);
+            }
+            abort(404, 'La venta solicitada no existe.');
         }
 
-        $items = $venta->detalles->map(fn($d) => [
-            'producto' => $d->producto->nombre ?? 'Producto',
-            'cantidad' => $d->cantidad,
-            'precio'   => (float) $d->precio_unitario,
-            'subtotal' => (float) ($d->cantidad * $d->precio_unitario),
-        ]);
+        // Validación de permisos por rol
+        $user = Auth::user();
+        if ($user && (int) $user->id_rol === 3) {
+            $esPropia = ((int) $venta->id_usuario === (int) $user->id_usuario)
+                || ((int) ($venta->cliente?->id_usuario ?? 0) === (int) $user->id_usuario);
+            if (!$esPropia) {
+                if ($request->wantsJson() || $request->query('format') === 'json') {
+                    return response()->json(['ok' => false, 'msg' => 'No autorizado'], 403);
+                }
+                abort(403, 'No tienes autorización para ver este comprobante.');
+            }
+        }
 
-        return response()->json([
-            'ok'    => true,
-            'venta' => [
+        if ($request->wantsJson() || $request->query('format') === 'json') {
+            $items = $venta->detalles->map(fn($d) => [
+                'producto'        => $d->producto->nombre ?? 'Producto',
+                'producto_nombre' => $d->producto->nombre ?? 'Producto',
+                'cantidad'        => $d->cantidad,
+                'precio'          => (float) $d->precio_unitario,
+                'precio_unitario' => (float) $d->precio_unitario,
+                'subtotal'        => (float) ($d->cantidad * $d->precio_unitario),
+            ]);
+
+            $payload = [
                 'id_venta'    => $venta->id_venta,
                 'fecha'       => $venta->fecha ? \Carbon\Carbon::parse($venta->fecha)->format('d/m/Y H:i') : '',
                 'total'       => (float) $venta->total,
                 'estado'      => $venta->estado,
                 'metodo_pago' => $venta->metodo_pago ?? 'Efectivo',
-                'cliente'     => $venta->cliente->usuario->nombres ?? 'Cliente Mostrador',
+                'cliente'     => $venta->cliente_nombre ?? ($venta->cliente->usuario->nombres ?? 'Cliente Mostrador'),
                 'vendedor'    => $venta->usuario->nombres ?? 'Sistema',
+                'notas'       => $venta->notas,
                 'items'       => $items,
-            ],
-        ]);
+            ];
+
+            return response()->json([
+                'ok'      => true,
+                'venta'   => $payload,
+                'factura' => $payload,
+            ]);
+        }
+
+        return view('ventas.factura-pos', compact('venta'));
     }
 }

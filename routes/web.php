@@ -72,10 +72,10 @@ Route::middleware(['auth', 'role:1'])->group(function () {
 
     // Ventas y Pedidos (Admin)
     Route::get('/ventas', [PedidoController::class, 'index'])->name('ventas.index');
+    Route::get('/ventas/{id}', [PedidoController::class, 'show'])->name('ventas.show');
     Route::post('/ventas/cambiar-estado', [PedidoController::class, 'cambiarEstado'])->name('ventas.cambiarEstado');
     Route::post('/ventas/cambiar-estado-pago', [PedidoController::class, 'cambiarEstadoPago'])->name('ventas.cambiarEstadoPago');
     Route::post('/ventas/crear-pos', [PosController::class, 'crear'])->name('ventas.crearPOS');
-    Route::get('/ventas/factura/{id_venta}', [PosController::class, 'obtenerFactura'])->name('ventas.factura');
 
     // Reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
@@ -126,12 +126,19 @@ Route::middleware(['auth', 'role:3'])->group(function () {
     Route::get('/catalogo', [ProductoController::class, 'catalogo'])->name('productos.catalogo');
     Route::get('/mis-compras', [MisComprasController::class, 'index'])->name('cliente.misCompras');
 
-    // Carrito de Compras (AJAX)
+    // Carrito de Compras (AJAX & Form)
     Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
     Route::get('/carrito/obtener', [CarritoController::class, 'obtener'])->name('carrito.obtener');
     Route::post('/carrito/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
     Route::post('/carrito/eliminar', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
+    Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
     Route::post('/carrito/finalizar', [CarritoController::class, 'finalizar'])->name('carrito.finalizar');
+    Route::post('/ventas/confirmar', [CarritoController::class, 'finalizar'])->name('ventas.confirmar');
+});
+
+// ── Comprobantes y Facturación POS (Acceso Autenticado con Control de Permisos) ──
+Route::middleware(['auth'])->group(function () {
+    Route::get('/ventas/factura/{id_venta}', [PosController::class, 'obtenerFactura'])->name('ventas.factura');
 });
 
 // ── APIs Compartidas (Admin & Trabajador) ─────────────────────
