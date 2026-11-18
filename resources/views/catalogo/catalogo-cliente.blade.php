@@ -4,53 +4,15 @@
 @section('subtitle', 'Explora nuestros productos y realiza tus pedidos')
 
 @section('topbar-actions')
-<button onclick="openCart()"
-   class="relative flex items-center gap-2.5 bg-sky-500 hover:bg-sky-600 text-white px-5 py-2.5 rounded-2xl font-bold text-sm transition-all shadow-md shadow-sky-500/20 cursor-pointer">
+<a href="{{ route('carrito.checkout') }}"
+   class="relative flex items-center gap-2.5 bg-sky-500 hover:bg-sky-600 text-white px-5 py-2.5 rounded-2xl font-bold text-sm transition-all shadow-md shadow-sky-500/20">
     <i class="fas fa-cart-shopping"></i>
     <span class="hidden sm:inline">Carrito</span>
     <span id="cartBadge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white shadow-sm">0</span>
-</button>
+</a>
 @endsection
 
 @section('content')
-<!-- Cart Overlay -->
-    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
-
-    <!-- Cart Sidebar Drawer -->
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="p-6 border-b border-slate-200/60 flex items-center justify-between bg-white/50">
-            <div>
-                <h3 class="text-xl font-extrabold text-slate-800 tracking-tight">Mi Pedido</h3>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Revisión de Carrito</p>
-            </div>
-            <button onclick="closeCart()" class="w-10 h-10 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all flex items-center justify-center cursor-pointer">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar" id="cartItemsContainer">
-            <!-- Dynamic Cart Items injected here -->
-        </div>
-
-        <div class="p-6 border-t border-slate-200/60 bg-white/80 backdrop-blur-md">
-            <div class="flex justify-between items-end mb-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <span class="text-slate-500 font-bold uppercase tracking-wider text-xs">Total Estimado</span>
-                <span class="text-2xl font-black text-trigestion-600" id="cartTotalDisplay">$0.00</span>
-            </div>
-
-            <div class="relative mb-4">
-                <textarea id="notasCompra" placeholder="Instrucciones especiales para entrega..." rows="2"
-                    class="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 outline-none focus:ring-4 focus:ring-trigestion-500/10 focus:border-trigestion-500 transition-all resize-none shadow-sm"></textarea>
-            </div>
-
-            <button onclick="finalizarCompra()" id="btnCheckout"
-                class="w-full py-4 bg-gradient-to-r from-trigestion-500 to-sky-600 text-white font-extrabold rounded-2xl shadow-lg shadow-trigestion-500/30 hover:shadow-xl transition-all transform active:scale-95 flex items-center justify-center gap-2 text-base cursor-pointer">
-                <i class="fas fa-credit-card"></i> <span>Finalizar Compra</span>
-            </button>
-        </div>
-    </div>
-
-
 <!-- HERO BANNER -->
                 <div class="bg-gradient-to-r from-trigestion-500 via-trigestion-600 to-sky-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-trigestion-500/20">
                     <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -228,6 +190,7 @@
     window.APP.rutas.carritoEliminar = '{{ route('carrito.eliminar') }}';
     window.APP.rutas.carritoFinalizar = '{{ route('carrito.finalizar') }}';
     window.APP.rutas.misCompras = '{{ route('cliente.misCompras') }}';
+    window.APP.rutas.checkout = '{{ route('carrito.checkout') }}';
 </script>
 <script src="{{ asset('js/pages/catalogo.js') }}"></script>
 @endpush

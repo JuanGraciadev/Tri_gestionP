@@ -6,7 +6,7 @@
     <div class="w-full flex flex-col items-center justify-center">
 
     <!-- Success Modal -->
-    @if (session('success'))
+    @if (session('registro_exitoso'))
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md">
             <div class="relative z-10 w-full max-w-md">
                 <div class="glass w-full rounded-2xl sm:rounded-[2.5rem] shadow-2xl p-10 text-center animate-slide border border-white/60">
@@ -17,7 +17,7 @@
                         &iexcl;Registro Exitoso! &nbsp;🎉
                     </h2>
                     <p class="text-slate-500 font-medium text-sm mb-8 leading-relaxed">
-                        {{ session('success') }}
+                        {{ session('registro_exitoso') }}
                     </p>
                     <a href="{{ route('login') }}"
                        class="w-full water-gradient text-white font-bold py-4 rounded-2xl hover:shadow-lg hover:shadow-sky-300 transition-all flex items-center justify-center gap-2 text-base">

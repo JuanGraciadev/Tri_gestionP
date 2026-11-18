@@ -130,20 +130,21 @@ class ReportService
         // 2. Producción total
         $produccionTotal = (int) DB::table('produccion')->sum('cantidad');
 
-        // 3. Inventario status classification across active products
+        // 3. Inventario status — 2 queries para todos los productos activos
         $productos = Producto::where('estado', 1)->get();
         $disponibles = 0;
         $bajoStock   = 0;
         $agotados    = 0;
 
-        foreach ($productos as $p) {
-            $stock = StockService::disponible($p->id_producto);
-            if ($stock > 5) {
-                $disponibles++;
-            } elseif ($stock > 0) {
-                $bajoStock++;
-            } else {
-                $agotados++;
+        if ($productos->isNotEmpty()) {
+            $ids   = $productos->pluck('id_producto')->toArray();
+            $stock = StockService::disponibleBulk($ids);
+
+            foreach ($productos as $p) {
+                $s = $stock[$p->id_producto] ?? 0;
+                if ($s > 5)      $disponibles++;
+                elseif ($s > 0)  $bajoStock++;
+                else             $agotados++;
             }
         }
 
@@ -319,38 +320,44 @@ class ReportService
     /**
      * Detailed Inventory Status for all active products.
      * Classification: Normal (> stock_minimo), Bajo Stock (1..stock_minimo), Agotado (0).
+     * Usa disponibleBulk() → solo 2 queries para todos los productos.
      */
     public function getEstadoInventario(): array
     {
-        return Producto::with('categoria')
-            ->where('estado', 1)
-            ->orderBy('nombre')
-            ->get()
-            ->map(function ($p) {
-                $stock = StockService::disponible($p->id_producto);
-                $minimo = $p->stock_minimo ?? 10;
-                $estado = match (true) {
-                    $stock > $minimo => 'Normal',
-                    $stock > 0       => 'Bajo Stock',
-                    default          => 'Agotado',
-                };
-                $badgeStyle = match ($estado) {
-                    'Normal'     => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                    'Bajo Stock' => 'bg-amber-100 text-amber-700 border-amber-200',
-                    'Agotado'    => 'bg-rose-100 text-rose-700 border-rose-200',
-                };
-                return [
-                    'id_producto' => $p->id_producto,
-                    'nombre'      => $p->nombre,
-                    'categoria'   => $p->categoria->nombre ?? 'General',
-                    'precio'      => $p->precio,
-                    'stock'       => $stock,
-                    'stock_minimo'=> $minimo,
-                    'estado'      => $estado,
-                    'badge'       => $badgeStyle,
-                ];
-            })
-            ->toArray();
+        $productos = Producto::with('categoria')->where('estado', 1)->orderBy('nombre')->get();
+
+        if ($productos->isEmpty()) {
+            return [];
+        }
+
+        // 2 queries para todos los productos en lugar de 2 por producto
+        $ids   = $productos->pluck('id_producto')->toArray();
+        $stock = StockService::disponibleBulk($ids);
+
+        return $productos->map(function ($p) use ($stock) {
+            $s      = $stock[$p->id_producto] ?? 0;
+            $minimo = $p->stock_minimo ?? 10;
+            $estado = match (true) {
+                $s > $minimo => 'Normal',
+                $s > 0       => 'Bajo Stock',
+                default      => 'Agotado',
+            };
+            $badgeStyle = match ($estado) {
+                'Normal'     => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                'Bajo Stock' => 'bg-amber-100 text-amber-700 border-amber-200',
+                'Agotado'    => 'bg-rose-100 text-rose-700 border-rose-200',
+            };
+            return [
+                'id_producto' => $p->id_producto,
+                'nombre'      => $p->nombre,
+                'categoria'   => $p->categoria->nombre ?? 'General',
+                'precio'      => $p->precio,
+                'stock'       => $s,
+                'stock_minimo'=> $minimo,
+                'estado'      => $estado,
+                'badge'       => $badgeStyle,
+            ];
+        })->toArray();
     }
 
     /**

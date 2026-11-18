@@ -78,18 +78,18 @@
             </div>
         </div>
 
-        <!-- Unidades Producidas -->
+        <!-- Stock Disponible (producido − vendido) -->
         <div class="glass-card rounded-[2.5rem] p-6 relative overflow-hidden group">
             <div class="flex justify-between items-start mb-5 relative z-10">
                 <div class="w-14 h-14 rounded-[1.2rem] bg-emerald-50 flex items-center justify-center text-emerald-600 text-2xl border border-white/80 shadow-sm group-hover:scale-110 transition-transform">
                     <i class="fas fa-boxes-stacked"></i>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">Total</span>
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">Disponible</span>
             </div>
             <div class="relative z-10">
-                <div class="text-4xl font-black text-slate-800 tracking-tighter mb-1">{{ number_format($totalUnidades) }}</div>
-                <div class="text-slate-500 font-bold text-xs uppercase tracking-wider">Unidades Producidas</div>
-                <p class="text-[10px] text-slate-400 mt-1">Suma histórica de productos terminados</p>
+                <div class="text-4xl font-black text-slate-800 tracking-tighter mb-1">{{ number_format($totalUnidadesDisponibles) }}</div>
+                <div class="text-slate-500 font-bold text-xs uppercase tracking-wider">Unidades Disponibles</div>
+                <p class="text-[10px] text-slate-400 mt-1">Producido menos ventas confirmadas</p>
             </div>
         </div>
 
@@ -102,7 +102,7 @@
                 <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">Variedad</span>
             </div>
             <div class="relative z-10">
-                <div class="text-4xl font-black text-slate-800 tracking-tighter mb-1">{{ number_format($productosDistintos ?? $productosConStock ?? 0) }}</div>
+                <div class="text-4xl font-black text-slate-800 tracking-tighter mb-1">{{ number_format($productosDistintos) }}</div>
                 <div class="text-slate-500 font-bold text-xs uppercase tracking-wider">Productos en Catálogo</div>
                 <p class="text-[10px] text-slate-400 mt-1">Productos con registro de inventario</p>
             </div>
@@ -140,7 +140,7 @@
                         <th class="px-8 py-5">Producto</th>
                         <th class="px-8 py-5">Lote de Producción</th>
                         <th class="px-8 py-5">Cantidad Entrada</th>
-                        <th class="px-8 py-5">Stock Acumulado</th>
+                        <th class="px-8 py-5">Stock Disponible</th>
                         <th class="px-8 py-5">Bodega</th>
                         <th class="px-8 py-5">Fecha</th>
                         <th class="px-8 py-5">Registrado por</th>
@@ -149,12 +149,13 @@
                 <tbody class="divide-y divide-slate-100 bg-white" id="inventarioBody">
                     @forelse ($inventario as $item)
                     @php
-                        $stockAcumulado = $stockPorProducto[$item->id_producto] ?? 0;
+                        $stockDisponibleProducto = $stockDisponible[$item->id_producto] ?? 0;
                         $nombreProducto = $item->producto->nombre ?? 'Producto desconocido';
                         $loteProduccion = $item->produccion->lote_produccion ?? '—';
                         $bodega = $item->bodega ?? 'Bodega Principal';
                         $operario = $item->usuario->nombres ?? $item->usuario->name ?? 'Desconocido';
                         $fecha = $item->fecha ? \Carbon\Carbon::parse($item->fecha)->format('d/m/Y') : '—';
+                        $sinStock = $stockDisponibleProducto <= 0;
                     @endphp
                     <tr class="hover:bg-slate-50/60 transition-colors group inventario-row"
                         data-search="{{ strtolower($nombreProducto . ' ' . $loteProduccion . ' ' . $bodega) }}">
@@ -188,12 +189,19 @@
                             </span>
                         </td>
 
-                        <!-- Stock Acumulado -->
+                        <!-- Stock Disponible (producido − vendido) -->
                         <td class="px-8 py-5">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 text-sm font-black">
-                                <i class="fas fa-cubes text-[10px]"></i>
-                                {{ number_format($stockAcumulado) }} uds.
-                            </span>
+                            @if ($sinStock)
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-black">
+                                    <i class="fas fa-circle-xmark text-[10px]"></i>
+                                    Agotado (0)
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 text-sm font-black">
+                                    <i class="fas fa-cubes text-[10px]"></i>
+                                    {{ number_format($stockDisponibleProducto) }} uds.
+                                </span>
+                            @endif
                         </td>
 
                         <!-- Bodega -->

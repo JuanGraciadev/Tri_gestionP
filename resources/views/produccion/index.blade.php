@@ -130,11 +130,24 @@
                                             <span class="font-bold text-slate-700">#{{ $prod->id_inventario_materia }}</span>
                                         </div>
                                         @endif
+                                        @if (!empty($prod->materiales_consumidos))
+                                        <div class="w-full h-[1px] bg-slate-200/60"></div>
+                                        <div>
+                                            <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1 mb-1.5">
+                                                <i class="fas fa-tags text-teal-400"></i> Insumos consumidos
+                                            </span>
+                                            @foreach($prod->materiales_consumidos as $mat)
+                                            <div class="flex justify-between text-[11px] font-medium text-slate-500">
+                                                <span>{{ $mat['nombre'] }}</span>
+                                                <span class="font-black text-teal-600">{{ $mat['total_consumido'] }} {{ $mat['unidad_medida'] }}</span>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @endif
                                         @if ($prod->descripcion)
                                         <div class="w-full h-[1px] bg-slate-200/60"></div>
                                         <div class="text-[12px] text-slate-500 italic">"{{ $prod->descripcion }}"</div>
-                                        @endif
-                                    </div>
+                                        @endif                                    </div>
 
                                     <!-- Action button -->
                                     @if ($prod->estado === 'En Producción')
@@ -267,6 +280,30 @@
                     </div>
                 </div>
 
+                <!-- Insumos de la Receta (etiquetas, tapas, bolsas) -->
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase ml-1">
+                        Insumos a Consumir
+                        <span class="text-slate-400 font-normal normal-case">(Opcional — etiquetas, tapas, bolsas...)</span>
+                    </label>
+
+                    <div id="recetaContainer" class="space-y-2">
+                        <!-- Filas dinámicas de insumos -->
+                    </div>
+
+                    <button type="button" onclick="agregarFilaInsumo()"
+                        class="w-full py-2.5 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-teal-400 hover:text-teal-500 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> Agregar Insumo
+                    </button>
+
+                    @if($insumos->isEmpty())
+                    <p class="text-[11px] text-amber-500 font-medium ml-1">
+                        <i class="fas fa-triangle-exclamation mr-1"></i>
+                        No hay insumos registrados. <a href="{{ route('materias-primas.index') }}" class="underline">Registrar insumos</a>
+                    </p>
+                    @endif
+                </div>
+
                 <div class="flex justify-end gap-4 pt-4 border-t border-slate-100">
                     <button type="button" onclick="closeModal('modalIniciar')" class="px-8 py-4 text-slate-500 font-bold hover:text-slate-800 transition-colors cursor-pointer">Cancelar</button>
                     <button type="submit" class="bg-gradient-to-r from-emerald-500 to-sky-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-emerald-200 transition-all transform active:scale-95 flex items-center gap-2 cursor-pointer">
@@ -279,5 +316,15 @@
 @endsection
 
 @push('scripts')
+<script>
+    // Datos de insumos para el selector dinámico
+    window.INSUMOS = @json($insumos->map(fn($i) => [
+        'id'           => $i->id_materia_prima,
+        'nombre'       => $i->nombre,
+        'stock'        => (float)$i->stock,
+        'unidad'       => $i->unidad_medida ?? 'uds.',
+        'stock_minimo' => (float)$i->stock_minimo,
+    ]));
+</script>
 <script src="{{ asset('js/pages/produccion.js') }}"></script>
 @endpush

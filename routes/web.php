@@ -135,6 +135,7 @@ Route::middleware(['auth', 'role:3'])->group(function () {
     Route::get('/mis-compras', [MisComprasController::class, 'index'])->name('cliente.misCompras');
 
     // Carrito de Compras (AJAX & Form)
+    Route::get('/carrito', [CarritoController::class, 'checkout'])->name('carrito.checkout');
     Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
     Route::get('/carrito/obtener', [CarritoController::class, 'obtener'])->name('carrito.obtener');
     Route::post('/carrito/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');

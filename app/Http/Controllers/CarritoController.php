@@ -18,6 +18,27 @@ class CarritoController extends Controller
         protected VentaService $ventaService = new VentaService()
     ) {}
 
+    /**
+     * Muestra la vista del carrito / checkout.
+     */
+    public function checkout(): \Illuminate\View\View
+    {
+        $carrito = session('carrito', []);
+        $total   = 0;
+        $items   = [];
+
+        foreach ($carrito as $item) {
+            $subtotal = $item['precio_unitario'] * $item['cantidad'];
+            $total   += $subtotal;
+            $items[]  = array_merge($item, ['subtotal' => $subtotal]);
+        }
+
+        return view('ventas.checkout', [
+            'carrito' => $items,
+            'total'   => $total,
+        ]);
+    }
+
     public function agregar(Request $request): JsonResponse
     {
         $idProducto = (int) $request->input('id_producto', 0);

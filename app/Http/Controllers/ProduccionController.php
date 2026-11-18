@@ -31,7 +31,12 @@ class ProduccionController extends Controller
             ->orderByDesc('id_inventario_materia')
             ->get();
 
-        return view('produccion.index', compact('producciones', 'productos', 'materiaPrima'));
+        // Insumos activos para la receta (etiquetas, tapas, bolsas, etc.)
+        $insumos = \App\Models\MateriaPrima::where('estado', true)
+            ->orderBy('nombre')
+            ->get(['id_materia_prima', 'nombre', 'stock', 'unidad_medida', 'stock_minimo']);
+
+        return view('produccion.index', compact('producciones', 'productos', 'materiaPrima', 'insumos'));
     }
 
     // ── Crear (Descontar materia prima al INICIAR) ──────────────────────────────
@@ -40,6 +45,20 @@ class ProduccionController extends Controller
     {
         $data = $request->validated();
 
+        // Parsear receta desde los campos del formulario si viene como arrays separados
+        if (empty($data['receta']) && $request->filled('receta_insumo')) {
+            $ids       = $request->input('receta_insumo', []);
+            $cantidades = $request->input('receta_cantidad', []);
+            $receta = [];
+            foreach ($ids as $i => $idInsumo) {
+                $cant = (float) ($cantidades[$i] ?? 0);
+                if ($idInsumo && $cant > 0) {
+                    $receta[] = ['id_materia_prima' => (int) $idInsumo, 'cantidad_por_unidad' => $cant];
+                }
+            }
+            $data['receta'] = $receta;
+        }
+
         try {
             $this->produccionService->iniciarProduccion($data, Auth::user()->id_usuario);
 
@@ -47,7 +66,7 @@ class ProduccionController extends Controller
                 ->with('alert', [
                     'icon'  => 'success',
                     'title' => 'Producción Iniciada',
-                    'text'  => 'La producción se ha registrado y la materia prima fue descontada.',
+                    'text'  => 'La producción se ha registrado y los insumos fueron descontados.',
                 ]);
         } catch (\RuntimeException $e) {
             return redirect()->route('produccion.index')

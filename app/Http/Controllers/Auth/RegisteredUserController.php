@@ -53,6 +53,6 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        return redirect()->route('register')->with('success', '¡Registro completado con éxito! Tu cuenta ha sido creada correctamente.');
+        return redirect()->route('register')->with('registro_exitoso', '¡Registro completado con éxito! Tu cuenta ha sido creada correctamente.');
     }
 }

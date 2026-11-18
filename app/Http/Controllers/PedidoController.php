@@ -26,9 +26,15 @@ class PedidoController extends Controller
             ->orderByDesc('id_venta')
             ->paginate(15);
 
-        $clientes = User::where('id_rol', 3)->where('estado', 1)->orderBy('nombres')->get();
-        $productos = Producto::where('estado', 1)->orderBy('nombre')->get()->map(function ($p) {
-            $p->stock = StockService::disponible($p->id_producto);
+        $clientes  = User::where('id_rol', 3)->where('estado', 1)->orderBy('nombres')->get();
+        $productos = Producto::where('estado', 1)->orderBy('nombre')->get();
+
+        // Stock en bulk — 2 queries en lugar de 2 por producto
+        $stockMap = StockService::disponibleBulk(
+            $productos->pluck('id_producto')->toArray()
+        );
+        $productos = $productos->map(function ($p) use ($stockMap) {
+            $p->stock = $stockMap[$p->id_producto] ?? 0;
             return $p;
         });
 

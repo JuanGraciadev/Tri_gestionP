@@ -3,20 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\InventarioMateriaPrima;
+use App\Models\MovimientoInventario;
 use Illuminate\View\View;
 
 class InventarioMateriaPrimaController extends Controller
 {
     /**
      * Display the raw-material inventory listing.
-     *
-     * Shows every inventario_materia_prima entry with its related
-     * lote-detalle (tipo_envase, capacidad, proveedor, unidades)
-     * and the parent lote (codigo_lote).
-     *
-     * Entries are created automatically by LoteController::storeDetalle()
-     * and decremented by ProduccionController::finalizar().
-     * There is no manual CRUD for this table.
      */
     public function index(): View
     {

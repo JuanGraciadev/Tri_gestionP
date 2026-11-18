@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateLoteRequest;
 use App\Models\InventarioMateriaPrima;
 use App\Models\Lote;
 use App\Models\LoteDetalle;
+use App\Models\MovimientoInventario;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -146,8 +147,6 @@ class LoteController extends Controller
     /**
      * Store a new detail line for a batch and automatically create the
      * corresponding inventario_materia_prima entry (Bodega Principal, ingreso = unidades).
-     *
-     * Original: crearDetalle → INSERT detalles → lastInsertId → INSERT inventario_materia_prima
      */
     public function storeDetalle(StoreLoteDetalleRequest $request): RedirectResponse
     {
@@ -162,17 +161,31 @@ class LoteController extends Controller
         ]);
 
         if ($detalle) {
-            // Auto-create inventory entry — mirrors the original model's side-effect
+            // Auto-create inventory entry
             try {
-                InventarioMateriaPrima::create([
-                    'ingreso'      => $detalle->unidades,
-                    'fecha'        => now()->toDateString(),
-                    'bodega'       => 'Bodega Principal',
-                    'id_detalles'  => $detalle->id_detalles,
+                $inventario = InventarioMateriaPrima::create([
+                    'ingreso'        => $detalle->unidades,
+                    'fecha'          => now()->toDateString(),
+                    'bodega'         => 'Bodega Principal',
+                    'id_detalles'    => $detalle->id_detalles,
                     'id_retornables' => null,
                 ]);
+
+                // Registrar movimiento de auditoría (ENTRADA)
+                MovimientoInventario::registrar(
+                    MovimientoInventario::TIPO_RECURSO_MATERIA_PRIMA,
+                    $inventario->id_inventario_materia,
+                    ($detalle->tipo_envase ?? 'Materia Prima') . ' - Lote ' . ($detalle->lote->codigo_lote ?? ''),
+                    MovimientoInventario::TIPO_ENTRADA,
+                    (float) $detalle->unidades,
+                    0,
+                    (float) $detalle->unidades,
+                    'LOTE',
+                    auth()->id(),
+                    $detalle->id_detalles,
+                    'Ingreso de materia prima por creación de detalle de lote'
+                );
             } catch (\Exception $e) {
-                // Non-fatal: log but do not block the user
                 \Log::warning('InventarioMateriaPrima insert failed: ' . $e->getMessage());
             }
 
@@ -189,16 +202,19 @@ class LoteController extends Controller
             ]);
         }
 
-        // Always redirect back to the same batch-details page
         return redirect()->route('lotes.detalles', $data['id_lote']);
     }
 
     /**
-     * Update an existing detail line (does NOT touch the inventory entry).
+     * Update an existing detail line and sync the inventory entry's ingreso
+     * to match the new unidades value.
      */
     public function updateDetalle(UpdateLoteDetalleRequest $request, LoteDetalle $detalle): RedirectResponse
     {
         $data = $request->validated();
+
+        $unidadesAnterior = (int) $detalle->unidades;
+        $unidadesNueva    = (int) $data['unidades'];
 
         $updated = $detalle->update([
             'unidades'    => $data['unidades'],
@@ -208,6 +224,32 @@ class LoteController extends Controller
         ]);
 
         if ($updated) {
+            // Sincronizar el ingreso del inventario_materia_prima asociado
+            $inventario = InventarioMateriaPrima::where('id_detalles', $detalle->id_detalles)->first();
+            if ($inventario) {
+                $stockAnterior = (int) $inventario->ingreso;
+                $diferencia = $unidadesNueva - $unidadesAnterior;
+                $nuevoStock = $stockAnterior + $diferencia;
+
+                $inventario->ingreso = $nuevoStock;
+                $inventario->save();
+
+                // Registrar movimiento de auditoría (AJUSTE)
+                MovimientoInventario::registrar(
+                    MovimientoInventario::TIPO_RECURSO_MATERIA_PRIMA,
+                    $inventario->id_inventario_materia,
+                    ($detalle->tipo_envase ?? 'Materia Prima') . ' - Lote ' . ($detalle->lote->codigo_lote ?? ''),
+                    MovimientoInventario::TIPO_AJUSTE,
+                    (float) abs($diferencia),
+                    (float) $stockAnterior,
+                    (float) $nuevoStock,
+                    'AJUSTE',
+                    auth()->id(),
+                    $detalle->id_detalles,
+                    'Ajuste de unidades en detalle de lote'
+                );
+            }
+
             session()->flash('alert', [
                 'icon'  => 'success',
                 'title' => 'Detalle Actualizado',
@@ -221,7 +263,6 @@ class LoteController extends Controller
             ]);
         }
 
-        // Redirect back to the detail page for this batch
         return redirect()->route('lotes.detalles', $data['id_lote']);
     }
 }
